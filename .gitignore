@@ -262,4 +262,4 @@ src/Smart_Medical.Blazor.Server/Logs/*
 src/Smart_Medical.Blazor.Server.Tiered/Logs/*
 
 # Use abp install-libs to restore.
-**/wwwroot/libs/*
+#**/wwwroot/libs/*
