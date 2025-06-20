@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Smart_Medical</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Smart_Medical.Domain\Smart_Medical.Domain.csproj" />
+    <ProjectReference Include="..\Smart_Medical.Application.Contracts\Smart_Medical.Application.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MD5" Version="2.2.5" />
+    <PackageReference Include="Volo.Abp.SettingManagement.Application" Version="9.2.0" />
+  </ItemGroup>
+
+</Project>

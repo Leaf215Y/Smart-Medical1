@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Smart_Medical.Blazor.Client": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:51114;http://localhost:51115"
+    }
+  }
+}
