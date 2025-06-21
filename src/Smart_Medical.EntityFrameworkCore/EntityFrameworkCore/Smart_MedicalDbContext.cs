@@ -1,4 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
+//using Smart_Medical.DoctorvVsit;
+//using Smart_Medical.Medical;
+//using Smart_Medical.Patient;
+//using Smart_Medical.Pharmacy;
+
 using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -36,6 +42,10 @@ public class Smart_MedicalDbContext :
     public DbSet<Role> Roles { get; set; }
     public DbSet<Prescription> Prescriptions { get; set; }
     public DbSet<Medication> Medications { get; set; }
+
+
+    //public DbSet<Drug> Drugs { get; set; }
+    //public DbSet<Sick> Medicals { get; set; }
 
 
     public Smart_MedicalDbContext(DbContextOptions<Smart_MedicalDbContext> options)

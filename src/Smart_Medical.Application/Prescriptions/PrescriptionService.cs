@@ -18,6 +18,11 @@ namespace Smart_Medical.Prescriptions
         {
             this.pres = pres;
         }
+        /// <summary>
+        /// 创建处方
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ApiResult> CreateAsync(PrescriptionDto input)
         {
@@ -25,6 +30,7 @@ namespace Smart_Medical.Prescriptions
             res = await pres.InsertAsync(res);
             //var prescription = await pres.InsertAsync(input);
             return ApiResult.Success(ResultCode.Success);
+
         }
         /// <summary>
         /// 获取处方树
