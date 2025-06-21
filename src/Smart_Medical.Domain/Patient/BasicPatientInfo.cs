@@ -90,14 +90,6 @@ namespace Smart_Medical.Patient
         /// </summary>
         public DateTime VisitDate { get; set; } = DateTime.Now;
 
-        /// <summary>
-        /// 创建时间
-        /// </summary>
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
-
-        /// <summary>
-        /// 更新时间
-        /// </summary>
-        public DateTime UpdatedTime { get; set; } = DateTime.Now;
+     
     }
 }
