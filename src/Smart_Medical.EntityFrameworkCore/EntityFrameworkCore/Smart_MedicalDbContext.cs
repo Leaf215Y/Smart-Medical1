@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Smart_Medical.DoctorvVsit;
+using Smart_Medical.Medical;
 using Smart_Medical.Patient;
+using Smart_Medical.Pharmacy;
 using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -18,33 +20,21 @@ public class Smart_MedicalDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
-    #region Entities from the modules
-
-    /* Notice: We only implemented IIdentityDbContext and ITenantManagementDbContext
-     * and replaced them for this DbContext. This allows you to perform JOIN
-     * queries for the entities of these modules over the repositories easily. You
-     * typically don't need that for other modules. But, if you need, you can
-     * implement the DbContext interface of the needed module and use ReplaceDbContext
-     * attribute just like IIdentityDbContext and ITenantManagementDbContext.
-     *
-     * More info: Replacing a DbContext of a module ensures that the related module
-     * uses this DbContext on runtime. Otherwise, it will use its own DbContext class.
-     */
-
-    //Identity
-    // Tenant Management
-    #endregion
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
+
     public DbSet<Prescription> Prescriptions { get; set; }
     public DbSet<Medication> Medications { get; set; }
+
+
     public DbSet<DoctorAccount> DoctorAccounts { get; set; }
     public DbSet<DoctorClinic> DoctorClinics { get; set; }
     public DbSet<DoctorDepartment> DoctorDepartments { get; set; }
     public DbSet<BasicPatientInfo> BasicPatientInfos { get; set; }
     public DbSet<PatientPrescription> PatientPrescriptions { get; set; }
-
-
+   
+    public DbSet<Drug> Drugs { get; set; }
+    public DbSet<Sick> Medicals { get; set; }
 
     public Smart_MedicalDbContext(DbContextOptions<Smart_MedicalDbContext> options)
         : base(options)
@@ -158,6 +148,35 @@ public class Smart_MedicalDbContext :
         });
 
 
+
+           builder.Entity<Drug>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Drugs", Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention(); 
+            b.Property(x => x.DrugName).IsRequired().HasMaxLength(128);
+            b.Property(x => x.DrugType).IsRequired().HasMaxLength(32);
+            b.Property(x => x.FeeName).IsRequired().HasMaxLength(32);
+            b.Property(x => x.DosageForm).IsRequired().HasMaxLength(32);
+            b.Property(x => x.Specification).IsRequired().HasMaxLength(64);
+            b.Property(x => x.Effect).IsRequired().HasMaxLength(256);
+            b.Property(x => x.Category).IsRequired();
+            b.Property(x => x.PurchasePrice).HasColumnType("decimal(18,2)");
+            b.Property(x => x.SalePrice).HasColumnType("decimal(18,2)");
+        });
+
+        builder.Entity<Sick>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medicals", Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.Property(x => x.Status).IsRequired().HasMaxLength(32);
+            b.Property(x => x.InpatientNumber).IsRequired().HasMaxLength(32);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(32);
+            b.Property(x => x.DischargeDepartment).IsRequired().HasMaxLength(64);
+            b.Property(x => x.Gender).IsRequired().HasMaxLength(8);
+            b.Property(x => x.DischargeTime).IsRequired();
+            b.Property(x => x.AdmissionDiagnosis).IsRequired().HasMaxLength(128);
+            b.Property(x => x.DischargeDiagnosis).IsRequired().HasMaxLength(128);
+        });
 
     }
 }
