@@ -11,6 +11,6 @@ namespace Smart_Medical.Prescriptions
     public interface IMedicationService : IApplicationService
     {
         Task<ApiResult> CreateAsync(CreateUpdateMedicationDto input);
-        Task<ApiResult<List<MedicationDto>>> GetMedicationList(int PrescriptionId);
+        Task<ApiResult<PageResult<List<MedicationDto>>>> GetMedicationList(int PrescriptionId, int pageIndex, int pageSize);
     }
 }

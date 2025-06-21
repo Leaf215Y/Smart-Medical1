@@ -37,11 +37,16 @@ namespace Smart_Medical.Prescriptions
         /// <param name="PrescriptionId"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ApiResult<List<MedicationDto>>> GetMedicationList(int PrescriptionId)
+        public async Task<ApiResult<PageResult<List<MedicationDto>>>> GetMedicationList(int PrescriptionId,int pageIndex,int pageSize)
         {
+
             var res = await medica.GetListAsync(x => x.PrescriptionId == PrescriptionId);
+            var totalCount =await medica.CountAsync(x => x.PrescriptionId == PrescriptionId);
+            var totalPage = (int)Math.Ceiling((double)totalCount / pageSize);
+           
+            res=res.OrderByDescending(x=>x.Id).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
             var dto = ObjectMapper.Map<List<Medication>, List<MedicationDto>>(res);
-            return ApiResult<List<MedicationDto>>.Success(dto, ResultCode.Success);
+            return ApiResult<PageResult<List<MedicationDto>>>.Success(new PageResult<List<MedicationDto>> { Data=dto,}, ResultCode.Success);
         }
     }
 }
