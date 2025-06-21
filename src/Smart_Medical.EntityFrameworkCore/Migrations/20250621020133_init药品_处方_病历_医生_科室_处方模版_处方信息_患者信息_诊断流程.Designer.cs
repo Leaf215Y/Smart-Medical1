@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Smart_Medical.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Smart_Medical.Migrations
 {
     [DbContext(typeof(Smart_MedicalDbContext))]
-    partial class Smart_MedicalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250621020133_init药品_处方_病历_医生_科室_处方模版_处方信息_患者信息_诊断流程")]
+    partial class init药品_处方_病历_医生_科室_处方模版_处方信息_患者信息_诊断流程
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
