@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 
 namespace Smart_Medical.EntityFrameworkCore;
@@ -29,10 +31,12 @@ public class Smart_MedicalDbContext :
 
     //Identity
     // Tenant Management
+    #endregion
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<Prescription> Prescriptions { get; set; }
+    public DbSet<Medication> Medications { get; set; }
 
-    #endregion
 
     public Smart_MedicalDbContext(DbContextOptions<Smart_MedicalDbContext> options)
         : base(options)
@@ -58,5 +62,23 @@ public class Smart_MedicalDbContext :
         //    b.ConfigureByConvention(); //auto configure for the base class props
         //    //...
         //});
+
+
+        builder.Entity<Prescription>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Prescriptions",
+                Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.PrescriptionName).IsRequired().HasMaxLength(128);
+
+        });
+        builder.Entity<Medication>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medications",
+                Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.MedicationName).IsRequired().HasMaxLength(128);
+
+        });
     }
 }
