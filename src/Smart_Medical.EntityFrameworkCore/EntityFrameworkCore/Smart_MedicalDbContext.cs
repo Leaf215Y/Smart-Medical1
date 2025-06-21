@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Smart_Medical.DoctorvVsit;
-using Smart_Medical.Patient;
-using Smart_Medical.Prescriptions;
+using Smart_Medical.Medical;
+using Smart_Medical.Pharmacy;
 using Smart_Medical.RBAC;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -45,6 +44,10 @@ public class Smart_MedicalDbContext :
     public DbSet<PatientPrescription> PatientPrescriptions { get; set; }
 
 
+    #endregion
+   
+    public DbSet<Drug> Drugs { get; set; }
+    public DbSet<Sick> Medicals { get; set; }
 
     public Smart_MedicalDbContext(DbContextOptions<Smart_MedicalDbContext> options)
         : base(options)
@@ -158,6 +161,35 @@ public class Smart_MedicalDbContext :
         });
 
 
+
+           builder.Entity<Drug>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Drugs", Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention(); 
+            b.Property(x => x.DrugName).IsRequired().HasMaxLength(128);
+            b.Property(x => x.DrugType).IsRequired().HasMaxLength(32);
+            b.Property(x => x.FeeName).IsRequired().HasMaxLength(32);
+            b.Property(x => x.DosageForm).IsRequired().HasMaxLength(32);
+            b.Property(x => x.Specification).IsRequired().HasMaxLength(64);
+            b.Property(x => x.Effect).IsRequired().HasMaxLength(256);
+            b.Property(x => x.Category).IsRequired();
+            b.Property(x => x.PurchasePrice).HasColumnType("decimal(18,2)");
+            b.Property(x => x.SalePrice).HasColumnType("decimal(18,2)");
+        });
+
+        builder.Entity<Sick>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medicals", Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.Property(x => x.Status).IsRequired().HasMaxLength(32);
+            b.Property(x => x.InpatientNumber).IsRequired().HasMaxLength(32);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(32);
+            b.Property(x => x.DischargeDepartment).IsRequired().HasMaxLength(64);
+            b.Property(x => x.Gender).IsRequired().HasMaxLength(8);
+            b.Property(x => x.DischargeTime).IsRequired();
+            b.Property(x => x.AdmissionDiagnosis).IsRequired().HasMaxLength(128);
+            b.Property(x => x.DischargeDiagnosis).IsRequired().HasMaxLength(128);
+        });
 
     }
 }
