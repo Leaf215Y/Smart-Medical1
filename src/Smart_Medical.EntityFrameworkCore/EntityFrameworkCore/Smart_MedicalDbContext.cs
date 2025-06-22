@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.Patient;
@@ -27,6 +28,8 @@ public class Smart_MedicalDbContext :
     public DbSet<Medication> Medications { get; set; }
 
 
+
+
     public DbSet<DoctorAccount> DoctorAccounts { get; set; }
     public DbSet<DoctorClinic> DoctorClinics { get; set; }
     public DbSet<DoctorDepartment> DoctorDepartments { get; set; }
@@ -35,6 +38,7 @@ public class Smart_MedicalDbContext :
    
     public DbSet<Drug> Drugs { get; set; }
     public DbSet<Sick> Medicals { get; set; }
+
 
     public Smart_MedicalDbContext(DbContextOptions<Smart_MedicalDbContext> options)
         : base(options)

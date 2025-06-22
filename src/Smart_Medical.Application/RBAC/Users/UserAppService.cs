@@ -12,6 +12,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.RBAC.Users
 {
+    //[ApiExplorerSettings(GroupName = "用户管理")]
     public class UserAppService : ApplicationService, IUserAppService
     {
         private readonly IRepository<User, Guid> _userRepository;
@@ -53,9 +54,9 @@ namespace Smart_Medical.RBAC.Users
 
         public async Task<ApiResult<PageResult<List<UserDto>>>> GetListAsync([FromQuery] Seach seach)
         {
-            var list = await _userRepository.GetListAsync();
+            var list = await _userRepository.GetQueryableAsync();
 
-            var totalCount = list.Count;
+            var totalCount = list.Count();
             var totalPage = (int)Math.Ceiling((double)totalCount / seach.PageSize);
             var pagedList = list.Skip((seach.PageIndex - 1) * seach.PageSize).Take(seach.PageSize).ToList();
             var userDtos = ObjectMapper.Map<List<User>, List<UserDto>>(pagedList);
@@ -73,7 +74,7 @@ namespace Smart_Medical.RBAC.Users
         public async Task<ApiResult<UserDto>> LoginAsync(LoginDto loginDto)
         {
             // 根据用户名查找用户
-            var users = await _userRepository.GetListAsync();
+            var users = await _userRepository.GetQueryableAsync();
             var user = users.FirstOrDefault(u => u.UserName == loginDto.UserName);
 
             // 检查用户是否存在

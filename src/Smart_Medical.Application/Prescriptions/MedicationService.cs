@@ -3,13 +3,19 @@ using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.ObjectMapping;
 
 namespace Smart_Medical.Prescriptions
 {
+    /// <summary>
+    /// 处方下对应用药管理
+    /// </summary>
+    //[ApiExplorerSettings(GroupName = "处方下对应用药管理")]
     public class MedicationService: ApplicationService, IMedicationService
     {
         private readonly IRepository<Medication> medica;
@@ -37,11 +43,21 @@ namespace Smart_Medical.Prescriptions
         /// <param name="PrescriptionId"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ApiResult<List<MedicationDto>>> GetMedicationList(int PrescriptionId)
+        public async Task<ApiResult<PageResult<List<MedicationDto>>>> GetMedicationList([FromQuery]MedicationSearchDto search)
         {
-            var res = await medica.GetListAsync(x => x.PrescriptionId == PrescriptionId);
-            var dto = ObjectMapper.Map<List<Medication>, List<MedicationDto>>(res);
-            return ApiResult<List<MedicationDto>>.Success(dto, ResultCode.Success);
+           
+            var list = await medica.GetQueryableAsync();
+            list = list.WhereIf(search.PrescriptionId!=null,x=>x.PrescriptionId==search.PrescriptionId);
+           
+            var res = list.PageResult(search.pageIndex, search.pageSize);
+            var dto = ObjectMapper.Map<List<Medication>, List<MedicationDto>>(res.Queryable.ToList());
+            var pageInfo = new PageResult<List<MedicationDto>>
+            {
+                Data = dto,
+                TotleCount = res.RowCount,
+                TotlePage = (int)Math.Ceiling((double)res.RowCount / search.pageSize)
+            };
+            return ApiResult<PageResult<List<MedicationDto>>>.Success(pageInfo, ResultCode.Success);
         }
     }
 }
