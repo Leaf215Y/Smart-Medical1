@@ -1,4 +1,5 @@
-﻿using Smart_Medical.Until;
+﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,6 @@ namespace Smart_Medical.Prescriptions
     public interface IMedicationService : IApplicationService
     {
         Task<ApiResult> CreateAsync(CreateUpdateMedicationDto input);
-        Task<ApiResult<PageResult<List<MedicationDto>>>> GetMedicationList(int PrescriptionId, int pageIndex, int pageSize);
+        Task<ApiResult<PageResult<List<MedicationDto>>>> GetMedicationList([FromQuery] MedicationSearchDto search);
     }
 }

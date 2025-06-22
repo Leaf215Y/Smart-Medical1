@@ -10,6 +10,10 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Prescriptions
 {
+    /// <summary>
+    /// 处方模板
+    /// </summary>
+    [ApiExplorerSettings(GroupName = "v2")]
     public class PrescriptionService : ApplicationService, IPrescriptionService
     {
         private readonly IRepository<Prescription, int> pres;
@@ -41,8 +45,8 @@ namespace Smart_Medical.Prescriptions
         public async Task<ApiResult<List<PrescriptionTree>>> GetPrescriptionTree(int pid)
         {
             // 一次性查出所有数据
-            var allList = await pres.GetListAsync();
-            var tree = BuildTree(allList, pid);
+            var allList = await pres.GetQueryableAsync();
+            var tree = BuildTree(allList.ToList(), pid);
             return ApiResult<List<PrescriptionTree>>.Success(tree, ResultCode.Success);
         }
         /// <summary>
@@ -63,6 +67,18 @@ namespace Smart_Medical.Prescriptions
                 result.Add(node);
             }
             return result;
+        }
+        /// <summary>
+        /// 根据不同的处方父级id，返回不同的处方对应的信息
+        /// </summary>
+        /// <param name="pid"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ApiResult<List<PrescriptionDto>>> StartPrescriptions(int pid)
+        {
+            var list=await pres.GetQueryableAsync();
+            var res=list.Where(x=>x.ParentId==pid).ToList();
+            return ApiResult<List<PrescriptionDto>>.Success(ObjectMapper.Map<List<Prescription>, List<PrescriptionDto>>(res), ResultCode.Success);
         }
     }
 }

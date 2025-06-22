@@ -12,6 +12,7 @@ using Volo.Abp.ObjectMapping;
 
 namespace Smart_Medical.RBAC.Roles
 {
+    //[ApiExplorerSettings(GroupName = "角色管理")]
     public class RoleAppService : ApplicationService, IRoleAppService
     {
         private readonly IRepository<Role, int> role;
@@ -29,9 +30,9 @@ namespace Smart_Medical.RBAC.Roles
 
         public async Task<PageResult<List<RoleDto>>> GetListAsync([FromQuery] Seach seach)
         {
-            var list = await role.GetListAsync();
+            var list = await role.GetQueryableAsync();
 
-            var totalCount = list.Count;
+            var totalCount = list.Count();
             var totalPage = (int)Math.Ceiling((double)totalCount / seach.PageSize);
             var pagedList = list.Skip((seach.PageIndex - 1) * seach.PageSize).Take(seach.PageSize).ToList();
             var userDtos = ObjectMapper.Map<List<Role>, List<RoleDto>>(pagedList);
