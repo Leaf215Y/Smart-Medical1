@@ -1,4 +1,5 @@
 ﻿using Smart_Medical.OutpatientClinic.Dtos;
+using Smart_Medical.OutpatientClinic.Dtos.Parameter;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,12 @@ namespace Smart_Medical.OutpatientClinic.IServices
         /// </summary>
         /// <returns></returns>
         Task<ApiResult> RegistrationPatientAsync(InsertPatientDto input);
+
+        /// <summary>
+        /// 就诊患者
+        /// </summary>
+        /// <returns></returns>
+        Task<ApiResult<PagedResultDto<GetVisitingDto>>> VisitingPatientsAsync(GetVistingParameterDtos input);
+
     }
 }

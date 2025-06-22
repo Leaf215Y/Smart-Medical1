@@ -34,6 +34,7 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<DoctorClinic, InsertPatientDto>().ReverseMap();
         CreateMap<BasicPatientInfo, InsertPatientDto>().ReverseMap();
         CreateMap<Sick, InsertPatientDto>().ReverseMap();
+        CreateMap<BasicPatientInfo, GetVisitingDto>().ReverseMap();
 
         #endregion
 
