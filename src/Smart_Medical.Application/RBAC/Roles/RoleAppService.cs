@@ -20,6 +20,7 @@ namespace Smart_Medical.RBAC.Roles
         {
             this.role = role;
         }
+
         public async Task<ApiResult> CreateAsync(CreateUpdateRoleDto input)
         {
             var roles = ObjectMapper.Map<CreateUpdateRoleDto, Role>(input);

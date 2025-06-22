@@ -68,33 +68,37 @@ namespace Smart_Medical.OutpatientClinic.Dtos
         /// </summary>
         public DateTime? DiseaseOnsetTime { get; set; }
 
-        #endregion
-
-        #region  医生信息
-
-        /// <summary>
-        /// 所属科室编号
-        /// </summary>
-        public Guid DepartmentId { get; set; }
-
-        /// <summary>
-        /// 账户标识
-        /// </summary>
-        [Required(ErrorMessage = "账户标识不能为空")]
-        [StringLength(20, ErrorMessage = "账户标识长度不能超过20个字符")]
-        public string AccountId { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 员工姓名
-        /// </summary>
-        [Required(ErrorMessage = "姓名不能为空")]
-        [StringLength(20, ErrorMessage = "姓名长度不能超过20个字符")]
-        public string EmployeeName { get; set; } = string.Empty;
-
-        #endregion
+        #endregion        
 
         #region  病历
 
+        /// <summary>
+        /// 体温（℃）
+        /// </summary>
+        [Required]
+        [Range(30, 45, ErrorMessage = "体温应在30~45℃之间")]
+        public decimal Temperature { get; set; }
+
+        /// <summary>
+        /// 脉搏（次/min）
+        /// </summary>
+        [Required]
+        [Range(20, 200, ErrorMessage = "脉搏应在20~200次/min之间")]
+        public int Pulse { get; set; }
+
+        /// <summary>
+        /// 呼吸（次/min）
+        /// </summary>
+        [Required]
+        [Range(5, 60, ErrorMessage = "呼吸应在5~60次/min之间")]
+        public int Breath { get; set; }
+
+        /// <summary>
+        /// 血压（mmHg）
+        /// </summary>
+        [Required]
+        [StringLength(16)]
+        public string BloodPressure { get; set; } = string.Empty;
 
 
         #endregion
@@ -107,6 +111,14 @@ namespace Smart_Medical.OutpatientClinic.Dtos
         /// </summary>
         [Required(ErrorMessage = "主治医生ID不能为空！")]
         public Guid DoctorId { get; set; }
+
+        /// <summary>
+        /// 门诊科室名称 
+        /// 患者就诊的科室名称，可用于快速展示，但建议通过 DoctorId 或 DepartmentId 关联 DoctorDepartment 获取完整信息。
+        /// </summary>
+        [Required(ErrorMessage = "门诊科室不能为空！")]
+        [StringLength(50, ErrorMessage = "门诊科室名称不能超过50个字符！")]
+        public string DepartmentName { get; set; } = string.Empty;
 
         /// <summary>
         /// 就诊状态【1】待审核【2】已退回【3】已撤回【4】待接诊【5】已取消【6】已街镇【7】待随访【8】待评价

@@ -1,4 +1,8 @@
 ﻿using AutoMapper;
+using Smart_Medical.DoctorvVsit;
+using Smart_Medical.Medical;
+using Smart_Medical.OutpatientClinic.Dtos;
+using Smart_Medical.Patient;
 using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
 using Smart_Medical.RBAC.Roles;
@@ -24,6 +28,14 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<PrescriptionDto, Prescription>().ReverseMap();
         CreateMap<CreateUpdateMedicationDto, Medication>().ReverseMap();
         CreateMap<Medication, MedicationDto>().ReverseMap();
+
+        #region 
+
+        CreateMap<DoctorClinic, InsertPatientDto>().ReverseMap();
+        CreateMap<BasicPatientInfo, InsertPatientDto>().ReverseMap();
+        CreateMap<Sick, InsertPatientDto>().ReverseMap();
+
+        #endregion
 
         //CreateMap<List<Medication>, List<MedicationDto>>().ReverseMap();
     }
