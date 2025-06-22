@@ -1,98 +1,84 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Volo.Abp.Domain.Entities.Auditing;
 
-namespace Smart_Medical.Patient
+namespace Smart_Medical.OutpatientClinic.Dtos.Parameter
 {
     /// <summary>
-    /// 患者开具处方
+    /// 处方
     /// </summary>
-    public class PatientPrescription : FullAuditedAggregateRoot<Guid>
+    public class DoctorPrescriptionDto
     {
-        /// <summary>
-        /// 处方模板编号0【无模板（非模板录入）】1【西药处方】2【中药处方】
-        /// </summary>
-        public int PrescriptionTemplateNumber { get; set; } = 0;
-
         /// <summary>
         /// 患者编号
         /// </summary>
         public Guid PatientNumber { get; set; }
 
-        #region   药品信息
+        /// <summary>
+        /// 处方类型标记（1=西药，2=中药）
+        /// </summary>
+        public int PrescriptionTemplateNumber { get; set; }
 
         /// <summary>
-        ///  药品名称
+        /// 药品项列表
         /// </summary>
-        [Required]
-        [StringLength(100)]
+        public List<PrescriptionItemDto> PrescriptionItems { get; set; } = new();
+    }
+    /// <summary>
+    /// 药品项列表
+    /// </summary>
+    public class PrescriptionItemDto
+    {
+        /// <summary>
+        /// 药品名称
+        /// </summary>
         public string MedicationName { get; set; } = string.Empty;
 
         /// <summary>
         /// 规格
         /// </summary>
-        [StringLength(100)]
         public string Specification { get; set; } = string.Empty;
+
         /// <summary>
         /// 单价
         /// </summary>
-        [Required]
         public decimal UnitPrice { get; set; }
+
         /// <summary>
         /// 每次剂量
         /// </summary>
-        [Required]
         public int Dosage { get; set; }
+
         /// <summary>
         /// 剂量单位
         /// </summary>
-        [Required]
-        [StringLength(20)]
         public string DosageUnit { get; set; } = string.Empty;
 
         /// <summary>
         /// 用法
         /// </summary>
-        [Required]
-        [StringLength(20)]
         public string Usage { get; set; } = string.Empty;
+
         /// <summary>
         /// 频次
         /// </summary>
-        [StringLength(20)]
         public string Frequency { get; set; } = string.Empty;
+
         /// <summary>
         /// 药品总量
         /// </summary>
-        [Required]
         public int Number { get; set; }
+
         /// <summary>
         /// 数量单位
         /// </summary>
-        [Required]
-        [StringLength(20)]
         public string NumberUnit { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 总金额
-        /// </summary>
-        public decimal TotalPrice { get; set; }
-        /// <summary>
-        /// 处方Id
-        /// </summary>
-        [Required]
-        public int PrescriptionId { get; set; }
-
-        #endregion        
 
         /// <summary>
         /// 医嘱内容
         /// </summary>
-        [StringLength(200, ErrorMessage = "医嘱内容长度不能超过200个字符")]
         public string MedicalAdvice { get; set; } = string.Empty;
     }
 }
