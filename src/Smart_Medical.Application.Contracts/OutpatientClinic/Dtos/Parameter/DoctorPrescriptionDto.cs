@@ -9,7 +9,7 @@ namespace Smart_Medical.OutpatientClinic.Dtos.Parameter
     /// <summary>
     /// 处方
     /// </summary>
-    public class PrescriptionDto
+    public class DoctorPrescriptionDto
     {
         /// <summary>
         /// 患者编号

@@ -239,42 +239,50 @@ public class PatientService : ApplicationService, IPatientService
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public async Task<ApiResult> DoctorsPrescription(PrescriptionDto input)
+    public async Task<ApiResult> DoctorsPrescription(DoctorPrescriptionDto input)
     {
-        if (input == null || input.PrescriptionItems == null || !input.PrescriptionItems.Any())
-            return ApiResult.Fail("处方信息不能为空！", ResultCode.Error);
-
-        // 统一的 PrescriptionId，代表一次处方
-        var prescriptionId = new Random().Next(100000, 999999);
-
-        using (var uow = _unitOfWorkManager.Begin())
+        try
         {
-            foreach (var item in input.PrescriptionItems)
-            {
-                var prescription = new PatientPrescription
-                {
-                    PatientNumber = input.PatientNumber,
-                    PrescriptionTemplateNumber = input.PrescriptionTemplateNumber,
-                    MedicationName = item.MedicationName,
-                    Specification = item.Specification,
-                    UnitPrice = item.UnitPrice,
-                    Dosage = item.Dosage,
-                    DosageUnit = item.DosageUnit,
-                    Usage = item.Usage,
-                    Frequency = item.Frequency,
-                    Number = item.Number,
-                    NumberUnit = item.NumberUnit,
-                    MedicalAdvice = item.MedicalAdvice,
-                    TotalPrice = item.UnitPrice * item.Number,
-                    PrescriptionId = prescriptionId
-                };
+            if (input == null || input.PrescriptionItems == null || !input.PrescriptionItems.Any())
+                return ApiResult.Fail("处方信息不能为空！", ResultCode.Error);
 
-                await _prescriptionRepo.InsertAsync(prescription);
+            // 统一的 PrescriptionId，代表一次处方
+            var prescriptionId = new Random().Next(100000, 999999);
+
+            using (var uow = _unitOfWorkManager.Begin())
+            {
+                foreach (var item in input.PrescriptionItems)
+                {
+                    var prescription = new PatientPrescription
+                    {
+                        PatientNumber = input.PatientNumber,
+                        PrescriptionTemplateNumber = input.PrescriptionTemplateNumber,
+                        MedicationName = item.MedicationName,
+                        Specification = item.Specification,
+                        UnitPrice = item.UnitPrice,
+                        Dosage = item.Dosage,
+                        DosageUnit = item.DosageUnit,
+                        Usage = item.Usage,
+                        Frequency = item.Frequency,
+                        Number = item.Number,
+                        NumberUnit = item.NumberUnit,
+                        MedicalAdvice = item.MedicalAdvice,
+                        TotalPrice = item.UnitPrice * item.Number,
+                        PrescriptionId = prescriptionId
+                    };
+
+                    await _prescriptionRepo.InsertAsync(prescription);
+                }
+
+                await uow.CompleteAsync();
             }
 
-            await uow.CompleteAsync();
+            return ApiResult.Success(ResultCode.Success);
         }
+        catch (Exception)
+        {
 
-        return ApiResult.Success(ResultCode.Success);
+            throw;
+        }
     }
 }

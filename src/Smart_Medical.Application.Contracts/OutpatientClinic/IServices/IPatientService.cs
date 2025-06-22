@@ -43,6 +43,6 @@ namespace Smart_Medical.OutpatientClinic.IServices
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<ApiResult> DoctorsPrescription(PrescriptionDto input);
+        Task<ApiResult> DoctorsPrescription(DoctorPrescriptionDto input);
     }
 }
