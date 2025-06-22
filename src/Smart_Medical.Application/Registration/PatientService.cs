@@ -29,14 +29,19 @@ public class PatientService : ApplicationService, IPatientService
     /// 患者病历信息
     /// </summary>
     private readonly IRepository<Sick, Guid> _sickRepo;
+    /// <summary>
+    /// 患者开具处方
+    /// </summary>
+    private readonly IRepository<PatientPrescription, Guid> _prescriptionRepo;
 
     public PatientService(
-        IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo)
+        IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo)
     {
         _unitOfWorkManager = unitOfWorkManager;
         _doctorclinRepo = doctorclinRepo;
         _patientRepo = basicpatientRepo;
         _sickRepo = sickRepo;
+        _prescriptionRepo = prescriptionRepo;
     }
 
     /// <summary>
@@ -53,11 +58,24 @@ public class PatientService : ApplicationService, IPatientService
                 // ================================
                 //  1. 创建患者基本信息
                 // ================================
+
+                BasicPatientInfo patientInfo = null;
+
+                // 查询患者是否已存在（根据身份证号）
+                bool exists = await _patientRepo.AnyAsync(x => x.IdNumber == input.IdNumber);
+
+                // 映射 DTO 到实体
                 BasicPatientInfo patient = ObjectMapper.Map<InsertPatientDto, BasicPatientInfo>(input);
                 patient.VisitStatus = "待就诊"; // 初始状态设为“待就诊”
 
-                var isPatientInserted = await _patientRepo.InsertAsync(patient) != null;
-                if (!isPatientInserted)
+                // 患者信息不存在则插入，存在则更新
+                if (!exists)
+                    patientInfo = await _patientRepo.InsertAsync(patient);
+                else
+                    patientInfo = await _patientRepo.UpdateAsync(patient);
+
+                // 判断是否成功
+                if (patientInfo == null)
                 {
                     return ApiResult.Fail("患者信息登记失败，请稍后重试！", ResultCode.Error);
                 }
@@ -81,7 +99,7 @@ public class PatientService : ApplicationService, IPatientService
                 Sick sick = ObjectMapper.Map<InsertPatientDto, Sick>(input);
                 sick.AdmissionDiagnosis = "";                      // 初始为空
                 sick.DischargeDepartment = "";                     // 初始为空
-                sick.DischargeDiagnosis = patient.Id.ToString();   // 绑定患者 ID（注意字段命名可能有点奇怪）
+                sick.DischargeDiagnosis = patient.Id.ToString();   // 绑定患者 ID
                 sick.InpatientNumber = "";                         // 暂无住院号
                 sick.Status = "";                                  // 暂无状态
                 sick.Name = patient.PatientName;                   // 冗余存下姓名方便查询
@@ -98,7 +116,7 @@ public class PatientService : ApplicationService, IPatientService
                 await uow.CompleteAsync(); // 所有插入成功才会走到这里，提交事务
 
                 return ApiResult.Success(ResultCode.Success); // 返回成功结果
-            
+
             }
             catch (Exception)
             {
@@ -167,6 +185,96 @@ public class PatientService : ApplicationService, IPatientService
         }
     }
 
-    //就诊患者详细信息
+    /// <summary>
+    /// 就诊患者详细信息
+    /// </summary>
+    /// <param name="patientId">患者id</param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<ApiResult<BasicPatientInfoDto>> GetPatientInfoAsync(Guid patientId)
+    {
+        try
+        {
+            var patientInfo = await _patientRepo.FindAsync(patientId);
+            if (patientInfo == null)
+            {
+                return ApiResult<BasicPatientInfoDto>.Fail("未找到该患者信息", ResultCode.NotFound);
+            }
+            var result = ObjectMapper.Map<BasicPatientInfo, BasicPatientInfoDto>(patientInfo);
+            return ApiResult<BasicPatientInfoDto>.Success(result, ResultCode.Success);
+        }
+        catch (Exception)
+        {
 
+            throw;
+        }
+    }
+
+
+    /// <summary>
+    /// 患者所有病历信息
+    /// </summary>
+    /// <param name="patientId">病历外键</param>
+    /// <returns></returns>
+    public async Task<ApiResult<List<GetSickInfoDto>>> GetPatientSickInfoAsync(Guid patientId)
+    {
+        try
+        {
+            var sickList = await _sickRepo.GetListAsync(x => x.DischargeDiagnosis == patientId.ToString());
+            if (sickList == null || !sickList.Any())
+            {
+                return ApiResult<List<GetSickInfoDto>>.Fail("未找到该患者病历信息", ResultCode.NotFound);
+            }
+            var result = ObjectMapper.Map<List<Sick>, List<GetSickInfoDto>>(sickList);
+            return ApiResult<List<GetSickInfoDto>>.Success(result, ResultCode.Success);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 开具处方
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    public async Task<ApiResult> DoctorsPrescription(PrescriptionDto input)
+    {
+        if (input == null || input.PrescriptionItems == null || !input.PrescriptionItems.Any())
+            return ApiResult.Fail("处方信息不能为空！", ResultCode.Error);
+
+        // 统一的 PrescriptionId，代表一次处方
+        var prescriptionId = new Random().Next(100000, 999999);
+
+        using (var uow = _unitOfWorkManager.Begin())
+        {
+            foreach (var item in input.PrescriptionItems)
+            {
+                var prescription = new PatientPrescription
+                {
+                    PatientNumber = input.PatientNumber,
+                    PrescriptionTemplateNumber = input.PrescriptionTemplateNumber,
+                    MedicationName = item.MedicationName,
+                    Specification = item.Specification,
+                    UnitPrice = item.UnitPrice,
+                    Dosage = item.Dosage,
+                    DosageUnit = item.DosageUnit,
+                    Usage = item.Usage,
+                    Frequency = item.Frequency,
+                    Number = item.Number,
+                    NumberUnit = item.NumberUnit,
+                    MedicalAdvice = item.MedicalAdvice,
+                    TotalPrice = item.UnitPrice * item.Number,
+                    PrescriptionId = prescriptionId
+                };
+
+                await _prescriptionRepo.InsertAsync(prescription);
+            }
+
+            await uow.CompleteAsync();
+        }
+
+        return ApiResult.Success(ResultCode.Success);
+    }
 }

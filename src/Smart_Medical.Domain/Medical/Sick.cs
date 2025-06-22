@@ -88,7 +88,7 @@ namespace Smart_Medical.Medical
         public string BloodPressure { get; set; }
 
         /// <summary>
-        /// 出院诊断【病历外键】
+        /// 出院诊断【病历外键, 绑定病人id】
         /// </summary>
         [Required]
         [StringLength(128)]

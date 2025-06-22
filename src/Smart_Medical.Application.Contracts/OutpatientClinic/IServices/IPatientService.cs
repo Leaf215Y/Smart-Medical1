@@ -24,5 +24,25 @@ namespace Smart_Medical.OutpatientClinic.IServices
         /// <returns></returns>
         Task<ApiResult<PagedResultDto<GetVisitingDto>>> VisitingPatientsAsync(GetVistingParameterDtos input);
 
+        /// <summary>
+        /// 就诊患者详细信息
+        /// </summary>
+        /// <param name="patientId"></param>
+        /// <returns></returns>
+        Task<ApiResult<BasicPatientInfoDto>> GetPatientInfoAsync(Guid patientId);
+
+        /// <summary>
+        /// 患者所有病历信息
+        /// </summary>
+        /// <param name="patientId">病历外键</param>
+        /// <returns></returns>
+        Task<ApiResult<List<GetSickInfoDto>>> GetPatientSickInfoAsync(Guid patientId);
+
+        /// <summary>
+        /// 开具处方
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<ApiResult> DoctorsPrescription(PrescriptionDto input);
     }
 }
