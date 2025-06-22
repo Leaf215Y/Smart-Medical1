@@ -51,7 +51,7 @@ namespace Smart_Medical.RBAC.Users
             return ApiResult<UserDto>.Success(userDto, ResultCode.Success);
         }
 
-        public async Task<PageResult<List<UserDto>>> GetListAsync([FromQuery] Seach seach)
+        public async Task<ApiResult<PageResult<List<UserDto>>>> GetListAsync([FromQuery] Seach seach)
         {
             var list = await _userRepository.GetListAsync();
 
@@ -60,12 +60,14 @@ namespace Smart_Medical.RBAC.Users
             var pagedList = list.Skip((seach.PageIndex - 1) * seach.PageSize).Take(seach.PageSize).ToList();
             var userDtos = ObjectMapper.Map<List<User>, List<UserDto>>(pagedList);
 
-            return new PageResult<List<UserDto>>
+            var pageResults = new PageResult<List<UserDto>>
             {
                 TotleCount = totalCount,
                 TotlePage = totalPage,
                 Data = userDtos
             };
+
+            return ApiResult<PageResult<List<UserDto>>>.Success(pageResults, ResultCode.Success);
         }
 
         public async Task<ApiResult<UserDto>> LoginAsync(LoginDto loginDto)
@@ -99,7 +101,10 @@ namespace Smart_Medical.RBAC.Users
                 return ApiResult.Fail("用户不存在", ResultCode.NotFound);
             }
 
+
+
             var updatedUser = ObjectMapper.Map(input, user);
+            updatedUser.UserPwd= user.UserPwd.GetMD5(); // 确保密码被加密
             await _userRepository.UpdateAsync(updatedUser);
             return ApiResult.Success(ResultCode.Success);
         }
