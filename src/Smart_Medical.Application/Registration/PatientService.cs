@@ -74,7 +74,6 @@ public class PatientService : ApplicationService, IPatientService
                 if (!exists)
                     patientInfo = await _patientRepo.InsertAsync(patient);
                 else
-
                     patientInfo = await _patientRepo.UpdateAsync(patient);
 
                 // 判断是否成功
@@ -84,11 +83,14 @@ public class PatientService : ApplicationService, IPatientService
                 }
 
                 // ================================
-                //  2. 创建就诊流程记录（排队 + 接诊）
+                //  2. 创建就诊流程记录
                 // ================================
                 DoctorClinic doctorClinic = ObjectMapper.Map<InsertPatientDto, DoctorClinic>(input);
                 doctorClinic.PatientId = patient.Id;         // 关联患者 ID
                 doctorClinic.DispensingStatus = 0;           // 默认“未发药”
+                if (!exists)
+                    // 如果是新患者，默认初诊；如果是老患者，默认复诊
+                    doctorClinic.VisitType = "复诊";
 
                 var isClinicInserted = await _doctorclinRepo.InsertAsync(doctorClinic) != null;
                 if (!isClinicInserted)
@@ -313,11 +315,19 @@ public class PatientService : ApplicationService, IPatientService
                         PrescriptionId = prescriptionId
                     };
 
-                    await _prescriptionRepo.InsertAsync(prescription);
+                    var exists = await _prescriptionRepo.InsertAsync(prescription);
                 }
 
                 await uow.CompleteAsync();
             }
+            //如果没有抛出异常,说明事务提交成功,如果抛出异常,说明事务会被自动回滚。
+            //开具处方后，将患者的就诊状态更新为“已就诊”，流程信息也会被更新
+            var patient = await _patientRepo.GetAsync(input.PatientNumber);
+            patient.VisitStatus = "已就诊"; // 更新患者状态为“已就诊”
+            await _patientRepo.UpdateAsync(patient);
+
+            var doctorClinic = await _doctorclinRepo.FirstOrDefaultAsync(x => x.PatientId == input.PatientNumber);
+
 
             return ApiResult.Success(ResultCode.Success);
         }
