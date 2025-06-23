@@ -5,6 +5,7 @@ using Smart_Medical.Medical;
 using Smart_Medical.Patient;
 using Smart_Medical.Pharmacy;
 using Smart_Medical.Prescriptions;
+using Smart_Medical.Pharmacy.InAndOutWarehouse;
 using Smart_Medical.RBAC;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -36,6 +37,10 @@ public class Smart_MedicalDbContext :
     public DbSet<BasicPatientInfo> BasicPatientInfos { get; set; }
     public DbSet<PatientPrescription> PatientPrescriptions { get; set; }
    
+    public DbSet<PharmaceuticalCompany> PharmaceuticalCompanies { get; set; }
+    public DbSet<DrugInStock> DrugInStocks { get; set; }
+    #endregion
+
     public DbSet<Drug> Drugs { get; set; }
     public DbSet<Sick> Medicals { get; set; }
 
@@ -45,6 +50,7 @@ public class Smart_MedicalDbContext :
     {
 
     }
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -180,6 +186,26 @@ public class Smart_MedicalDbContext :
             b.Property(x => x.DischargeTime).IsRequired();
             b.Property(x => x.AdmissionDiagnosis).IsRequired().HasMaxLength(128);
             b.Property(x => x.DischargeDiagnosis).IsRequired().HasMaxLength(128);
+        });
+
+        builder.Entity<PharmaceuticalCompany>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "PharmaceuticalCompanies", Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.Property(x => x.CompanyName).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ContactPerson).HasMaxLength(64);
+            b.Property(x => x.ContactPhone).HasMaxLength(32);
+            b.Property(x => x.Address).HasMaxLength(256);
+        });
+
+        builder.Entity<DrugInStock>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "DrugInStocks", Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.Property(x => x.BatchNumber).IsRequired().HasMaxLength(64);
+
+            b.HasOne<Drug>().WithMany().HasForeignKey(x => x.DrugId).IsRequired();
+            b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.PharmaceuticalCompanyId).IsRequired();
         });
 
     }

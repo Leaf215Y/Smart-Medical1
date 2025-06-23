@@ -9,7 +9,7 @@ namespace Smart_Medical.Pharmacy
 {
     public class PharmaceuticalCompanyDto : AuditedEntityDto<Guid>
     {
-        public string Name { get; set; }
+        public string CompanyName { get; set; }
         public string ContactPerson { get; set; }
         public string ContactPhone { get; set; }
         public string Address { get; set; }
