@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp;
 
 namespace Smart_Medical.Pharmacy
 {
@@ -23,26 +24,31 @@ namespace Smart_Medical.Pharmacy
             _drugRepository = drugRepository;
         }
 
-        public async Task<DrugDto> StockInAsync(CreateDrugInStockDto input)
+        public async Task StockInAsync(DrugInStockCreateDto input)
         {
-            // 1. 创建入库记录
-            // 将输入的DTO映射为DrugInStock实体
-            var drugInStock = ObjectMapper.Map<CreateDrugInStockDto, DrugInStock>(input);
-            // 将入库记录插入数据库
-            await _drugInStockRepository.InsertAsync(drugInStock);
-
-            // 2. 更新药品的总库存信息
-            // 根据DrugId获取药品实体
+            // 1. 查找药品实体，如果不存在，GetAsync会自动抛出EntityNotFoundException
             var drug = await _drugRepository.GetAsync(input.DrugId);
-            // 增加药品的库存数量
+
+            // 2. 更新药品的总库存
             drug.Stock += input.Quantity;
-            // (可选) 更新药品的默认供应商为本次入库的供应商
-            drug.PharmaceuticalCompanyId = input.PharmaceuticalCompanyId;
-            // 更新药品信息到数据库
             await _drugRepository.UpdateAsync(drug);
 
-            // 3. 将更新后的药品实体映射为DTO并返回
-            return ObjectMapper.Map<Drug, DrugDto>(drug);
+            // 3. 创建入库记录
+            var drugInStock = new DrugInStock
+            {
+                DrugId = input.DrugId,
+                PharmaceuticalCompanyId = input.PharmaceuticalCompanyId,
+                Quantity = input.Quantity,
+                StockInDate = input.StockInDate,
+                BatchNumber = input.BatchNumber
+            };
+            await _drugInStockRepository.InsertAsync(drugInStock);
+
+            // (可选业务逻辑) 可以在这里检查库存是否超过上限或低于下限，并触发相应事件
+            // if (drug.Stock < drug.StockLower) { ... }
+            // if (drug.Stock > drug.StockUpper) { ... }
+
         }
+
     }
 }

@@ -29,7 +29,7 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
         public int Quantity { get; set; }
 
         /// <summary>
-        /// 入库日期ss
+        /// 入库日期
         /// </summary>
         [Required]
         public DateTime StockInDate { get; set; }

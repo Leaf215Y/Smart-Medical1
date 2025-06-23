@@ -2,6 +2,7 @@
 using Smart_Medical.RBAC;
 using Smart_Medical.RBAC.Roles;
 using Smart_Medical.RBAC.Users;
+using Smart_Medical.Pharmacy;
 
 namespace Smart_Medical;
 
@@ -18,5 +19,12 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
 
         CreateMap<Role, RoleDto>().ReverseMap();
         CreateMap<CreateUpdateRoleDto, Role>().ReverseMap();
+
+        CreateMap<PharmaceuticalCompany, PharmaceuticalCompanyDto>();
+        CreateMap<CreateUpdatePharmaceuticalCompanyDto, PharmaceuticalCompany>();
+
+        // 药品相关映射
+        CreateMap<CreateUpdateDrugDto, Drug>();
+        CreateMap<Drug, DrugDto>();
     }
 }
