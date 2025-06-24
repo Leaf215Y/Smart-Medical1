@@ -47,18 +47,18 @@ namespace Smart_Medical.DoctorvVsit
         /// 患者本次就诊的主要症状或不适的简要描述。
         /// </summary>
         [StringLength(500, ErrorMessage = "主诉内容不能超过500个字符！")]
-        public string? ChiefComplaint { get; set; }
+        public string? ChiefComplaint { get; set; } = string.Empty;
 
         /// <summary>
         /// 初步诊断 🩺
         /// 医生对患者病情做出的初步判断和诊断结果。
         /// </summary>
         [StringLength(1000, ErrorMessage = "初步诊断内容不能超过1000个字符！")]
-        public string? PreliminaryDiagnosis { get; set; }
+        public string? PreliminaryDiagnosis { get; set; } = string.Empty;
 
         /// <summary>
         /// 就诊类型 
-        /// 例如：初诊、复诊、急诊等，建议使用枚举或常量进行规范。
+        /// 例如： 初诊、复诊、急诊等，建议使用枚举或常量进行规范。
         /// </summary>
         [Required(ErrorMessage = "就诊类型不能为空！")]
         [StringLength(20, ErrorMessage = "就诊类型长度不能超过20个字符！")]
@@ -70,25 +70,34 @@ namespace Smart_Medical.DoctorvVsit
         public int DispensingStatus { get; set; } = 0;
 
         /// <summary>
-        /// 就诊状态【1】待审核【2】已退回【3】已撤回【4】待接诊【5】已取消【6】已街镇【7】待随访【8】待评价
+        /// 患者就诊状态
         /// </summary>
-        public enum ExecutionStatus
-        {
-            PendingReview = 1, // 待审核
-            Returned = 2, // 已退回
-            Withdrawn = 3, // 已撤回
-            PendingConsultation = 4, // 待接诊
-            Cancelled = 5, // 已取消
-            Completed = 6, // 已街镇
-            PendingFollowUp = 7, // 待随访
-            PendingEvaluation = 8 // 待评价
-        }
+        public ExecutionStatus ExecutionStatus { get; set; } = ExecutionStatus.PendingConsultation;//默认状态为待就诊
+
 
         /// <summary>
         /// 备注信息 
         /// 任何需要补充的就诊相关说明或特殊情况。
         /// </summary>
         [StringLength(1000, ErrorMessage = "备注信息不能超过1000个字符！")]
-        public string? Remarks { get; set; }
+        public string? Remarks { get; set; } = string.Empty;
     }
+
+    /// <summary>
+    /// 就诊状态 枚举【1】待审核【2】已退回【3】已撤回【4】待接诊【5】已取消【6】已街镇【7】待随访【8】待评价
+    /// </summary>
+    public enum ExecutionStatus
+    {
+        PendingConsultation = 1, // 待就诊
+        Cancelled = 2, // 已取消
+        Completed = 3, // 已就诊
+        PendingEvaluation = 3// 待评价
+        //PendingReview = 1, // 待审核
+        // Returned = 2, // 已退回
+        //Withdrawn = 3, // 已撤回
+        //PendingFollowUp = 7, // 待随访
+    }
+
+
+
 }

@@ -1,10 +1,13 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Smart_Medical.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -54,7 +57,7 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
 
-
+        var services = context.Services;
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
@@ -76,11 +79,14 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
-       /* context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
-        context.Services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
-        {
-            options.IsDynamicClaimsEnabled = true;
-        });*/
+        //context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+        //context.Services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
+        //{
+        //    options.IsDynamicClaimsEnabled = true;
+        //});
+
+
+
     }
 
     private void ConfigureBundles()
@@ -143,17 +149,32 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
 
     private static void ConfigureSwaggerServices(ServiceConfigurationContext context, IConfiguration configuration)
     {
-        context.Services.AddAbpSwaggerGenWithOAuth(
-            configuration["AuthServer:Authority"]!,
-            new Dictionary<string, string>
-            {
-                    {"Smart_Medical", "Smart_Medical API"}
-            },
+        context.Services.AddSwaggerGen(
+           
             options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Smart_Medical API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Smart_Medical", Version = "v1" });
+                options.SwaggerDoc("v2", new OpenApiInfo { Title = "v2", Version = "v2" });
+
+                options.DocInclusionPredicate((doc, desc) =>
+                {
+                    return doc == desc.GroupName;
+                });
+
                 options.DocInclusionPredicate((docName, description) => true);
+                //开启权限小锁
+                options.OperationFilter<AddResponseHeadersFilter>();
+                options.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
+                options.OperationFilter<SecurityRequirementsOperationFilter>();
                 options.CustomSchemaIds(type => type.FullName);
+
+                //就是这里！！！！！！！！！
+                var basePath = AppDomain.CurrentDomain.BaseDirectory;
+                var xmlPath = Path.Combine(basePath, "Smart_Medical.Application.xml");//这个就是刚刚配置的xml文件名
+                options.IncludeXmlComments(xmlPath, true);//默认的第二个参数是false，这个是controller的注释，记得修改
+
+
+                options.HideAbpEndpoints(); // 可选：隐藏 ABP 默认生成的接口
             });
     }
 
@@ -212,11 +233,20 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
         app.UseSwagger();
         app.UseAbpSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Smart_Medical API");
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+            c.SwaggerEndpoint("/swagger/v2/swagger.json", "v2");
 
-            var configuration = context.ServiceProvider.GetRequiredService<IConfiguration>();
-            c.OAuthClientId(configuration["AuthServer:SwaggerClientId"]);
-            c.OAuthScopes("Smart_Medical");
+
+            // 模型的默认扩展深度，设置为 -1 完全隐藏模型
+            c.DefaultModelsExpandDepth(1);
+            // API文档仅展开标记
+            c.DocExpansion(DocExpansion.List);
+            c.DefaultModelRendering(ModelRendering.Example);
+            c.DefaultModelExpandDepth(-1);
+            // API前缀设置为空
+            c.RoutePrefix = string.Empty;
+            // API页面Title
+            c.DocumentTitle = "Smart_Medical API";
         });
 
         app.UseAuditing();

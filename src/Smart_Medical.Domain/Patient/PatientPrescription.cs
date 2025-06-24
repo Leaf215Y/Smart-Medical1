@@ -14,7 +14,8 @@ namespace Smart_Medical.Patient
     public class PatientPrescription : FullAuditedAggregateRoot<Guid>
     {
         /// <summary>
-        /// 处方模板编号【可为0，为0则不属于任何模板】
+        /// 处方模板   编号0【无模板（非模板录入）】  
+        /// Prescriptionid 处方信息id 关联 
         /// </summary>
         public int PrescriptionTemplateNumber { get; set; } = 0;
 
@@ -23,10 +24,7 @@ namespace Smart_Medical.Patient
         /// </summary>
         public Guid PatientNumber { get; set; }
 
-<<<<<<< Updated upstream
         #region   药品信息
-
-=======
         /// <summary>
         /// 是否使用处方模版
         /// </summary>
@@ -37,9 +35,8 @@ namespace Smart_Medical.Patient
         public string? DrugIds { get; set; }=string.Empty;
 
 
-        #region   药品信息
+       /* #region   药品信息
 /*
->>>>>>> Stashed changes
         /// <summary>
         ///  药品名称
         /// </summary>
@@ -101,17 +98,14 @@ namespace Smart_Medical.Patient
         /// </summary>
         [Required]
         public int PrescriptionId { get; set; }
-<<<<<<< Updated upstream
-
-=======
 */
->>>>>>> Stashed changes
         #endregion        
 
+
         /// <summary>
-        /// 医嘱内容
+        /// 医嘱内容  备注
         /// </summary>
-        [StringLength(200, ErrorMessage = "医嘱内容长度不能超过200个字符")]
-        public string MedicalAdvice { get; set; } = string.Empty;
+        [StringLength(500, ErrorMessage = "医嘱内容长度不能超过500个字符")]
+        public string? MedicalAdvice { get; set; } = string.Empty;
     }
 }

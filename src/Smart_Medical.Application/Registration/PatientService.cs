@@ -97,7 +97,7 @@ public class PatientService : ApplicationService, IPatientService
                 {
                     return ApiResult.Fail("就诊流程创建失败，请稍后重试！", ResultCode.Error);
                 }
-
+/*
                 // ================================
                 // 3. 创建患者病历信息（暂为空）
                 // ================================
@@ -108,13 +108,13 @@ public class PatientService : ApplicationService, IPatientService
                 sick.InpatientNumber = "";                         // 暂无住院号
                 sick.Status = "";                                  // 暂无状态
                 sick.Name = patient.PatientName;                   // 冗余存下姓名方便查询*/
-
+/*
                 var isSickInserted = await _sickRepo.InsertAsync(sick) != null;
                 if (!isSickInserted)
                 {
                     return ApiResult.Fail("患者病历信息创建失败，请稍后重试！", ResultCode.Error);
                 }
-
+*/
                 // ================================
                 //  提交整个事务
                 // ================================
@@ -223,7 +223,21 @@ public class PatientService : ApplicationService, IPatientService
     /// <returns></returns>
     public async Task<ApiResult<List<GetSickInfoDto>>> GetPatientSickInfoAsync(Guid patientId)
     {
-        
+        /* try
+         {
+             var sickList = await _sickRepo.GetListAsync(x => x.DischargeDiagnosis == patientId.ToString());
+             if (sickList == null || !sickList.Any())
+             {
+                 return ApiResult<List<GetSickInfoDto>>.Fail("未找到该患者病历信息", ResultCode.NotFound);
+             }
+             var result = ObjectMapper.Map<List<Sick>, List<GetSickInfoDto>>(sickList);
+             return ApiResult<List<GetSickInfoDto>>.Success(result, ResultCode.Success);
+         }
+         catch (Exception)
+         {
+             throw;
+         }*/
+        throw new Exception();
     }
 
     /// <summary>
@@ -249,7 +263,7 @@ public class PatientService : ApplicationService, IPatientService
                     {
                         PatientNumber = input.PatientNumber,
                         PrescriptionTemplateNumber = input.PrescriptionTemplateNumber,
-                        MedicationName = item.MedicationName,
+                    /*    MedicationName = item.MedicationName,
                         Specification = item.Specification,
                         UnitPrice = item.UnitPrice,
                         Dosage = item.Dosage,
@@ -260,7 +274,7 @@ public class PatientService : ApplicationService, IPatientService
                         NumberUnit = item.NumberUnit,
                         MedicalAdvice = item.MedicalAdvice,
                         TotalPrice = item.UnitPrice * item.Number,
-                        PrescriptionId = prescriptionId
+                        PrescriptionId = prescriptionId*/
                     };
 
                     var exists = await _prescriptionRepo.InsertAsync(prescription);

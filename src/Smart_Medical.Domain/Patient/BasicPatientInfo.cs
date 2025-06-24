@@ -58,16 +58,16 @@ namespace Smart_Medical.Patient
         public string IdNumber { get; set; } = string.Empty;
 
         /// <summary>
-        /// 就诊类型（初诊/复诊，必填）
+        /// 就诊 类型（初诊/复诊，必填）
         /// </summary>
         [Required(ErrorMessage = "就诊类型不能为空")]
         [StringLength(20, ErrorMessage = "就诊类型长度不能超过20个字符")]
         public string VisitType { get; set; } = "初诊";
 
         /// <summary>
-        /// 是否为传染病
+        /// 是否为传染病 默认没有
         /// </summary>
-        public bool IsInfectiousDisease { get; set; }
+        public bool IsInfectiousDisease { get; set; }= false;
 
         /// <summary>
         /// 发病时间
@@ -89,6 +89,8 @@ namespace Smart_Medical.Patient
         /// 就诊日期
         /// </summary>
         public DateTime VisitDate { get; set; } = DateTime.Now;
+
+
 
      
     }
