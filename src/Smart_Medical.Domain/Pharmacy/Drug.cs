@@ -34,6 +34,8 @@ namespace Smart_Medical.Pharmacy
         [StringLength(32)]
         public string FeeName { get; set; }
 
+
+
         /// <summary>
         ///  剂型
         /// </summary>

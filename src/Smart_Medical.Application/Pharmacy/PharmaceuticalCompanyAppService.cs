@@ -27,9 +27,14 @@ namespace Smart_Medical.Pharmacy
 
         /// <summary>
         /// 根据公司名称模糊查询
+        /// Search pharmaceutical companies by name (fuzzy search)
         /// </summary>
-        /// <param name="name">公司名称</param>
-        /// <returns></returns>
+        /// <remarks>
+        /// GET /api/app/pharmacy/pharmaceutical-company/find-by-name?name={name}
+        /// 根据公司名称模糊查询医药公司信息。
+        /// </remarks>
+        /// <param name="name">公司名称（模糊查询）</param>
+        /// <returns>公司列表</returns>
         public async Task<ListResultDto<PharmaceuticalCompanyDto>> FindByNameAsync(string name)
         {
             //从仓储中获取包含指定名称的公司列表
@@ -42,8 +47,13 @@ namespace Smart_Medical.Pharmacy
 
         /// <summary>
         /// 获取所有公司列表
+        /// Get all pharmaceutical companies
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// GET /api/app/pharmacy/pharmaceutical-company/all
+        /// 获取所有医药公司信息列表。
+        /// </remarks>
+        /// <returns>公司列表</returns>
         public async Task<ListResultDto<PharmaceuticalCompanyDto>> GetListAllAsync()
         {
             //从仓储中获取所有公司

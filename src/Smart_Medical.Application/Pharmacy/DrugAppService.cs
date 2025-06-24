@@ -21,6 +21,16 @@ namespace Smart_Medical.Pharmacy
 
         }
 
+        /// <summary>
+        /// 新增药品
+        /// Add a new drug
+        /// </summary>
+        /// <remarks>
+        /// POST /api/app/pharmacy/drug
+        /// 用于添加新的药品信息，需传入药品名称、类型、价格、库存等参数。
+        /// </remarks>
+        /// <param name="input">药品创建参数</param>
+        /// <returns>操作结果，包含新增药品的详细信息</returns>
         public override async Task<DrugDto> CreateAsync(CreateUpdateDrugDto input)
         {
 
@@ -49,7 +59,17 @@ namespace Smart_Medical.Pharmacy
             return await base.CreateAsync(input);
         }
 
-        public override async Task DeleteAsync(int id)
+        /// <summary>
+        /// 删除药品
+        /// Delete a drug
+        /// </summary>
+        /// <remarks>
+        /// DELETE /api/app/pharmacy/drug/{id}
+        /// 根据药品ID删除药品信息。
+        /// </remarks>
+        /// <param name="id">药品ID</param>
+        /// <returns>无返回值，操作成功则表示删除成功</returns>
+        public override async Task DeleteAsync(Guid id)
         {
             var drug = await Repository.FindAsync(id);
             if (drug == null)
@@ -60,7 +80,18 @@ namespace Smart_Medical.Pharmacy
             await base.DeleteAsync(id);
         }
 
-        public override async Task<DrugDto> UpdateAsync(int id, CreateUpdateDrugDto input)
+        /// <summary>
+        /// 更新药品信息
+        /// Update drug information
+        /// </summary>
+        /// <remarks>
+        /// PUT /api/app/pharmacy/drug/{id}
+        /// 根据药品ID更新药品的详细信息。
+        /// </remarks>
+        /// <param name="id">药品ID</param>
+        /// <param name="input">药品更新参数</param>
+        /// <returns>操作结果，包含更新后的药品详细信息</returns>
+        public override async Task<DrugDto> UpdateAsync(Guid id, CreateUpdateDrugDto input)
         {
             // 1. 校验药品是否存在
             var drug = await Repository.GetAsync(id);
@@ -105,6 +136,20 @@ namespace Smart_Medical.Pharmacy
             return ObjectMapper.Map<Drug, DrugDto>(drug);
         }
 
+        /// <summary>
+        /// 获取药品分页列表
+        /// Get paged drug list
+        /// </summary>
+        /// <remarks>
+        /// GET /api/app/pharmacy/drugs
+        /// 分页获取药品信息列表，可按名称、类型、类别等条件筛选。
+        /// </remarks>
+        /// <param name="name">药品名称（可选，模糊查询）</param>
+        /// <param name="type">药品类型（可选）</param>
+        /// <param name="category">药品类别（可选）</param>
+        /// <param name="skipCount">跳过的记录数（分页）</param>
+        /// <param name="maxResultCount">每页最大记录数</param>
+        /// <returns>药品分页列表</returns>
         public async Task<PagedResultDto<DrugDto>> GetPagedListAsync(string name, string type, DrugCategory? category, int skipCount, int maxResultCount)
         {
             var query = await Repository.GetQueryableAsync();
