@@ -1,19 +1,14 @@
-﻿using AutoMapper.Internal.Mappers;
-using MD5Hash;
+﻿using MD5Hash;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO和接口
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Smart_Medical.RBAC; // 引入Domain层的RBAC实体
-using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO和接口
-using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO
-using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的Roles DTO
 
 namespace Smart_Medical.RBAC.Users
 {
@@ -29,7 +24,7 @@ namespace Smart_Medical.RBAC.Users
 
         public async Task<ApiResult> CreateAsync(CreateUpdateUserDto input)
         {
-            input.UserPwd = input.UserPwd.GetMD5();
+            input.UserPwd = input.UserPwd.GetHashCode().ToString();
             var user = ObjectMapper.Map<CreateUpdateUserDto, User>(input);
             var result = await _userRepository.InsertAsync(user);
             return ApiResult.Success(ResultCode.Success);
@@ -125,7 +120,7 @@ namespace Smart_Medical.RBAC.Users
             }
 
             // 验证密码
-            if (user.UserPwd != loginDto.UserPwd.GetMD5())
+            if (user.UserPwd != loginDto.UserPwd.GetHashCode().ToString())
             {
                 return ApiResult<UserDto>.Fail("密码错误", ResultCode.ValidationError);
             }
