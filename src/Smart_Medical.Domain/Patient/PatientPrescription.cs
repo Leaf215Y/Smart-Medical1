@@ -23,8 +23,23 @@ namespace Smart_Medical.Patient
         /// </summary>
         public Guid PatientNumber { get; set; }
 
+<<<<<<< Updated upstream
         #region   药品信息
 
+=======
+        /// <summary>
+        /// 是否使用处方模版
+        /// </summary>
+        public bool IsActive { get; set; } = true;
+        /// <summary>
+        /// 不使用处方模版时，  药品ID集合
+        /// </summary>
+        public string? DrugIds { get; set; }=string.Empty;
+
+
+        #region   药品信息
+/*
+>>>>>>> Stashed changes
         /// <summary>
         ///  药品名称
         /// </summary>
@@ -86,7 +101,11 @@ namespace Smart_Medical.Patient
         /// </summary>
         [Required]
         public int PrescriptionId { get; set; }
+<<<<<<< Updated upstream
 
+=======
+*/
+>>>>>>> Stashed changes
         #endregion        
 
         /// <summary>
