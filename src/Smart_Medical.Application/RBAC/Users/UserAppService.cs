@@ -61,7 +61,7 @@ namespace Smart_Medical.RBAC.Users
             var queryable = await _userRepository.GetQueryableAsync();
 
             // 使用 Include 联查 UserRoles 及其关联的 Role 实体，确保在映射到 DTO 时包含关联数据
-            queryable = queryable.Include(u => u.UserRoles).ThenInclude(ur => ur.Role);
+            //queryable = queryable.Include(u => u.UserRoles).ThenInclude(ur => ur.Role);
 
             if (!string.IsNullOrWhiteSpace(input.UserName))
             {

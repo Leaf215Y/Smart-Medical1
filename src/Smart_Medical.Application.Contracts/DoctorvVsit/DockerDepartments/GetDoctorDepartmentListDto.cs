@@ -12,30 +12,25 @@ namespace Smart_Medical.DoctorvVsit.DockerDepartments
     /// </summary>
     public class GetDoctorDepartmentListDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         /// <summary>
         /// 科室名称（必填）
         /// </summary>
-        [Required(ErrorMessage = "科室名称不能为空")]
-        [StringLength(50, ErrorMessage = "科室名称长度不能超过50个字符")]
         public string DepartmentName { get; set; } = string.Empty;
 
         /// <summary>
         /// 科室大类
         /// </summary>
-        [StringLength(30, ErrorMessage = "科室大类长度不能超过30个字符")]
         public string DepartmentCategory { get; set; } = string.Empty;
 
         /// <summary>
         /// 科室地址
         /// </summary>
-        [StringLength(100, ErrorMessage = "科室地址长度不能超过100个字符")]
         public string Address { get; set; } = string.Empty;
 
         /// <summary>
         /// 科室负责人姓名
         /// </summary>
-        [StringLength(20, ErrorMessage = "负责人姓名长度不能超过20个字符")]
         public string DirectorName { get; set; } = string.Empty;
 
         /// <summary>
@@ -56,7 +51,6 @@ namespace Smart_Medical.DoctorvVsit.DockerDepartments
         /// <summary>
         /// 科室类型
         /// </summary>
-        [StringLength(20, ErrorMessage = "科室类型长度不能超过20个字符")]
         public string? Type { get; set; }
     }
 }

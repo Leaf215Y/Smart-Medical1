@@ -4,6 +4,6 @@ namespace Smart_Medical.Application.Contracts.RBAC.Permissions
 {
     public class SeachPermissionDto : PagedAndSortedResultRequestDto
     {
-        public string PermissionName { get; set; }
+        public string? PermissionName { get; set; } = string.Empty;
     }
 }
