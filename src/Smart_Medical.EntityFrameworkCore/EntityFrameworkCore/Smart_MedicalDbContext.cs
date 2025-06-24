@@ -83,6 +83,7 @@ public class Smart_MedicalDbContext :
             b.Property(x => x.PrescriptionName).IsRequired().HasMaxLength(128);
 
         });
+       
         builder.Entity<Medication>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medications",
