@@ -7,9 +7,11 @@ using Smart_Medical.Patient;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.ObjectMapping;
 using Volo.Abp.Uow;
@@ -81,11 +83,14 @@ public class PatientService : ApplicationService, IPatientService
                 }
 
                 // ================================
-                //  2. 创建就诊流程记录（排队 + 接诊）
+                //  2. 创建就诊流程记录
                 // ================================
                 DoctorClinic doctorClinic = ObjectMapper.Map<InsertPatientDto, DoctorClinic>(input);
                 doctorClinic.PatientId = patient.Id;         // 关联患者 ID
                 doctorClinic.DispensingStatus = 0;           // 默认“未发药”
+                if (!exists)
+                    // 如果是新患者，默认初诊；如果是老患者，默认复诊
+                    doctorClinic.VisitType = "复诊";
 
                 var isClinicInserted = await _doctorclinRepo.InsertAsync(doctorClinic) != null;
                 if (!isClinicInserted)
@@ -214,18 +219,57 @@ public class PatientService : ApplicationService, IPatientService
     /// <summary>
     /// 患者所有病历信息
     /// </summary>
-    /// <param name="patientId">病历外键</param>
+    /// <param name="patientId">患者id</param>
     /// <returns></returns>
     public async Task<ApiResult<List<GetSickInfoDto>>> GetPatientSickInfoAsync(Guid patientId)
     {
         try
         {
-            var sickList = await _sickRepo.GetListAsync(x => x.DischargeDiagnosis == patientId.ToString());
-            if (sickList == null || !sickList.Any())
-            {
-                return ApiResult<List<GetSickInfoDto>>.Fail("未找到该患者病历信息", ResultCode.NotFound);
-            }
-            var result = ObjectMapper.Map<List<Sick>, List<GetSickInfoDto>>(sickList);
+            // 获取患者基本信息数据
+            var patients = await _patientRepo.GetQueryableAsync();
+
+            // 获取就诊记录数据
+            var clinics = await _doctorclinRepo.GetQueryableAsync();
+
+            // 获取病历数据
+            var sicks = await _sickRepo.GetQueryableAsync();
+
+            // 获取处方数据
+            var prescriptions = await _prescriptionRepo.GetQueryableAsync();
+
+            var query = from patient in patients
+                            // 过滤出指定 patientId 的患者
+                        where patient.Id == patientId
+
+                        // 左连接 DoctorClinic（就诊记录），通过 PatientId 关联
+                        join clinic in clinics
+                            on patient.Id equals clinic.PatientId into clinicGroup
+                        from clinic in clinicGroup.DefaultIfEmpty()
+
+                            // 左连接病历表 Sick，通过患者姓名关联（注意：名字可能重复，建议用唯一标识更稳）
+                        join sick in sicks
+                            on patient.Id.ToString() equals sick.DischargeDiagnosis into sickGroup
+                        //on patient.PatientName equals sick.Name into sickGroup
+                        from sick in sickGroup.DefaultIfEmpty()
+
+                            // 左连接处方表，通过 Patient.Id 匹配 Prescription.PatientNumber
+                        join prescription in prescriptions
+                            on patient.Id equals prescription.PatientNumber into prescriptionGroup
+                        from prescription in prescriptionGroup.DefaultIfEmpty() // left join，可能没有处方
+
+                        select new GetSickInfoDto
+                        {
+                            BloodPressure = sick.BloodPressure,                                     // 血压
+                            Breath = sick.Breath,                                                   // 呼吸频率
+                            Pulse = sick.Pulse,                                                     // 脉搏
+                            Temperature = sick.Temperature,                                         // 体温
+                            PrescriptionTemplateNumber = prescription.PrescriptionTemplateNumber,   // 处方模板编号
+                            ChiefComplaint = clinic.ChiefComplaint,                                 // 主诉
+                            MedicalAdvice = prescription.MedicalAdvice                              // 医嘱内容
+                        };
+
+            //查询
+            var result = await AsyncExecuter.ToListAsync(query);
             return ApiResult<List<GetSickInfoDto>>.Success(result, ResultCode.Success);
         }
         catch (Exception)
@@ -271,11 +315,19 @@ public class PatientService : ApplicationService, IPatientService
                         PrescriptionId = prescriptionId
                     };
 
-                    await _prescriptionRepo.InsertAsync(prescription);
+                    var exists = await _prescriptionRepo.InsertAsync(prescription);
                 }
 
                 await uow.CompleteAsync();
             }
+            //如果没有抛出异常,说明事务提交成功,如果抛出异常,说明事务会被自动回滚。
+            //开具处方后，将患者的就诊状态更新为“已就诊”，流程信息也会被更新
+            var patient = await _patientRepo.GetAsync(input.PatientNumber);
+            patient.VisitStatus = "已就诊"; // 更新患者状态为“已就诊”
+            await _patientRepo.UpdateAsync(patient);
+
+            var doctorClinic = await _doctorclinRepo.FirstOrDefaultAsync(x => x.PatientId == input.PatientNumber);
+
 
             return ApiResult.Success(ResultCode.Success);
         }
@@ -286,3 +338,7 @@ public class PatientService : ApplicationService, IPatientService
         }
     }
 }
+
+
+
+
