@@ -11,7 +11,8 @@ namespace Smart_Medical.Until
         Success = 200,
         Error = 500,
         NotFound = 300,
-        ValidationError = 400
+        ValidationError = 400,
+        AlreadyExists = 409
     }
     public class ApiResult
     {

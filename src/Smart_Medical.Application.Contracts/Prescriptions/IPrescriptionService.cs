@@ -8,7 +8,10 @@ using Volo.Abp.Application.Services;
 
 namespace Smart_Medical.Prescriptions
 {
-    public interface IPrescriptionService:IApplicationService
+    /// <summary>
+    /// 处方管理服务接口
+    /// </summary>
+    public interface IPrescriptionService : IApplicationService
     {
         Task<ApiResult> CreateAsync(PrescriptionDto input);
         Task<ApiResult<List<PrescriptionTree>>> GetPrescriptionTree(int pid);

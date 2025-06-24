@@ -1,8 +1,6 @@
-﻿using AutoMapper.Internal.Mappers;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -10,6 +8,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Pharmacy
 {
+    [ApiExplorerSettings(GroupName = "制药公司管理")]
     public class PharmaceuticalCompanyAppService :
        CrudAppService<
            PharmaceuticalCompany,
@@ -19,10 +18,12 @@ namespace Smart_Medical.Pharmacy
            CreateUpdatePharmaceuticalCompanyDto>,
        IPharmaceuticalCompanyAppService
     {
-        public PharmaceuticalCompanyAppService(IRepository<PharmaceuticalCompany, Guid> repository)
-            : base(repository)
-        {
+        private readonly IRepository<PharmaceuticalCompany, Guid> _pharmaceuticalCompanyRepository;
 
+        public PharmaceuticalCompanyAppService(IRepository<PharmaceuticalCompany, Guid> pharmaceuticalCompanyRepository)
+            : base(pharmaceuticalCompanyRepository)
+        {
+            _pharmaceuticalCompanyRepository = pharmaceuticalCompanyRepository;
         }
 
         /// <summary>
