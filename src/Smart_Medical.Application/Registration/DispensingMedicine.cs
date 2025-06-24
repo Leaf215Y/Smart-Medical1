@@ -42,7 +42,7 @@ namespace Smart_Medical.Registration
         /// <summary>
         /// 药品
         /// </summary>
-        private readonly IRepository<Drug, Guid> _drugRepo;
+        private readonly IRepository<Drug, int> _drugRepo;
         /// <summary>
         /// 构造函数注入
         /// </summary>
@@ -52,7 +52,7 @@ namespace Smart_Medical.Registration
         /// <param name="sickRepo"></param>
         /// <param name="prescriptionRepo"></param>
         public DispensingMedicine(
-            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug,Guid> drugRepo)
+            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug, int> drugRepo)
         {
             _unitOfWorkManager = unitOfWorkManager;
             _doctorclinRepo = doctorclinRepo;
@@ -69,7 +69,7 @@ namespace Smart_Medical.Registration
         /// <returns>返回 ApiResult，标识发药成功或失败及相关提示信息</returns>
         public async Task<ApiResult> DistributeMedicine(Guid patientNumber)
         {
-            // 先来个“身份证”校验，患者编号不能是空Guid，空Guid你发啥药？
+            /*// 先来个“身份证”校验，患者编号不能是空Guid，空Guid你发啥药？
             if (patientNumber == Guid.Empty)
             {
                 return ApiResult.Fail("患者编号不能为空！", ResultCode.NotFound);
@@ -142,9 +142,11 @@ namespace Smart_Medical.Registration
 
                     // 返回系统异常提示，别给客户解释“臭鱼烂虾”之类的
                     return ApiResult.Fail("发药失败，系统异常！", ResultCode.NotFound);
-                }
+                }*/
+            throw new Exception();
+
             }
         }
 
     }
-}
+
