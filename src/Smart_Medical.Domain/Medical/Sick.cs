@@ -8,8 +8,14 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Smart_Medical.Medical
 {
-    public class Sick : AuditedAggregateRoot<Guid>
+    public class Sick : FullAuditedAggregateRoot<Guid>
     {
+        /// <summary>
+        /// 患者基本信息Id
+        /// </summary>
+        [Required(ErrorMessage = "患者基本信息Id不能为空")]
+        public Guid BasicPatientId { get; set; }
+
         /// <summary>
         /// 病历状态
         /// </summary>
@@ -22,41 +28,22 @@ namespace Smart_Medical.Medical
         /// </summary>
         [Required]
         [StringLength(32)]
-        public string InpatientNumber { get; set; }
+        public string? InpatientNumber { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 姓名
-        /// </summary>
-        [Required]
-        [StringLength(32)]
-        public string Name { get; set; }
 
-        /// <summary>
-        /// 出院科室
-        /// </summary>
-        [Required]
-        [StringLength(64)]
-        public string DischargeDepartment { get; set; }
-
-        /// <summary>
-        /// 性别
-        /// </summary>
-        [Required]
-        [StringLength(8)]
-        public string Gender { get; set; }
 
         /// <summary>
         /// 出院时间
         /// </summary>
         [Required]
-        public DateTime DischargeTime { get; set; }
+        public DateTime? DischargeTime { get; set; } = null;
 
         /// <summary>
         /// 入院诊断
         /// </summary>
         [Required]
         [StringLength(128)]
-        public string AdmissionDiagnosis { get; set; }
+        public string? AdmissionDiagnosis { get; set; } = string.Empty;
 
 
         /// <summary>
@@ -64,34 +51,29 @@ namespace Smart_Medical.Medical
         /// </summary>
         [Required]
         [Range(30, 45, ErrorMessage = "体温应在30~45℃之间")]
-        public decimal Temperature { get; set; }
+        public decimal? Temperature { get; set; } =0;
 
         /// <summary>
         /// 脉搏（次/min）
         /// </summary>
         [Required]
         [Range(20, 200, ErrorMessage = "脉搏应在20~200次/min之间")]
-        public int Pulse { get; set; }
+        public int? Pulse { get; set; } = 0;
 
         /// <summary>
         /// 呼吸（次/min）
         /// </summary>
         [Required]
         [Range(5, 60, ErrorMessage = "呼吸应在5~60次/min之间")]
-        public int Breath { get; set; }
+        public int? Breath { get; set; } = 0;
 
         /// <summary>
         /// 血压（mmHg）
         /// </summary>
         [Required]
         [StringLength(16)]
-        public string BloodPressure { get; set; }
+        public string? BloodPressure { get; set; }=string.Empty;
 
-        /// <summary>
-        /// 出院诊断【病历外键, 绑定病人id】
-        /// </summary>
-        [Required]
-        [StringLength(128)]
-        public string DischargeDiagnosis { get; set; }
+       
     }
 }

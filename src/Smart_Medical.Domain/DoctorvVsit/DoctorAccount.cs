@@ -56,5 +56,7 @@ namespace Smart_Medical.DoctorvVsit
         /// </summary>
         [StringLength(30, ErrorMessage = "科室名称长度不能超过30个字符")]
         public string DepartmentName { get; set; } = string.Empty;
+
+
     }
 }

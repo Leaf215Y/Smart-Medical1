@@ -28,7 +28,5 @@ namespace Smart_Medical.Dictionarys
         /// 字典数据描述
         /// </summary>
         public string DictionaryDataDesc { get; set; }
-
-
     }
 }

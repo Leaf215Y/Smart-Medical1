@@ -16,9 +16,9 @@ namespace Smart_Medical.Prescriptions
     [ApiExplorerSettings(GroupName = "v2")]
     public class PrescriptionService : ApplicationService, IPrescriptionService
     {
-        private readonly IRepository<PrescriptionAs, int> pres;
+        private readonly IRepository<Prescription, int> pres;
 
-        public PrescriptionService(IRepository<PrescriptionAs, int> pres)
+        public PrescriptionService(IRepository<Prescription, int> pres)
         {
             this.pres = pres;
         }
@@ -30,7 +30,7 @@ namespace Smart_Medical.Prescriptions
         [HttpPost]
         public async Task<ApiResult> CreateAsync(PrescriptionDto input)
         {
-            var res = ObjectMapper.Map<PrescriptionDto, PrescriptionAs>(input);
+            var res = ObjectMapper.Map<PrescriptionDto, Prescription>(input);
             res = await pres.InsertAsync(res);
             //var prescription = await pres.InsertAsync(input);
             return ApiResult.Success(ResultCode.Success);
@@ -52,7 +52,7 @@ namespace Smart_Medical.Prescriptions
         /// <summary>
         /// 内存递归组装树
         /// </summary>
-        private List<PrescriptionTree> BuildTree(List<PrescriptionAs> all, int parentId)
+        private List<PrescriptionTree> BuildTree(List<Prescription> all, int parentId)
         {
             var children = all.Where(x => x.ParentId == parentId).ToList();
             var result = new List<PrescriptionTree>();
@@ -78,7 +78,7 @@ namespace Smart_Medical.Prescriptions
         {
             var list=await pres.GetQueryableAsync();
             var res=list.Where(x=>x.ParentId==pid).ToList();
-            return ApiResult<List<PrescriptionDto>>.Success(ObjectMapper.Map<List<PrescriptionAs>, List<PrescriptionDto>>(res), ResultCode.Success);
+            return ApiResult<List<PrescriptionDto>>.Success(ObjectMapper.Map<List<Prescription>, List<PrescriptionDto>>(res), ResultCode.Success);
         }
     }
 }

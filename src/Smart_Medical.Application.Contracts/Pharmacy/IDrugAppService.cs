@@ -10,10 +10,10 @@ namespace Smart_Medical.Pharmacy
 {
     public interface IDrugAppService : IApplicationService
     {
-        Task<DrugDto> GetAsync(Guid id);
+        Task<DrugDto> GetAsync(int id);
         Task<PagedResultDto<DrugDto>> GetListAsync(PagedAndSortedResultRequestDto input);
         Task<DrugDto> CreateAsync(CreateUpdateDrugDto input);
-        Task<DrugDto> UpdateAsync(Guid id, CreateUpdateDrugDto input);
-        Task DeleteAsync(Guid id);
+        Task<DrugDto> UpdateAsync(int id, CreateUpdateDrugDto input);
+        Task DeleteAsync(int id);
     }
 }
