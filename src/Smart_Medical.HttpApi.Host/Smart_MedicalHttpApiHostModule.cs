@@ -36,22 +36,22 @@ namespace Smart_Medical;
     typeof(Smart_MedicalApplicationModule),
     typeof(Smart_MedicalEntityFrameworkCoreModule),
     typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
-    typeof(AbpAspNetCoreSerilogModule),
-    typeof(AbpSwashbuckleModule)
+    typeof(AbpSwashbuckleModule),
+    typeof(AbpAspNetCoreSerilogModule)
 )]
 public class Smart_MedicalHttpApiHostModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
-      /*  PreConfigure<OpenIddictBuilder>(builder =>
-        {
-            builder.AddValidation(options =>
-            {
-                options.AddAudiences("Smart_Medical");
-                options.UseLocalServer();
-                options.UseAspNetCore();
-            });
-        });*/
+        /*  PreConfigure<OpenIddictBuilder>(builder =>
+          {
+              builder.AddValidation(options =>
+              {
+                  options.AddAudiences("Smart_Medical");
+                  options.UseLocalServer();
+                  options.UseAspNetCore();
+              });
+          });*/
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -60,6 +60,15 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
         var services = context.Services;
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
+
+        /*services.AddAbpSwaggerGen(
+            options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "权限管理", Version = "权限管理" });
+                options.SwaggerDoc("v2", new OpenApiInfo { Title = "角色权限关联管理", Version = "角色权限关联管理" });
+                options.DocInclusionPredicate((docName, description) => true);
+                options.CustomSchemaIds(type => type.FullName);
+            });*/
 
 
         Configure<AbpAntiForgeryOptions>(options =>
@@ -110,8 +119,8 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
             options.Applications["MVC"].RootUrl = configuration["App:SelfUrl"];
             options.RedirectAllowedUrls.AddRange(configuration["App:RedirectAllowedUrls"]?.Split(',') ?? Array.Empty<string>());
 
-        /*    options.Applications["Angular"].RootUrl = configuration["App:ClientUrl"];
-            options.Applications["Angular"].Urls[AccountUrlNames.PasswordReset] = "account/reset-password";*/
+            /*    options.Applications["Angular"].RootUrl = configuration["App:ClientUrl"];
+                options.Applications["Angular"].Urls[AccountUrlNames.PasswordReset] = "account/reset-password";*/
         });
     }
 
@@ -150,18 +159,34 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
     private static void ConfigureSwaggerServices(ServiceConfigurationContext context, IConfiguration configuration)
     {
         context.Services.AddSwaggerGen(
-           
+
             options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Smart_Medical", Version = "v1" });
-                options.SwaggerDoc("v2", new OpenApiInfo { Title = "v2", Version = "v2" });
+                options.SwaggerDoc("权限管理", new OpenApiInfo { Title = "权限管理", Version = "权限管理" });
+                options.SwaggerDoc("角色管理", new OpenApiInfo { Title = "角色管理", Version = "角色管理" });
+                options.SwaggerDoc("用户管理", new OpenApiInfo { Title = "用户管理", Version = "用户管理" });
+                options.SwaggerDoc("用户角色关联管理", new OpenApiInfo { Title = "用户角色关联管理", Version = "用户角色关联管理" });
+                options.SwaggerDoc("角色权限关联管理", new OpenApiInfo { Title = "角色权限关联管理", Version = "角色权限关联管理" });
+                options.SwaggerDoc("药品管理", new OpenApiInfo { Title = "药品管理", Version = "药品管理" });
+                options.SwaggerDoc("处方管理", new OpenApiInfo { Title = "处方管理", Version = "处方管理" });
+                options.SwaggerDoc("制药公司管理", new OpenApiInfo { Title = "制药公司管理", Version = "制药公司管理" });
+                options.SwaggerDoc("药品入库管理", new OpenApiInfo { Title = "药品入库管理", Version = "药品入库管理" });
+                options.SwaggerDoc("患者管理", new OpenApiInfo { Title = "患者管理", Version = "患者管理" });
+                options.SwaggerDoc("病种管理", new OpenApiInfo { Title = "病种管理", Version = "病种管理" });
+                options.SwaggerDoc("科室管理", new OpenApiInfo { Title = "科室管理", Version = "科室管理" });
+                options.SwaggerDoc("收费发药管理", new OpenApiInfo { Title = "收费发药管理", Version = "收费发药管理" });
+                options.SwaggerDoc("字典管理", new OpenApiInfo { Title = "字典管理", Version = "字典管理" });
+                options.SwaggerDoc("医疗管理", new OpenApiInfo { Title = "医疗管理", Version = "医疗管理" });
 
                 options.DocInclusionPredicate((doc, desc) =>
                 {
-                    return doc == desc.GroupName;
+                    if (!desc.GroupName.IsNullOrWhiteSpace())
+                    {
+                        return doc == desc.GroupName;
+                    }
+                    return true;
                 });
 
-                options.DocInclusionPredicate((docName, description) => true);
                 //开启权限小锁
                 options.OperationFilter<AddResponseHeadersFilter>();
                 options.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
@@ -222,10 +247,10 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
         app.UseAuthentication();
         //app.UseAbpOpenIddictValidation();
 
-     /*   if (MultiTenancyConsts.IsEnabled)
-        {
-            app.UseMultiTenancy();
-        }*/
+        /*   if (MultiTenancyConsts.IsEnabled)
+           {
+               app.UseMultiTenancy();
+           }*/
         app.UseUnitOfWork();
         app.UseDynamicClaims();
         app.UseAuthorization();
@@ -233,9 +258,21 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
         app.UseSwagger();
         app.UseAbpSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-            c.SwaggerEndpoint("/swagger/v2/swagger.json", "v2");
-
+            c.SwaggerEndpoint("/swagger/权限管理/swagger.json", "权限管理");
+            c.SwaggerEndpoint("/swagger/角色管理/swagger.json", "角色管理");
+            c.SwaggerEndpoint("/swagger/用户管理/swagger.json", "用户管理");
+            c.SwaggerEndpoint("/swagger/用户角色关联管理/swagger.json", "用户角色管理");
+            c.SwaggerEndpoint("/swagger/角色权限关联管理/swagger.json", "角色权限管理");
+            c.SwaggerEndpoint("/swagger/药品管理/swagger.json", "药品管理");
+            c.SwaggerEndpoint("/swagger/处方管理/swagger.json", "处方管理");
+            c.SwaggerEndpoint("/swagger/制药公司管理/swagger.json", "制药公司管理");
+            c.SwaggerEndpoint("/swagger/药品入库管理/swagger.json", "药品入库管理");
+            c.SwaggerEndpoint("/swagger/患者管理/swagger.json", "患者管理");
+            c.SwaggerEndpoint("/swagger/病种管理/swagger.json", "病种管理");
+            c.SwaggerEndpoint("/swagger/科室管理/swagger.json", "科室管理");
+            c.SwaggerEndpoint("/swagger/收费发药管理/swagger.json", "收费发药管理");
+            c.SwaggerEndpoint("/swagger/字典管理/swagger.json", "字典管理");
+            c.SwaggerEndpoint("/swagger/医疗管理/swagger.json", "医疗管理");
 
             // 模型的默认扩展深度，设置为 -1 完全隐藏模型
             c.DefaultModelsExpandDepth(1);

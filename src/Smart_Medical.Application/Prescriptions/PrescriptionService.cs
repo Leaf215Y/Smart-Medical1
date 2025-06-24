@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Smart_Medical.Until;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
@@ -13,7 +11,7 @@ namespace Smart_Medical.Prescriptions
     /// <summary>
     /// 处方模板
     /// </summary>
-    [ApiExplorerSettings(GroupName = "v2")]
+    [ApiExplorerSettings(GroupName = "处方管理")]
     public class PrescriptionService : ApplicationService, IPrescriptionService
     {
         private readonly IRepository<Prescription, int> pres;
@@ -76,8 +74,8 @@ namespace Smart_Medical.Prescriptions
         [HttpGet]
         public async Task<ApiResult<List<PrescriptionDto>>> StartPrescriptions(int pid)
         {
-            var list=await pres.GetQueryableAsync();
-            var res=list.Where(x=>x.ParentId==pid).ToList();
+            var list = await pres.GetQueryableAsync();
+            var res = list.Where(x => x.ParentId == pid).ToList();
             return ApiResult<List<PrescriptionDto>>.Success(ObjectMapper.Map<List<Prescription>, List<PrescriptionDto>>(res), ResultCode.Success);
         }
     }

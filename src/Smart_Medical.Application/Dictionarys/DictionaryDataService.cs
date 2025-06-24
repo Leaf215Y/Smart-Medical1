@@ -1,32 +1,27 @@
-﻿using AutoMapper.Internal.Mappers;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Smart_Medical.Dictionarys.DictionaryDatas;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
-using System.Linq.Dynamic.Core;
-using Smart_Medical.Dictionarys.DictionaryDatas;
-using Smart_Medical.Dictionarys.DictionaryTypes;
 
 namespace Smart_Medical.Dictionarys
 {
     /// <summary>
     /// 字典数据
     /// </summary>
-    public class DictionaryDataService: ApplicationService, IDictionaryDataService
+    [ApiExplorerSettings(GroupName = "字典管理")]
+    public class DictionaryDataService : ApplicationService, IDictionaryDataService
     {
         private readonly IRepository<DictionaryData, Guid> dictionaryData;
         private readonly IRepository<DictionaryType, Guid> dictionarytype;
 
-        public DictionaryDataService(IRepository<DictionaryData,Guid> dictionaryData, IRepository<DictionaryType,Guid> dictionarytype)
+        public DictionaryDataService(IRepository<DictionaryData, Guid> dictionaryData, IRepository<DictionaryType, Guid> dictionarytype)
         {
             this.dictionaryData = dictionaryData;
             this.dictionarytype = dictionarytype;
@@ -39,7 +34,7 @@ namespace Smart_Medical.Dictionarys
         [HttpPost]
         public async Task<ApiResult> InsertDictionaryDataLAsync(CreateUpdateDictionaryDataDto input)
         {
-            var res=ObjectMapper.Map<CreateUpdateDictionaryDataDto, DictionaryData>(input);
+            var res = ObjectMapper.Map<CreateUpdateDictionaryDataDto, DictionaryData>(input);
             res = await dictionaryData.InsertAsync(res);
             return ApiResult.Success(ResultCode.Success);
 
@@ -54,7 +49,7 @@ namespace Smart_Medical.Dictionarys
         public async Task<ApiResult> UpdateDictionaryDataLAsync(Guid id, CreateUpdateDictionaryDataDto input)
         {
             var datalist = await dictionaryData.FindAsync(id);
-            if(datalist.DictionaryDataName==input.DictionaryDataName)
+            if (datalist.DictionaryDataName == input.DictionaryDataName)
             {
                 return ApiResult.Fail("字典数据已存在不能修改", ResultCode.NotFound);
             }
@@ -70,9 +65,9 @@ namespace Smart_Medical.Dictionarys
         [HttpGet]
         public async Task<ApiResult<PageResult<List<GetDictionaryDataDto>>>> GetDictionaryDataList([FromQuery] GetDictionaryDataSearchDto search)
         {
-            var datalist= await dictionaryData.GetQueryableAsync();
-            var res = datalist.PageResult(search.PageIndex,search.PageSize);
-           var dto= ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(res.Queryable.ToList());
+            var datalist = await dictionaryData.GetQueryableAsync();
+            var res = datalist.PageResult(search.PageIndex, search.PageSize);
+            var dto = ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(res.Queryable.ToList());
             var pageinfo = new PageResult<List<GetDictionaryDataDto>>
             {
                 Data = dto,
@@ -88,8 +83,8 @@ namespace Smart_Medical.Dictionarys
         /// <returns></returns>
         [HttpPut]
         public async Task<ApiResult> DeleteDictionaryListAsync(Guid id)
-        { 
-            var datalist=await dictionaryData.FindAsync(id);
+        {
+            var datalist = await dictionaryData.FindAsync(id);
             await dictionaryData.DeleteAsync(datalist);
             return ApiResult.Success(ResultCode.Success);
         }
@@ -117,7 +112,7 @@ namespace Smart_Medical.Dictionarys
                                         DictionaryValue = b.DictionaryValue,
                                         DictionaryTypeState = b.DictionaryTypeState
                                     }).ToListAsync(); // 优化3: 使用ToListAsync()异步执行查询
-            
+
             return ApiResult<List<DictionaryDto>>.Success(resultList, ResultCode.Success);
         }
     }

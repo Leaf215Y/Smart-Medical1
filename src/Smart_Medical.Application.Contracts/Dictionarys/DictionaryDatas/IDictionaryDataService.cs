@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp.Application.Services;
 
 namespace Smart_Medical.Dictionarys.DictionaryDatas
 {
-    public interface IDictionaryDataService
+    public interface IDictionaryDataService : IApplicationService
     {
 
         Task<ApiResult<PageResult<List<GetDictionaryDataDto>>>> GetDictionaryDataList([FromQuery] GetDictionaryDataSearchDto search);

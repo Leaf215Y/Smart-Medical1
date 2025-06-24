@@ -10,6 +10,9 @@ using Volo.Abp.Application.Services;
 
 namespace Smart_Medical.OutpatientClinic.IServices
 {
+    /// <summary>
+    /// 患者管理服务接口
+    /// </summary>
     public interface IPatientService : IApplicationService
     {
         /// <summary>
