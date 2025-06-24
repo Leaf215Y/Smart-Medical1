@@ -25,7 +25,7 @@ namespace Smart_Medical.Prescriptions
             this.medica = medica;
         }
         /// <summary>
-        /// 创建每个处方下的用药药品
+        /// 新增每个处方下的用药药品
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
