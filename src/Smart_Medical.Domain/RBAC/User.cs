@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Generic; // 引入集合类型命名空间，用于 ICollection
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,10 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Smart_Medical.RBAC
 {
+    /// <summary>
+    /// 用户实体类
+    /// 继承自 FullAuditedAggregateRoot<Guid>，表示这是一个具有完整审计功能（创建/修改/删除时间、操作人）的聚合根实体，主键类型为Guid。
+    /// </summary>
     public class User : FullAuditedAggregateRoot<Guid>
     {
 
@@ -33,5 +37,12 @@ namespace Smart_Medical.RBAC
         // 而不是 null (如果它是可空布尔类型的话)。
         // 大多数情况下，布尔值总会有一个默认值 false。 默认是未知  后续可以修改性别 
         public bool? UserSex { get; set; } = null;
+
+        /// <summary>
+        /// 用户和角色之间的多对多关联导航属性。
+        /// ICollection<UserRole> 表示一个用户可以拥有多个角色通过 UserRole 关联。
+        /// 这是一个集合导航属性，用于从 User 实体导航到与之关联的所有 UserRole 实体。
+        /// </summary>
+        public ICollection<UserRole> UserRoles { get; set; } // 新增：用户和角色之间的关联
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Smart_Medical.RBAC.Users
+namespace Smart_Medical.Application.Contracts.RBAC.Users
 {
     public class CreateUpdateUserDto
     {

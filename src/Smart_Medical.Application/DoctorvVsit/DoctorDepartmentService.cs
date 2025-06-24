@@ -1,26 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Polly.Caching;
 using Smart_Medical.DoctorvVsit.DockerDepartments;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Text;
 using System.Threading.Tasks;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using Volo.Abp.ObjectMapping;
 
 namespace Smart_Medical.DoctorvVsit
 {
     /// <summary>
     /// 科室管理
     /// </summary>
-    public class DoctorDepartmentService: ApplicationService, IDoctorDepartmentService
+    [ApiExplorerSettings(GroupName = "科室管理")]
+    public class DoctorDepartmentService : ApplicationService, IDoctorDepartmentService
     {
-        private readonly IRepository<DoctorDepartment,Guid> dept;
+        private readonly IRepository<DoctorDepartment, Guid> dept;
 
         public DoctorDepartmentService(IRepository<DoctorDepartment, Guid> dept)
         {
@@ -34,7 +31,7 @@ namespace Smart_Medical.DoctorvVsit
         [HttpPost]
         public async Task<ApiResult> InsertDoctorDepartment(CreateUpdateDoctorDepartmentDto input)
         {
-            var deptdto=ObjectMapper.Map<CreateUpdateDoctorDepartmentDto, DoctorDepartment>(input);
+            var deptdto = ObjectMapper.Map<CreateUpdateDoctorDepartmentDto, DoctorDepartment>(input);
             deptdto = await dept.InsertAsync(deptdto);
             return ApiResult.Success(ResultCode.Success);
         }
@@ -46,8 +43,8 @@ namespace Smart_Medical.DoctorvVsit
         [HttpGet]
         public async Task<ApiResult<PageResult<List<GetDoctorDepartmentListDto>>>> GetDoctorDepartmentList([FromQuery] GetDoctorDepartmentSearchDto search)
         {
-            var list=await dept.GetQueryableAsync();
-            list=list.WhereIf(!string.IsNullOrEmpty(search.DepartmentName),x=>x.DepartmentName.Contains(search.DepartmentName));
+            var list = await dept.GetQueryableAsync();
+            list = list.WhereIf(!string.IsNullOrEmpty(search.DepartmentName), x => x.DepartmentName.Contains(search.DepartmentName));
             var res = list.PageResult(search.PageIndex, search.PageSize);
             var dto = ObjectMapper.Map<List<DoctorDepartment>, List<GetDoctorDepartmentListDto>>(res.Queryable.ToList());
             var pageInfo = new PageResult<List<GetDoctorDepartmentListDto>>
@@ -55,9 +52,8 @@ namespace Smart_Medical.DoctorvVsit
                 Data = dto,
                 TotleCount = res.RowCount,
                 TotlePage = (int)Math.Ceiling((double)res.RowCount / search.PageSize),
-                 
             };
-            
+
             return ApiResult<PageResult<List<GetDoctorDepartmentListDto>>>.Success(pageInfo, ResultCode.Success);
         }
         /// <summary>
@@ -67,13 +63,13 @@ namespace Smart_Medical.DoctorvVsit
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<ApiResult> UpdateDoctorDepartment(Guid id,CreateUpdateDoctorDepartmentDto input)
+        public async Task<ApiResult> UpdateDoctorDepartment(Guid id, CreateUpdateDoctorDepartmentDto input)
         {
             var deptlist = await dept.FindAsync(id);
-           //if(deptlist.DepartmentName==input.DepartmentName)
-           // {
-           //     return ApiResult.Fail("科室名称已存在不能修改", ResultCode.NotFound);
-           // }
+            if (deptlist.DepartmentName == input.DepartmentName)
+            {
+                return ApiResult.Fail("科室名称已存在不能修改", ResultCode.NotFound);
+            }
             var dto = ObjectMapper.Map(input, deptlist);
             await dept.UpdateAsync(dto);
             return ApiResult.Success(ResultCode.Success);

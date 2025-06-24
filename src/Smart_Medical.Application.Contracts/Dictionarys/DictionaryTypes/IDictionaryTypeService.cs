@@ -12,7 +12,7 @@ namespace Smart_Medical.Dictionarys.DictionaryTypes
     /// <summary>
     /// 字典类型IService
     /// </summary>
-    public interface IDictionaryTypeService:IApplicationService
+    public interface IDictionaryTypeService : IApplicationService
     {
         Task<ApiResult> InsertDictionaryDataLAsync(CreateUpdateDictionaryTypeDto input);
         Task<ApiResult> UpdateDictionaryDataLAsync(Guid id, CreateUpdateDictionaryTypeDto input);

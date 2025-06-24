@@ -8,6 +8,9 @@ using Volo.Abp.Application.Services;
 
 namespace Smart_Medical.Medical
 {
+    /// <summary>
+    /// 病种管理服务接口
+    /// </summary>
     public interface IMedicalAppService : IApplicationService
     {
         Task<SickDto> GetSickAsync(Guid id);

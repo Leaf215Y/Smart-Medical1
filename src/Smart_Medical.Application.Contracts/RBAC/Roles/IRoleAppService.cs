@@ -1,18 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Smart_Medical.RBAC.Users;
-using Smart_Medical.Until;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Smart_Medical.Until;
 
-namespace Smart_Medical.RBAC.Roles
+namespace Smart_Medical.Application.Contracts.RBAC.Roles
 {
-    public interface IRoleAppService:IApplicationService
+    /// <summary>
+    /// 角色接口服务
+    /// </summary>
+    public interface IRoleAppService : IApplicationService
     {
-        Task<PageResult<List<RoleDto>>> GetListAsync([FromQuery] Seach seach);
+        Task<ApiResult<RoleDto>> GetAsync(Guid id);
+
+        Task<ApiResult<PageResult<List<RoleDto>>>> GetListAsync(SeachRoleDto input);
+
         Task<ApiResult> CreateAsync(CreateUpdateRoleDto input);
+
+        Task<ApiResult> UpdateAsync(Guid id, CreateUpdateRoleDto input);
+
+        Task<ApiResult> DeleteAsync(Guid id);
     }
 }

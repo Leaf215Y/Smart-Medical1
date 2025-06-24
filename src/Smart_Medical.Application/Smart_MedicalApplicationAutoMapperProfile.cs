@@ -1,23 +1,24 @@
 ﻿using AutoMapper;
 
-using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
 using Smart_Medical.OutpatientClinic.Dtos.Parameter;
 using Smart_Medical.Patient;
 
-using Smart_Medical.DoctorvVsit.DockerDepartments;
-using Smart_Medical.DoctorvVsit;
-
 using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
-using Smart_Medical.RBAC.Roles;
-using Smart_Medical.RBAC.Users;
+using Smart_Medical.Application.Contracts.RBAC.Roles;
+using Smart_Medical.Application.Contracts.RBAC.Users;
+using Smart_Medical.Application.Contracts.RBAC.Permissions;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
+using Smart_Medical.Application.Contracts.RBAC.RolePermissions;
 using System.Collections.Generic;
 using Smart_Medical.Pharmacy;
 using Smart_Medical.Dictionarys.DictionaryDatas;
 using Smart_Medical.Dictionarys;
 using Smart_Medical.Dictionarys.DictionaryTypes;
+using Smart_Medical.DoctorvVsit.DockerDepartments;
+using Smart_Medical.DoctorvVsit;
 
 namespace Smart_Medical;
 
@@ -29,14 +30,23 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
          * Alternatively, you can split your mapping configurations
          * into multiple profile classes for a better organization. */
         //用户
-        CreateMap<User, UserDto>().ReverseMap();
-        CreateMap<CreateUpdateUserDto, User>().ReverseMap();
+        CreateMap<User, UserDto>();
+        CreateMap<CreateUpdateUserDto, User>();
         //角色
-        CreateMap<Role, RoleDto>().ReverseMap();
-        CreateMap<CreateUpdateRoleDto, Role>().ReverseMap();
+        CreateMap<Role, RoleDto>();
+        CreateMap<CreateUpdateRoleDto, Role>();
+        //权限
+        CreateMap<Permission, PermissionDto>();
+        CreateMap<CreateUpdatePermissionDto, Permission>();
+        //用户角色关联
+        CreateMap<UserRole, UserRoleDto>();
+        CreateMap<CreateUpdateUserRoleDto, UserRole>();
+        //角色权限关联
+        CreateMap<RolePermission, RolePermissionDto>();
+        CreateMap<CreateUpdateRolePermissionDto, RolePermission>();
         //处方
         CreateMap<PrescriptionDto, Prescription>().ReverseMap();
-        CreateMap<CreateUpdateMedicationDto, Medication>().ReverseMap();
+        CreateMap<CreateUpdateMedicationDto, Medication>();
         CreateMap<Medication, MedicationDto>().ReverseMap();
 
         #region 
@@ -53,6 +63,8 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<CreateUpdateDoctorDepartmentDto, DoctorDepartment>().ReverseMap();
         CreateMap<DoctorDepartment, GetDoctorDepartmentListDto>().ReverseMap();
         CreateMap<GetDoctorDepartmentSearchDto, DoctorDepartment>().ReverseMap();
+
+
 
         CreateMap<PharmaceuticalCompany, PharmaceuticalCompanyDto>();
         CreateMap<CreateUpdatePharmaceuticalCompanyDto, PharmaceuticalCompany>();

@@ -1,8 +1,6 @@
-﻿using AutoMapper.Internal.Mappers;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
@@ -11,6 +9,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Pharmacy
 {
+    [ApiExplorerSettings(GroupName = "药品管理")]
     public class DrugAppService :
         CrudAppService<Drug, DrugDto, int, PagedAndSortedResultRequestDto, CreateUpdateDrugDto>,
         IDrugAppService

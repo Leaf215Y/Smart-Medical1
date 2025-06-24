@@ -8,6 +8,9 @@ using Volo.Abp.Application.Services;
 
 namespace Smart_Medical.Pharmacy
 {
+    /// <summary>
+    /// 制药公司服务接口
+    /// </summary>
     public interface IPharmaceuticalCompanyAppService :
          ICrudAppService<
              PharmaceuticalCompanyDto,

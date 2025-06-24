@@ -9,7 +9,10 @@ using Volo.Abp.Application.Services;
 
 namespace Smart_Medical.DoctorvVsit.DockerDepartments
 {
-    public interface IDoctorDepartmentService:IApplicationService
+    /// <summary>
+    /// 医生科室管理服务接口
+    /// </summary>
+    public interface IDoctorDepartmentService : IApplicationService
     {
         Task<ApiResult> InsertDoctorDepartment(CreateUpdateDoctorDepartmentDto input);
         Task<ApiResult<PageResult<List<GetDoctorDepartmentListDto>>>> GetDoctorDepartmentList([FromQuery] GetDoctorDepartmentSearchDto search);
