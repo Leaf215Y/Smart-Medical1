@@ -1,4 +1,5 @@
-﻿using Smart_Medical.Until;
+﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,8 @@ namespace Smart_Medical.DoctorvVsit.DockerDepartments
     public interface IDoctorDepartmentService:IApplicationService
     {
         Task<ApiResult> InsertDoctorDepartment(CreateUpdateDoctorDepartmentDto input);
+        Task<ApiResult<PageResult<List<GetDoctorDepartmentListDto>>>> GetDoctorDepartmentList([FromQuery] GetDoctorDepartmentSearchDto search);
+        Task<ApiResult> UpdateDoctorDepartment(Guid id, CreateUpdateDoctorDepartmentDto input);
+        Task<ApiResult> DeleteDoctorDepartment(string idsString);
     }
 }

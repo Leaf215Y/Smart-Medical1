@@ -70,14 +70,15 @@ namespace Smart_Medical.DoctorvVsit
         public async Task<ApiResult> UpdateDoctorDepartment(Guid id,CreateUpdateDoctorDepartmentDto input)
         {
             var deptlist = await dept.FindAsync(id);
-           if(deptlist.DepartmentName==input.DepartmentName)
-            {
-                return ApiResult.Fail("科室名称已存在不能修改", ResultCode.NotFound);
-            }
+           //if(deptlist.DepartmentName==input.DepartmentName)
+           // {
+           //     return ApiResult.Fail("科室名称已存在不能修改", ResultCode.NotFound);
+           // }
             var dto = ObjectMapper.Map(input, deptlist);
             await dept.UpdateAsync(dto);
             return ApiResult.Success(ResultCode.Success);
         }
+
         /// <summary>
         /// 删除科室信息
         /// </summary>
@@ -88,6 +89,52 @@ namespace Smart_Medical.DoctorvVsit
         {
             var deptlist = await dept.FindAsync(id);
             await dept.DeleteAsync(deptlist);
+            return ApiResult.Success(ResultCode.Success);
+        }
+
+        /// <summary>
+        /// 批量删除科室信息
+        /// </summary>
+        /// <param name="idsString">要删除的科室ID字符串，例如："guid1,guid2,guid3"</param>
+        /// <returns></returns>
+        [HttpPut]
+        public async Task<ApiResult> DeleteDoctorDepartment([FromQuery] string idsString) // 参数类型改为string
+        {
+            if (string.IsNullOrWhiteSpace(idsString))
+            {
+                return ApiResult.Fail("请提供要删除的科室ID字符串。", ResultCode.NotFound);
+            }
+
+            // 将逗号分隔的字符串解析为 List<Guid>
+            var ids = idsString.Split(',')
+                               .Where(s => !string.IsNullOrWhiteSpace(s))
+                               .Select(s =>
+                               {
+                                   if (Guid.TryParse(s.Trim(), out Guid id))
+                                   {
+                                       return id;
+                                   }
+                                   throw new FormatException($"无效的GUID格式: {s}"); // 如果有无效GUID，可以抛出异常
+                               })
+                               .ToList();
+
+            if (!ids.Any())
+            {
+                return ApiResult.Fail("解析后的科室ID列表为空。", ResultCode.NotFound);
+            }
+
+            // 查找所有需要删除的科室实体
+
+            var deptListToDelete = await dept.GetQueryableAsync();
+            deptListToDelete=deptListToDelete.Where(d => ids.Contains(d.Id));
+            if (!deptListToDelete.Any())
+            {
+                return ApiResult.Fail("没有找到匹配的科室信息。", ResultCode.NotFound);
+            }
+
+            // 批量删除 (硬删除或软删除取决于您的实体是否实现ISoftDelete)
+            await dept.DeleteManyAsync(deptListToDelete);
+
             return ApiResult.Success(ResultCode.Success);
         }
 

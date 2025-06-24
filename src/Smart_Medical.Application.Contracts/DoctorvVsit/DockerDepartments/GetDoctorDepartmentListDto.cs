@@ -12,7 +12,7 @@ namespace Smart_Medical.DoctorvVsit.DockerDepartments
     /// </summary>
     public class GetDoctorDepartmentListDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         /// <summary>
         /// 科室名称（必填）
         /// </summary>

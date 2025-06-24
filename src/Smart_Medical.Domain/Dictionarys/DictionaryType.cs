@@ -12,6 +12,8 @@ namespace Smart_Medical.Dictionarys
     /// </summary>
     public class DictionaryType:FullAuditedAggregateRoot<Guid>
     {
+        public Guid Id { get; set; }
+
         /// <summary>
         /// 字典排序
         /// </summary>

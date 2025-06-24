@@ -8,6 +8,7 @@ namespace Smart_Medical.Dictionarys.DictionaryTypes
 {
     public class GetDictionaryTypeSearchDto
     {
+        public Guid Id { get; set; }
         public string DictionaryTypeName { get; set; }
 
         public int PageIndex { get; set; }

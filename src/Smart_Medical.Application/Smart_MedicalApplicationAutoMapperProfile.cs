@@ -15,6 +15,9 @@ using Smart_Medical.RBAC.Roles;
 using Smart_Medical.RBAC.Users;
 using System.Collections.Generic;
 using Smart_Medical.Pharmacy;
+using Smart_Medical.Dictionarys.DictionaryDatas;
+using Smart_Medical.Dictionarys;
+using Smart_Medical.Dictionarys.DictionaryTypes;
 
 namespace Smart_Medical;
 
@@ -57,5 +60,10 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         // 药品相关映射
         CreateMap<CreateUpdateDrugDto, Drug>();
         CreateMap<Drug, DrugDto>();
+        //数据字典
+        CreateMap<CreateUpdateDictionaryDataDto, DictionaryData>().ReverseMap();
+        CreateMap<DictionaryData,GetDictionaryDataDto>().ReverseMap();
+        CreateMap<CreateUpdateDictionaryTypeDto, DictionaryType>().ReverseMap();
+        CreateMap<DictionaryType,GetDictionaryTypeDto>().ReverseMap();
     }
 }
