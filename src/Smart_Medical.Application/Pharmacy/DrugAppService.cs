@@ -12,10 +12,10 @@ using Volo.Abp.Domain.Repositories;
 namespace Smart_Medical.Pharmacy
 {
     public class DrugAppService :
-        CrudAppService<Drug, DrugDto, Guid, PagedAndSortedResultRequestDto, CreateUpdateDrugDto>,
+        CrudAppService<Drug, DrugDto, int, PagedAndSortedResultRequestDto, CreateUpdateDrugDto>,
         IDrugAppService
     {
-        public DrugAppService(IRepository<Drug, Guid> repository)
+        public DrugAppService(IRepository<Drug, int> repository)
             : base(repository)
         {
 
@@ -49,7 +49,7 @@ namespace Smart_Medical.Pharmacy
             return await base.CreateAsync(input);
         }
 
-        public override async Task DeleteAsync(Guid id)
+        public override async Task DeleteAsync(int id)
         {
             var drug = await Repository.FindAsync(id);
             if (drug == null)
@@ -60,7 +60,7 @@ namespace Smart_Medical.Pharmacy
             await base.DeleteAsync(id);
         }
 
-        public override async Task<DrugDto> UpdateAsync(Guid id, CreateUpdateDrugDto input)
+        public override async Task<DrugDto> UpdateAsync(int id, CreateUpdateDrugDto input)
         {
             // 1. 校验药品是否存在
             var drug = await Repository.GetAsync(id);
@@ -108,6 +108,8 @@ namespace Smart_Medical.Pharmacy
         public async Task<PagedResultDto<DrugDto>> GetPagedListAsync(string name, string type, DrugCategory? category, int skipCount, int maxResultCount)
         {
             var query = await Repository.GetQueryableAsync();
+
+            
 
             if (!string.IsNullOrWhiteSpace(name))
                 query = query.Where(d => d.DrugName.Contains(name));

@@ -25,8 +25,8 @@ public class Smart_MedicalDbContext :
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
 
-    public DbSet<PrescriptionAs> Prescriptions { get; set; }
-    public DbSet<Medication> Medications { get; set; }
+    public DbSet<Prescription> Prescriptions { get; set; }
+    //public DbSet<Medication> Medications { get; set; }
 
 
     #region
@@ -48,6 +48,9 @@ public class Smart_MedicalDbContext :
     public DbSet<DictionaryType> DictionaryTypes { get; set; }
 
 
+    public DbSet<Appointment> Appointments { get; set; }
+
+
     public Smart_MedicalDbContext(DbContextOptions<Smart_MedicalDbContext> options)
         : base(options)
     {
@@ -64,7 +67,7 @@ public class Smart_MedicalDbContext :
         builder.ConfigureSettingManagement();
         builder.ConfigureBackgroundJobs();
         builder.ConfigureAuditLogging();
-
+        
         /* Configure your own tables/entities inside here */
 
         //builder.Entity<YourEntity>(b =>
@@ -75,7 +78,7 @@ public class Smart_MedicalDbContext :
         //});
 
 
-        builder.Entity<PrescriptionAs>(b =>
+        builder.Entity<Prescription>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Prescriptions",
                 Smart_MedicalConsts.DbSchema);
@@ -83,15 +86,14 @@ public class Smart_MedicalDbContext :
             b.Property(x => x.PrescriptionName).IsRequired().HasMaxLength(128);
 
         });
-       
-        builder.Entity<Medication>(b =>
+      /*  builder.Entity<Medication>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medications",
                 Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
             b.Property(x => x.MedicationName).IsRequired().HasMaxLength(128);
 
-        });
+        });*/
 
         // PatientPrescription 配置
         builder.Entity<PatientPrescription>(b =>
@@ -99,11 +101,11 @@ public class Smart_MedicalDbContext :
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "PatientPrescriptions", Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
                                        //长度限制、必填项等
-            b.Property(x => x.MedicationName).IsRequired().HasMaxLength(128);
+          /*  b.Property(x => x.MedicationName).IsRequired().HasMaxLength(128);
             b.Property(x => x.Specification).HasMaxLength(128);
             b.Property(x => x.DosageUnit).IsRequired().HasMaxLength(20);
             b.Property(x => x.Dosage).IsRequired();
-            b.Property(x => x.UnitPrice).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.UnitPrice).IsRequired().HasColumnType("decimal(18,2)");*/
             b.Property(x => x.PrescriptionTemplateNumber).IsRequired().HasDefaultValue(0);
 
         });
@@ -184,12 +186,12 @@ public class Smart_MedicalDbContext :
             b.ConfigureByConvention();
             b.Property(x => x.Status).IsRequired().HasMaxLength(32);
             b.Property(x => x.InpatientNumber).IsRequired().HasMaxLength(32);
-            b.Property(x => x.Name).IsRequired().HasMaxLength(32);
+/*            b.Property(x => x.Name).IsRequired().HasMaxLength(32);
             b.Property(x => x.DischargeDepartment).IsRequired().HasMaxLength(64);
-            b.Property(x => x.Gender).IsRequired().HasMaxLength(8);
+            b.Property(x => x.Gender).IsRequired().HasMaxLength(8);*/
             b.Property(x => x.DischargeTime).IsRequired();
             b.Property(x => x.AdmissionDiagnosis).IsRequired().HasMaxLength(128);
-            b.Property(x => x.DischargeDiagnosis).IsRequired().HasMaxLength(128);
+            /*b.Property(x => x.DischargeDiagnosis).IsRequired().HasMaxLength(128);*/
         });
 
         builder.Entity<PharmaceuticalCompany>(b =>
@@ -198,8 +200,8 @@ public class Smart_MedicalDbContext :
             b.ConfigureByConvention();
             b.Property(x => x.CompanyName).IsRequired().HasMaxLength(128);
             b.Property(x => x.ContactPerson).HasMaxLength(64);
-            b.Property(x => x.ContactPhone).HasMaxLength(32);
-            b.Property(x => x.Address).HasMaxLength(256);
+            b.Property(x => x.ContactPhone).HasMaxLength(50);
+            b.Property(x => x.Address).HasMaxLength(200);
         });
 
         builder.Entity<DrugInStock>(b =>
@@ -207,9 +209,9 @@ public class Smart_MedicalDbContext :
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "DrugInStocks", Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention();
             b.Property(x => x.BatchNumber).IsRequired().HasMaxLength(64);
-
+/*
             b.HasOne<Drug>().WithMany().HasForeignKey(x => x.Id).IsRequired();
-            b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.Id).IsRequired();
+            b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.Id).IsRequired();*/
         });
 
         builder.Entity<DictionaryType>(b =>
@@ -219,13 +221,12 @@ public class Smart_MedicalDbContext :
             b.ConfigureByConvention();
         });
 
-        builder.Entity<Medication>(b =>
+        builder.Entity<Appointment>(b =>
         {
-            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medications",
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Appointments",
                 Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
-            b.Property(x => x.MedicationName).IsRequired().HasMaxLength(128);
-
+            b.Property(x => x.Remarks).IsRequired().HasMaxLength(500);
         });
 
     }

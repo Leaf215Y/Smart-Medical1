@@ -45,19 +45,22 @@ namespace Smart_Medical.Prescriptions
         [HttpGet]
         public async Task<ApiResult<PageResult<List<MedicationDto>>>> GetMedicationList([FromQuery]MedicationSearchDto search)
         {
-           
-            var list = await medica.GetQueryableAsync();
-            list = list.WhereIf(search.PrescriptionId!=null,x=>x.PrescriptionId==search.PrescriptionId);
-           
-            var res = list.PageResult(search.pageIndex, search.pageSize);
-            var dto = ObjectMapper.Map<List<Medication>, List<MedicationDto>>(res.Queryable.ToList());
-            var pageInfo = new PageResult<List<MedicationDto>>
-            {
-                Data = dto,
-                TotleCount = res.RowCount,
-                TotlePage = (int)Math.Ceiling((double)res.RowCount / search.pageSize)
-            };
-            return ApiResult<PageResult<List<MedicationDto>>>.Success(pageInfo, ResultCode.Success);
+
+            /* var list = await medica.GetQueryableAsync();
+             list = list.WhereIf(search.PrescriptionId!=null,x=>x.PrescriptionId==search.PrescriptionId);
+
+             var res = list.PageResult(search.pageIndex, search.pageSize);
+             var dto = ObjectMapper.Map<List<Medication>, List<MedicationDto>>(res.Queryable.ToList());
+             var pageInfo = new PageResult<List<MedicationDto>>
+             {
+                 Data = dto,
+                 TotleCount = res.RowCount,
+                 TotlePage = (int)Math.Ceiling((double)res.RowCount / search.pageSize)
+             };
+             return ApiResult<PageResult<List<MedicationDto>>>.Success(pageInfo, ResultCode.Success);*/
+
+            throw new Exception();
+
         }
     }
 }
