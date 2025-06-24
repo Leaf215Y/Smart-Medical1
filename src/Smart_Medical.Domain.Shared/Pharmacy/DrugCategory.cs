@@ -8,7 +8,7 @@ namespace Smart_Medical.Pharmacy
 {
     public enum DrugCategory
     {
-        Chinese = 0, // 中药
-        Western = 1  // 西药
+        Chinese = 1, // 中药
+        Western = 2  // 西药
     }
 }

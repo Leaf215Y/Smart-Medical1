@@ -13,7 +13,7 @@ namespace Smart_Medical.RBAC.Users
     public interface IUserAppService : IApplicationService
     {
         Task<ApiResult<UserDto>> GetAsync(Guid id);
-        Task<PageResult<List<UserDto>>> GetListAsync([FromQuery] Seach seach);
+        Task<ApiResult<PageResult<List<UserDto>>>> GetListAsync([FromQuery] Seach seach);
         Task<ApiResult> CreateAsync(CreateUpdateUserDto input);
         Task<ApiResult> UpdateAsync(Guid id, CreateUpdateUserDto input);
         Task<ApiResult> DeleteAsync(Guid id);
