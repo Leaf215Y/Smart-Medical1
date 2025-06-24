@@ -24,6 +24,16 @@ namespace Smart_Medical.Pharmacy
             _drugRepository = drugRepository;
         }
 
+        /// <summary>
+        /// 药品入库
+        /// Drug stock-in (add inventory record)
+        /// </summary>
+        /// <remarks>
+        /// POST /api/app/pharmacy/drug-in-stock
+        /// 用于将药品入库，增加库存并记录入库明细。
+        /// </remarks>
+        /// <param name="input">药品入库参数，包括药品ID、供应商ID、数量、入库日期、批号等</param>
+        /// <returns>无返回值，操作成功即表示入库成功</returns>
         public async Task StockInAsync(DrugInStockCreateDto input)
         {
             // 1. 查找药品实体，如果不存在，GetAsync会自动抛出EntityNotFoundException

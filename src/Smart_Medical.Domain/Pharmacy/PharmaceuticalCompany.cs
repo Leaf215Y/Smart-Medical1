@@ -8,12 +8,9 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Smart_Medical.Pharmacy
 {
-    public class PharmaceuticalCompany : AuditedAggregateRoot<Guid>
+    public class PharmaceuticalCompany : FullAuditedAggregateRoot<Guid>
     {
-        /// <summary>
-        /// 公司Id
-        /// </summary>
-        public Guid CompanyId { get; set; }
+ 
         /// <summary>
         /// 公司名称
         /// </summary>

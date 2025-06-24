@@ -46,9 +46,12 @@ public class PatientService : ApplicationService, IPatientService
 
     /// <summary>
     /// 快速就诊、登记患者信息
+    /// Quick registration and patient information entry
     /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
+    /// <remarks>
+    /// POST /api/app/patient/registration-patient
+    /// 用于快速登记患者基本信息并创建就诊流程、病历信息。
+    /// </remarks>
     public async Task<ApiResult> RegistrationPatientAsync(InsertPatientDto input)
     {
         using (var uow = _unitOfWorkManager.Begin(requiresNew: true))
@@ -66,7 +69,7 @@ public class PatientService : ApplicationService, IPatientService
 
                 // 映射 DTO 到实体
                 BasicPatientInfo patient = ObjectMapper.Map<InsertPatientDto, BasicPatientInfo>(input);
-                patient.VisitStatus = "待就诊"; // 初始状态设为“待就诊”
+                patient.VisitStatus = "待就诊"; // 初始状态设为"待就诊"
 
                 // 患者信息不存在则插入，存在则更新
                 if (!exists)
@@ -85,7 +88,7 @@ public class PatientService : ApplicationService, IPatientService
                 // ================================
                 DoctorClinic doctorClinic = ObjectMapper.Map<InsertPatientDto, DoctorClinic>(input);
                 doctorClinic.PatientId = patient.Id;         // 关联患者 ID
-                doctorClinic.DispensingStatus = 0;           // 默认“未发药”
+                doctorClinic.DispensingStatus = 0;           // 默认"未发药"
 
                 var isClinicInserted = await _doctorclinRepo.InsertAsync(doctorClinic) != null;
                 if (!isClinicInserted)
@@ -128,7 +131,12 @@ public class PatientService : ApplicationService, IPatientService
 
     /// <summary>
     /// 就诊患者
+    /// Visiting patients (list)
     /// </summary>
+    /// <remarks>
+    /// POST /api/app/patient/visiting-patients
+    /// 分页获取待就诊或已就诊的患者列表，可按关键词模糊查询。
+    /// </remarks>
     /// <param name="input">参数列表，包含分页和关键词</param>
     /// <returns></returns>
     public async Task<ApiResult<PagedResultDto<GetVisitingDto>>> VisitingPatientsAsync(GetVistingParameterDtos input)
@@ -187,7 +195,12 @@ public class PatientService : ApplicationService, IPatientService
 
     /// <summary>
     /// 就诊患者详细信息
+    /// Get patient detail info
     /// </summary>
+    /// <remarks>
+    /// GET /api/app/patient/patient-info/{patientId}
+    /// 获取指定患者的详细基本信息。
+    /// </remarks>
     /// <param name="patientId">患者id</param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
@@ -213,7 +226,12 @@ public class PatientService : ApplicationService, IPatientService
 
     /// <summary>
     /// 患者所有病历信息
+    /// Get all medical records for a patient
     /// </summary>
+    /// <remarks>
+    /// GET /api/app/patient/patient-sick-info/{patientId}
+    /// 获取指定患者的所有病历信息。
+    /// </remarks>
     /// <param name="patientId">病历外键</param>
     /// <returns></returns>
     public async Task<ApiResult<List<GetSickInfoDto>>> GetPatientSickInfoAsync(Guid patientId)
@@ -236,7 +254,12 @@ public class PatientService : ApplicationService, IPatientService
 
     /// <summary>
     /// 开具处方
+    /// Doctor's prescription
     /// </summary>
+    /// <remarks>
+    /// POST /api/app/patient/doctors-prescription
+    /// 医生为患者开具处方，支持多药品批量录入。
+    /// </remarks>
     /// <param name="input"></param>
     /// <returns></returns>
     public async Task<ApiResult> DoctorsPrescription(DoctorPrescriptionDto input)
