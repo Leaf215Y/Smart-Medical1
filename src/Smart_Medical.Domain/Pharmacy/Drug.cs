@@ -11,7 +11,7 @@ namespace Smart_Medical.Pharmacy
     public class Drug : AuditedAggregateRoot<Guid>
     {
         /// <summary>
-        /// 药品名称
+        /// 药品名称s
         /// </summary>
         [Required]
         [StringLength(128)]
@@ -105,6 +105,6 @@ namespace Smart_Medical.Pharmacy
         /// <summary>
         ///  供应商ID
         /// </summary>
-        public Guid? PharmaceuticalCompanyId { get; set; }
+        //public Guid? PharmaceuticalCompanyId { get; set; }
     }
 }

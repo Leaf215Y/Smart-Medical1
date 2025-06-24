@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp;
+using Smart_Medical.Until;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Smart_Medical.Pharmacy
 {
@@ -34,30 +36,75 @@ namespace Smart_Medical.Pharmacy
         /// </remarks>
         /// <param name="input">药品入库参数，包括药品ID、供应商ID、数量、入库日期、批号等</param>
         /// <returns>无返回值，操作成功即表示入库成功</returns>
-        public async Task StockInAsync(DrugInStockCreateDto input)
+        [HttpPost]
+        public async Task<ApiResult<DrugInStockDto>> StockInAsync(CreateUpdateDrugInStockDto input)
         {
-            // 1. 查找药品实体，如果不存在，GetAsync会自动抛出EntityNotFoundException
+            // 1. 查找药品实体
             var drug = await _drugRepository.GetAsync(input.DrugId);
+            if (drug == null)
+            {
+                return ApiResult<DrugInStockDto>.Fail("药品不存在", ResultCode.NotFound);
+            }
 
-            // 2. 更新药品的总库存
-            drug.Stock += input.Quantity;
+            // 2. 校验生产日期、有效期
+            if (input.ProductionDate > DateTime.Now)
+            {
+                return ApiResult<DrugInStockDto>.Fail("生产日期不能晚于当前时间", ResultCode.ValidationError);
+            }
+            if (input.ExpiryDate <= input.ProductionDate)
+            {
+                return ApiResult<DrugInStockDto>.Fail("有效期必须晚于生产日期", ResultCode.ValidationError);
+            }
+
+            // 3. 校验库存上下限
+            int newStock = drug.Stock + input.Quantity;
+            if (newStock > drug.StockUpper)
+            {
+                return ApiResult<DrugInStockDto>.Fail($"入库后库存({newStock})超过上限({drug.StockUpper})", ResultCode.ValidationError);
+            }
+            if (newStock < drug.StockLower)
+            {
+                return ApiResult<DrugInStockDto>.Fail($"入库后库存({newStock})低于下限({drug.StockLower})", ResultCode.ValidationError);
+            }
+
+            // 4. 更新药品库存
+            drug.Stock = newStock;
             await _drugRepository.UpdateAsync(drug);
 
-            // 3. 创建入库记录
+            // 5. 创建入库记录
             var drugInStock = new DrugInStock
             {
-                //Id = input.DrugId,
-                //PharmaceuticalCompanyId = input.PharmaceuticalCompanyId,
+                DrugId = input.DrugId,
                 Quantity = input.Quantity,
-                StockInDate = input.StockInDate,
-                BatchNumber = input.BatchNumber
+                UnitPrice = input.UnitPrice,
+                TotalAmount = input.UnitPrice * input.Quantity,
+                ProductionDate = input.ProductionDate,
+                ExpiryDate = input.ExpiryDate,
+                BatchNumber = input.BatchNumber,
+                Supplier = input.Supplier,
+                Status = "已入库",
+                CreationTime = DateTime.Now
             };
             await _drugInStockRepository.InsertAsync(drugInStock);
 
-            // (可选业务逻辑) 可以在这里检查库存是否超过上限或低于下限，并触发相应事件
-            // if (drug.Stock < drug.StockLower) { ... }
-            // if (drug.Stock > drug.StockUpper) { ... }
+            // 6. 映射为DrugInStockDto
+            var dto = new DrugInStockDto
+            {
+                Id = drugInStock.Id,
+                DrugId = drugInStock.DrugId,
+                Quantity = drugInStock.Quantity,
+                UnitPrice = drugInStock.UnitPrice,
+                TotalAmount = drugInStock.TotalAmount,
+                ProductionDate = drugInStock.ProductionDate,
+                ExpiryDate = drugInStock.ExpiryDate,
+                BatchNumber = drugInStock.BatchNumber,
+                Supplier = drugInStock.Supplier,
+                Status = drugInStock.Status,
+                // CreationTime 字段在Dto基类AuditedEntityDto<Guid>中
+                Remarks = input.Remarks
+            };
 
+            return ApiResult<DrugInStockDto>.Success(dto, ResultCode.Success);
         }
 
     }

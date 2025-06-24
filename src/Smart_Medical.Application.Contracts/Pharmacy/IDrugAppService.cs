@@ -1,19 +1,22 @@
-﻿using System;
+﻿using Smart_Medical.Pharmacy;
+using Smart_Medical.Until;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Smart_Medical.Pharmacy
 {
     public interface IDrugAppService : IApplicationService
     {
-        Task<DrugDto> GetAsync(Guid id);
-        Task<PagedResultDto<DrugDto>> GetListAsync(PagedAndSortedResultRequestDto input);
-        Task<DrugDto> CreateAsync(CreateUpdateDrugDto input);
-        Task<DrugDto> UpdateAsync(Guid id, CreateUpdateDrugDto input);
-        Task DeleteAsync(Guid id);
+        Task<ApiResult<DrugDto>> GetAsync(Guid id);
+        Task<ApiResult<PageResult<List<DrugDto>>>> GetListAsync([FromQuery] DrugSearchDto input);
+        Task<ApiResult> CreateAsync(CreateUpdateDrugDto input);
+        Task<ApiResult> UpdateAsync(Guid id, CreateUpdateDrugDto input);
+        Task<ApiResult> DeleteAsync(Guid id);
     }
 }

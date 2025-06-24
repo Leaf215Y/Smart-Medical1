@@ -5,27 +5,26 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Smart_Medical.Until;
 
 namespace Smart_Medical.Pharmacy
 {
-    public interface IPharmaceuticalCompanyAppService :
-         ICrudAppService<
-             PharmaceuticalCompanyDto,
-             Guid,
-             PagedAndSortedResultRequestDto,
-             CreateUpdatePharmaceuticalCompanyDto>
+    /// <summary>
+    /// 制药公司服务接口
+    /// </summary>
+    public interface IPharmaceuticalCompanyAppService : IApplicationService
     {
         /// <summary>
-        /// 根据公司名称模糊查询
+        /// 根据公司名称查询
         /// </summary>
         /// <param name="name">公司名称</param>
         /// <returns></returns>
-        Task<ListResultDto<PharmaceuticalCompanyDto>> FindByNameAsync(string name);
+        Task<ApiResult> FindByNameAsync(string name);
 
         /// <summary>
         /// 获取所有公司列表
         /// </summary>
         /// <returns></returns>
-        Task<ListResultDto<PharmaceuticalCompanyDto>> GetListAllAsync();
+        Task<ApiResult> GetListAllAsync();
     }
 }
