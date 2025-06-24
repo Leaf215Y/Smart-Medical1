@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.ObjectMapping;
@@ -30,6 +31,7 @@ namespace Smart_Medical.DoctorvVsit
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
+        [HttpPost]
         public async Task<ApiResult> InsertDoctorDepartment(CreateUpdateDoctorDepartmentDto input)
         {
             var deptdto=ObjectMapper.Map<CreateUpdateDoctorDepartmentDto, DoctorDepartment>(input);
@@ -41,6 +43,7 @@ namespace Smart_Medical.DoctorvVsit
         /// </summary>
         /// <param name="search"></param>
         /// <returns></returns>
+        [HttpGet]
         public async Task<ApiResult<PageResult<List<GetDoctorDepartmentListDto>>>> GetDoctorDepartmentList([FromQuery] GetDoctorDepartmentSearchDto search)
         {
             var list=await dept.GetQueryableAsync();
@@ -51,16 +54,19 @@ namespace Smart_Medical.DoctorvVsit
             {
                 Data = dto,
                 TotleCount = res.RowCount,
-                TotlePage = (int)Math.Ceiling((double)res.RowCount / search.PageSize)
+                TotlePage = (int)Math.Ceiling((double)res.RowCount / search.PageSize),
+                 
             };
+            
             return ApiResult<PageResult<List<GetDoctorDepartmentListDto>>>.Success(pageInfo, ResultCode.Success);
         }
-       /// <summary>
-       /// 修改科室列表
-       /// </summary>
-       /// <param name="id"></param>
-       /// <param name="input"></param>
-       /// <returns></returns>
+        /// <summary>
+        /// 修改科室列表
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpPut]
         public async Task<ApiResult> UpdateDoctorDepartment(Guid id,CreateUpdateDoctorDepartmentDto input)
         {
             var deptlist = await dept.FindAsync(id);
@@ -77,6 +83,7 @@ namespace Smart_Medical.DoctorvVsit
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [HttpPut]
         public async Task<ApiResult> DeleteDoctorDepartment(Guid id)
         {
             var deptlist = await dept.FindAsync(id);

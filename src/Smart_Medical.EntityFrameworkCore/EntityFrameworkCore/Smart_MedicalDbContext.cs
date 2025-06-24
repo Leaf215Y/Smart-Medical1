@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.Patient;
@@ -39,7 +38,6 @@ public class Smart_MedicalDbContext :
     public DbSet<Drug> Drugs { get; set; }
     public DbSet<Sick> Medicals { get; set; }
 
-
     public Smart_MedicalDbContext(DbContextOptions<Smart_MedicalDbContext> options)
         : base(options)
     {
@@ -74,6 +72,7 @@ public class Smart_MedicalDbContext :
             b.Property(x => x.PrescriptionName).IsRequired().HasMaxLength(128);
 
         });
+       
         builder.Entity<Medication>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medications",
