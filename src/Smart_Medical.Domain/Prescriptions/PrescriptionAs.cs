@@ -11,8 +11,9 @@ namespace Smart_Medical.Prescriptions
     /// <summary>
     /// 处方信息
     /// </summary>
-    public class Prescription : FullAuditedAggregateRoot<int>
+    public class PrescriptionAs : FullAuditedAggregateRoot<int>
     {
+
         /// <summary>
         /// 处方名称
         /// </summary>
@@ -23,6 +24,8 @@ namespace Smart_Medical.Prescriptions
         /// 父级Id
         /// </summary>
         [Required]
-        public int ParentId { get; set; }
+        public int ParentId { get; set; } 
+
+
     }
 }

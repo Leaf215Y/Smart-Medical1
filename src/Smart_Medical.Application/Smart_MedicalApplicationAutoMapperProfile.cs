@@ -32,7 +32,7 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<Role, RoleDto>().ReverseMap();
         CreateMap<CreateUpdateRoleDto, Role>().ReverseMap();
         //处方
-        CreateMap<PrescriptionDto, Prescription>().ReverseMap();
+        CreateMap<PrescriptionDto, PrescriptionAs>().ReverseMap();
         CreateMap<CreateUpdateMedicationDto, Medication>().ReverseMap();
         CreateMap<Medication, MedicationDto>().ReverseMap();
 

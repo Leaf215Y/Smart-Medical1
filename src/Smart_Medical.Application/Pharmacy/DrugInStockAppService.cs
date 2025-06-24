@@ -36,8 +36,8 @@ namespace Smart_Medical.Pharmacy
             // 3. 创建入库记录
             var drugInStock = new DrugInStock
             {
-                DrugId = input.DrugId,
-                PharmaceuticalCompanyId = input.PharmaceuticalCompanyId,
+                //Id = input.DrugId,
+                //PharmaceuticalCompanyId = input.PharmaceuticalCompanyId,
                 Quantity = input.Quantity,
                 StockInDate = input.StockInDate,
                 BatchNumber = input.BatchNumber

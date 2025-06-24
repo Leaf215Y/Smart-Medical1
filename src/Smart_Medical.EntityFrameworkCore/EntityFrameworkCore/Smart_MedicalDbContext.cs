@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
+using Smart_Medical.Dictionarys;
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.Patient;
 using Smart_Medical.Pharmacy;
-using Smart_Medical.Prescriptions;
 using Smart_Medical.Pharmacy.InAndOutWarehouse;
+using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -25,11 +25,11 @@ public class Smart_MedicalDbContext :
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
 
-    public DbSet<Prescription> Prescriptions { get; set; }
+    public DbSet<PrescriptionAs> Prescriptions { get; set; }
     public DbSet<Medication> Medications { get; set; }
 
 
-
+    #region
 
     public DbSet<DoctorAccount> DoctorAccounts { get; set; }
     public DbSet<DoctorClinic> DoctorClinics { get; set; }
@@ -43,6 +43,9 @@ public class Smart_MedicalDbContext :
 
     public DbSet<Drug> Drugs { get; set; }
     public DbSet<Sick> Medicals { get; set; }
+
+    public DbSet<DictionaryData> DictionaryDatas { get; set; }
+    public DbSet<DictionaryType> DictionaryTypes { get; set; }
 
 
     public Smart_MedicalDbContext(DbContextOptions<Smart_MedicalDbContext> options)
@@ -72,7 +75,7 @@ public class Smart_MedicalDbContext :
         //});
 
 
-        builder.Entity<Prescription>(b =>
+        builder.Entity<PrescriptionAs>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Prescriptions",
                 Smart_MedicalConsts.DbSchema);
@@ -204,8 +207,24 @@ public class Smart_MedicalDbContext :
             b.ConfigureByConvention();
             b.Property(x => x.BatchNumber).IsRequired().HasMaxLength(64);
 
-            b.HasOne<Drug>().WithMany().HasForeignKey(x => x.DrugId).IsRequired();
-            b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.PharmaceuticalCompanyId).IsRequired();
+            b.HasOne<Drug>().WithMany().HasForeignKey(x => x.Id).IsRequired();
+            b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.Id).IsRequired();
+        });
+
+        builder.Entity<DictionaryType>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "DictionaryTypes",
+                Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention();
+        });
+
+        builder.Entity<Medication>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medications",
+                Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.MedicationName).IsRequired().HasMaxLength(128);
+
         });
 
     }

@@ -24,6 +24,147 @@ namespace Smart_Medical.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("Smart_Medical.Dictionarys.DictionaryData", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("DictionaryDataDesc")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DictionaryDataName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("DictionaryDataState")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DictionaryDataType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("LastModifierId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DictionaryDatas");
+                });
+
+            modelBuilder.Entity("Smart_Medical.Dictionarys.DictionaryType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("DictionaryDataType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DictionaryLabel")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("DictionarySort")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DictionaryTypeDesc")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("DictionaryTypeState")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DictionaryValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("LastModifierId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppDictionaryTypes", (string)null);
+                });
+
             modelBuilder.Entity("Smart_Medical.DoctorvVsit.DoctorAccount", b =>
                 {
                     b.Property<Guid>("Id")
@@ -678,7 +819,6 @@ namespace Smart_Medical.Migrations
                     b.ToTable("AppDrugs", (string)null);
                 });
 
-            modelBuilder.Entity("Smart_Medical.Prescriptions.Medication", b =>
             modelBuilder.Entity("Smart_Medical.Pharmacy.InAndOutWarehouse.DrugInStock", b =>
                 {
                     b.Property<Guid>("Id")
@@ -712,6 +852,125 @@ namespace Smart_Medical.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("DeletionTime");
 
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StockInDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppDrugInStocks", (string)null);
+                });
+
+            modelBuilder.Entity("Smart_Medical.Pharmacy.PharmaceuticalCompany", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<string>("ContactPerson")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<string>("ContactPhone")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("LastModifierId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppPharmaceuticalCompanies", (string)null);
+                });
+
+            modelBuilder.Entity("Smart_Medical.Prescriptions.Medication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("DeletionTime");
+
                     b.Property<int>("Dosage")
                         .HasColumnType("int");
 
@@ -719,8 +978,6 @@ namespace Smart_Medical.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
-                    b.Property<Guid>("DrugId")
-                        .HasColumnType("char(36)");
 
                     b.Property<string>("ExtraProperties")
                         .IsRequired()
@@ -784,48 +1041,13 @@ namespace Smart_Medical.Migrations
                     b.ToTable("AppMedications", (string)null);
                 });
 
-            modelBuilder.Entity("Smart_Medical.Prescriptions.Prescription", b =>
+            modelBuilder.Entity("Smart_Medical.Prescriptions.PrescriptionAs", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-                    b.Property<Guid>("PharmaceuticalCompanyId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StockInDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DrugId");
-
-                    b.HasIndex("PharmaceuticalCompanyId");
-
-                    b.ToTable("AppDrugInStocks", (string)null);
-                });
-
-            modelBuilder.Entity("Smart_Medical.Pharmacy.PharmaceuticalCompany", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
-
-                    b.Property<Guid>("CompanyId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -833,16 +1055,6 @@ namespace Smart_Medical.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("varchar(40)")
                         .HasColumnName("ConcurrencyStamp");
-
-                    b.Property<string>("ContactPerson")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("varchar(64)");
-
-                    b.Property<string>("ContactPhone")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime(6)")
@@ -890,9 +1102,6 @@ namespace Smart_Medical.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppPrescriptions", (string)null);
-                    b.HasKey("Id");
-
-                    b.ToTable("AppPharmaceuticalCompanies", (string)null);
                 });
 
             modelBuilder.Entity("Smart_Medical.RBAC.Role", b =>
@@ -1442,13 +1651,13 @@ namespace Smart_Medical.Migrations
                 {
                     b.HasOne("Smart_Medical.Pharmacy.Drug", null)
                         .WithMany()
-                        .HasForeignKey("DrugId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Smart_Medical.Pharmacy.PharmaceuticalCompany", null)
                         .WithMany()
-                        .HasForeignKey("PharmaceuticalCompanyId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

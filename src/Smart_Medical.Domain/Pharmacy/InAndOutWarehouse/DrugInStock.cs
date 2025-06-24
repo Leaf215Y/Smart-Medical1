@@ -8,19 +8,8 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Smart_Medical.Pharmacy.InAndOutWarehouse
 {
-    public class DrugInStock : AuditedAggregateRoot<Guid>
+    public class DrugInStock : FullAuditedAggregateRoot<Guid>
     {
-        /// <summary>
-        /// 药品ID
-        /// </summary>
-        [Required]
-        public Guid DrugId { get; set; }
-
-        /// <summary>
-        /// 医药公司ID
-        /// </summary>
-        [Required]
-        public Guid PharmaceuticalCompanyId { get; set; }
 
         /// <summary>
         /// 入库数量
