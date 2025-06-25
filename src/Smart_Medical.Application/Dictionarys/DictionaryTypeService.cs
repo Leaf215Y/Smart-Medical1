@@ -67,7 +67,7 @@ namespace Smart_Medical.Dictionarys
         public async Task<ApiResult<PageResult<List<GetDictionaryTypeDto>>>> GetDictionaryTypeList(string datetype,[FromQuery] GetDictionaryTypeSearchDto search)
         {
             var typelist = await dictionarytype.GetQueryableAsync();
-            typelist = typelist.WhereIf(!string.IsNullOrEmpty(search.DictionaryTypeName),x => x.DictionaryDataType.Contains(search.DictionaryTypeName));
+            typelist = typelist.WhereIf(!string.IsNullOrEmpty(search.DictionaryTypeName),x => x.DictionaryDataType.Contains(search.DictionaryTypeName)).Where(x=>x.DictionaryDataType== datetype);
             var res = typelist.PageResult(search.PageIndex, search.PageSize);
             var dto = ObjectMapper.Map<List<DictionaryType>, List<GetDictionaryTypeDto>>(res.Queryable.ToList());
             var pageinfo = new PageResult<List<GetDictionaryTypeDto>>

@@ -10,6 +10,6 @@ namespace Smart_Medical.Dictionarys.DictionaryTypes
     public class GetDictionaryTypeSearchDto:Seach
     {
        
-        public string DictionaryTypeName { get; set; }
+        public string? DictionaryTypeName { get; set; }
     }
 }
