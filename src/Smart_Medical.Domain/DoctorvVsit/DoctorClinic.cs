@@ -84,10 +84,12 @@ namespace Smart_Medical.DoctorvVsit
     }
 
     /// <summary>
-    /// 就诊状态 枚举【1】待审核【2】已退回【3】已撤回【4】待接诊【5】已取消【6】已街镇【7】待随访【8】待评价
+    /// 就诊状态 
+    /// 【1】待就诊【2】已取消【3】已就诊【4】待评价
     /// </summary>
     public enum ExecutionStatus
     {
+        //枚举【1】待审核【2】已退回【3】已撤回【4】待接诊【5】已取消【6】已街镇【7】待随访【8】待评价
         PendingConsultation = 1, // 待就诊
         Cancelled = 2, // 已取消
         Completed = 3, // 已就诊

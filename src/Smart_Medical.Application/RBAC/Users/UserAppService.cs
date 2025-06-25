@@ -9,6 +9,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Smart_Medical.RBAC; // 引入Domain层的RBAC实体
+using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO和接口
+using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO
+using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的Roles DTO
 
 namespace Smart_Medical.RBAC.Users
 {
@@ -60,9 +65,8 @@ namespace Smart_Medical.RBAC.Users
         {
             var queryable = await _userRepository.GetQueryableAsync();
 
-
             // 使用 Include 联查 UserRoles 及其关联的 Role 实体，确保在映射到 DTO 时包含关联数据
-            //queryable = queryable.Include(u => u.UserRoles).ThenInclude(ur => ur.Role);
+            queryable = queryable.Include(u => u.UserRoles).ThenInclude(ur => ur.Role);
 
             if (!string.IsNullOrWhiteSpace(input.UserName))
             {

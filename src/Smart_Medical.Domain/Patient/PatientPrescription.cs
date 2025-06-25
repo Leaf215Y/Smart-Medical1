@@ -24,6 +24,7 @@ namespace Smart_Medical.Patient
         /// </summary>
         public Guid PatientNumber { get; set; }
 
+        #region   药品信息
         /// <summary>
         /// 是否使用处方模版
         /// </summary>
@@ -35,7 +36,7 @@ namespace Smart_Medical.Patient
 
 
        /* #region   药品信息
-
+/*
         /// <summary>
         ///  药品名称
         /// </summary>
@@ -97,8 +98,9 @@ namespace Smart_Medical.Patient
         /// </summary>
         [Required]
         public int PrescriptionId { get; set; }
+*/
+        #endregion        
 
-        #endregion        */
 
         /// <summary>
         /// 医嘱内容  备注

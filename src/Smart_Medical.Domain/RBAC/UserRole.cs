@@ -34,16 +34,13 @@ namespace Smart_Medical.RBAC
         /// </summary>
         public Role Role { get; set; }
 
-        // 添加公共构造函数，以支持通过ID创建UserRole实例
-        public UserRole(Guid id) : base(id)
+        public UserRole()
         {
-
+            
         }
 
-        // 无参数构造函数，供ORM等使用
-        public UserRole() : base()
+        public UserRole(Guid ID) : base()
         {
-
         }
     }
 }

@@ -20,10 +20,7 @@ namespace Smart_Medical.Application.Contracts.RBAC.Users
         public string UserPhone { get; set; }
         public bool? UserSex { get; set; }
 
-
         // 导航属性的DTO，用于展示关联的用户角色信息
-        // 移除此属性以避免循环引用，因为 UserRoleDto 中已包含 UserDto。
-        // 如果需要获取用户的角色列表，请通过 UserRoleAppService 查询。
-        // public ICollection<UserRoleDto> UserRoles { get; set; }
+        //public ICollection<UserRoleDto> UserRoles { get; set; }
     }
 }
