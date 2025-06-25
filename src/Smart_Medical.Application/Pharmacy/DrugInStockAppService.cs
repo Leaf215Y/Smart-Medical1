@@ -40,10 +40,10 @@ namespace Smart_Medical.Pharmacy
         public async Task<ApiResult<DrugInStockDto>> StockInAsync(CreateUpdateDrugInStockDto input)
         {
             // 1. 查找药品实体
-            var drug = await _drugRepository.GetAsync(input.DrugId);
+            var drug = await _drugRepository.FindAsync(input.DrugId);
             if (drug == null)
             {
-                return ApiResult<DrugInStockDto>.Fail("药品不存在", ResultCode.NotFound);
+                return ApiResult<DrugInStockDto>.Fail("找不到对应的药品，请检查药品ID是否正确。", ResultCode.NotFound);
             }
 
             // 2. 校验生产日期、有效期

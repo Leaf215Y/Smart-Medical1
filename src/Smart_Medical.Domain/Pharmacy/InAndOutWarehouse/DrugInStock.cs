@@ -12,7 +12,7 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
     /// <summary>
     /// 药品入库记录
     /// </summary>
-    public class DrugInStock : Entity<Guid>
+    public class DrugInStock : FullAuditedAggregateRoot<Guid>
     {
         /// <summary>
         /// 药品ID
