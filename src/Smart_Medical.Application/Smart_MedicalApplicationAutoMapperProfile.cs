@@ -14,8 +14,7 @@ using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Application.Contracts.RBAC.RolePermissions;
 using System.Collections.Generic;
 using Smart_Medical.Pharmacy;
-using Smart_Medical.DoctorvVsit.DockerDepartments;
-using Smart_Medical.DoctorvVsit;
+using Smart_Medical.Pharmacy.InAndOutWarehouse;
 
 namespace Smart_Medical;
 
@@ -69,7 +68,10 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         // 药品相关映射
         CreateMap<CreateUpdateDrugDto, Drug>();
         CreateMap<Drug, DrugDto>();
+        CreateMap<DrugInStock, DrugInStockDto>();
+        CreateMap<CreateUpdateDrugInStockDto, DrugInStock>();
 
-
+        CreateMap<Sick, SickDto>().ReverseMap();
+        CreateMap<CreateUpdateSickDto, Sick>().ReverseMap();
     }
 }
