@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
 using Smart_Medical.OutpatientClinic.Dtos.Parameter;
 using Smart_Medical.OutpatientClinic.IServices;
 using Smart_Medical.Patient;
+using Smart_Medical.Pharmacy;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
@@ -43,14 +45,20 @@ namespace Smart_Medical.Registration
         /// </summary>
         private readonly IRepository<PatientPrescription, Guid> _prescriptionRepo;
 
+        /// <summary>
+        /// 药品
+        /// </summary>
+        private readonly IRepository<Drug, int> _drugRepo;
+
         public PatientService(
-            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo)
+            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug, int> drugRepo)
         {
             _unitOfWorkManager = unitOfWorkManager;
             _doctorclinRepo = doctorclinRepo;
             _patientRepo = basicpatientRepo;
             _sickRepo = sickRepo;
             _prescriptionRepo = prescriptionRepo;
+            _drugRepo = drugRepo;
         }
 
         /// <summary>
@@ -150,7 +158,7 @@ namespace Smart_Medical.Registration
 
                 throw;
             }
-            
+
         }
 
 
@@ -277,16 +285,14 @@ namespace Smart_Medical.Registration
                             on patientId equals prescription.PatientNumber
                             select new GetSickInfoDto
                             {
-                                
+
                             };
 
 
-                var result = new List<GetSickInfoDto>();
-                //if (query == null)
-                //ApiResult.Fail("患者病历不存在",ResultCode.NotFound);
-
                 //查询
-                //var result = await AsyncExecuter.ToListAsync(query);
+                var result = await AsyncExecuter.ToListAsync(query);
+                if (result == null)
+                    ApiResult.Fail("患者病历不存在", ResultCode.NotFound);
                 return ApiResult<List<GetSickInfoDto>>.Success(result, ResultCode.Success);
             }
             catch (Exception ex)
@@ -308,12 +314,76 @@ namespace Smart_Medical.Registration
                 if (input == null || input.PatientNumber == Guid.Empty)
                     return ApiResult.Fail("患者信息不完整！", ResultCode.Error);
 
+                //如果使用处方模板，则必须提供模板编号
+                if (input.IsActive)
+                {
+                    if (input.PrescriptionItems == null)
+                    {
+                        return ApiResult.Fail("处方项不能为空！", ResultCode.Error);
+                    }
+                }
+
                 // 获取患者基本信息
                 var patient = await _patientRepo.FindAsync(input.PatientNumber);
                 if (patient == null)
                     return ApiResult.Fail("未找到该患者信息！", ResultCode.NotFound);
 
+                //生成统一的处方 ID
+                var prescriptionId = Guid.NewGuid();
 
+                // =============================================
+                // 根据 PrescriptionItems 插入处方明细表
+                // =============================================
+
+                //判断每种药品是否存在、库存是否充足
+                foreach (var item in input.PrescriptionItems)
+                {
+                    // 获取药品信息
+                    var drug = await _drugRepo.FirstOrDefaultAsync(d => d.Id == item.DrugId);
+                    //药品不存在返回错误信息
+                    if (drug == null)
+                        return ApiResult.Fail($"未找到药品ID为 {item.DrugId} 的药品信息", ResultCode.Error);
+
+                    //查找的药品库存是否充足
+                    int remainingStock = drug.Stock - item.Number;
+                    if (remainingStock < 0)
+                        return ApiResult.Fail($"药品 {drug.DrugName} 库存不足，无法开具处方", ResultCode.Error);
+
+                    //提前 return，但没有调用 uow.CompleteAsync()，那事务是不会提交的，会自动回滚
+
+                    // 更新药品库存
+                    drug.Stock = remainingStock;
+                    await _drugRepo.UpdateAsync(drug);
+                }
+
+                //创建处方记录
+                var prescription = new PatientPrescription
+                {
+                    PrescriptionTemplateNumber = input.PrescriptionTemplateNumber,
+                    PatientNumber = input.PatientNumber,
+                    IsActive = input.IsActive,
+                    // 序列化处方明细
+                    DrugIds = JsonConvert.SerializeObject(input.PrescriptionItems),
+                    MedicalAdvice = input.MedicalAdvice
+                };
+                //保存处方记录
+                await _prescriptionRepo.InsertAsync(prescription);
+
+                //更新患者状态为“已就诊”
+                patient.VisitStatus = "已就诊";
+                //更新 DoctorClinic 表的状态字段 
+                //判断状态为“待就诊”
+                var doctorClinic = await _doctorclinRepo.FirstOrDefaultAsync(
+                    x => x.PatientId == input.PatientNumber &&
+                    x.ExecutionStatus == ExecutionStatus.PendingConsultation
+                    );
+
+                if (doctorClinic == null)
+                    return ApiResult.Fail("未找到就诊记录！", ResultCode.NotFound);
+
+                // 更新就诊记录状态为“已就诊”
+                doctorClinic.ExecutionStatus = ExecutionStatus.Completed;
+                await _doctorclinRepo.UpdateAsync(doctorClinic);
 
                 return ApiResult.Success(ResultCode.Success);
             }
@@ -323,10 +393,6 @@ namespace Smart_Medical.Registration
             }
         }
     }
-
-
-
-
 }
 
 
