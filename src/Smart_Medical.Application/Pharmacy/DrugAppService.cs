@@ -1,15 +1,15 @@
-﻿using AutoMapper.Internal.Mappers;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using System.Linq.Dynamic.Core;
 
 namespace Smart_Medical.Pharmacy
 {
@@ -27,7 +27,6 @@ namespace Smart_Medical.Pharmacy
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet]
         public async Task<ApiResult<DrugDto>> GetAsync(int id)
         {
             try

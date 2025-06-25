@@ -49,10 +49,24 @@ namespace Smart_Medical.Dictionarys
         public async Task<ApiResult> UpdateDictionaryDataLAsync(Guid id, CreateUpdateDictionaryDataDto input)
         {
             var datalist = await dictionaryData.FindAsync(id);
-            if (datalist.DictionaryDataName == input.DictionaryDataName)
+
+           
+            if (datalist == null)
             {
-                return ApiResult.Fail("字典数据已存在不能修改", ResultCode.NotFound);
+                return ApiResult.Fail("未找到对应的字典数据", ResultCode.NotFound);
             }
+
+            // 检查同类型下是否有其他数据重名
+            var exists = await dictionaryData.AnyAsync(x =>
+                x.DictionaryDataName == input.DictionaryDataName &&
+                x.DictionaryDataType == input.DictionaryDataType &&
+                x.Id != id);
+
+            if (exists)
+            {
+                return ApiResult.Fail("字典数据名称已存在，不能修改为该名称", ResultCode.NotFound);
+            }
+
             var dto = ObjectMapper.Map(input, datalist);
             await dictionaryData.UpdateAsync(dto);
             return ApiResult.Success(ResultCode.Success);
@@ -66,6 +80,8 @@ namespace Smart_Medical.Dictionarys
         public async Task<ApiResult<PageResult<List<GetDictionaryDataDto>>>> GetDictionaryDataList([FromQuery] GetDictionaryDataSearchDto search)
         {
             var datalist = await dictionaryData.GetQueryableAsync();
+            datalist= datalist.WhereIf(!string.IsNullOrEmpty(search.DictionaryDataName), x => x.DictionaryDataName.Contains(search.DictionaryDataName))
+                .WhereIf(search.DictionaryDataState!=null, x => x.DictionaryDataState == search.DictionaryDataState);
             var res = datalist.PageResult(search.PageIndex, search.PageSize);
             var dto = ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(res.Queryable.ToList());
             var pageinfo = new PageResult<List<GetDictionaryDataDto>>

@@ -36,7 +36,7 @@ namespace Smart_Medical.Pharmacy
                 // 从数据库中获取包含指定名称的公司列表
                 var companies = await _repository.GetListAsync(c => c.CompanyName.Contains(name));
 
-                if (!companies.Any())
+                if (companies!=null)
                 {
                     return ApiResult.Success(ResultCode.NotFound);
                 }
@@ -62,7 +62,7 @@ namespace Smart_Medical.Pharmacy
                 // 获取所有公司列表
                 var companies = await _repository.GetListAsync();
 
-                if (!companies.Any())
+                if (companies!=null)
                 {
                     return ApiResult.Success(ResultCode.NotFound);
                 }
