@@ -17,7 +17,7 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
         /// <summary>
         /// 药品ID
         /// </summary>
-        public Guid DrugId { get; set; }
+        public int DrugId { get; set; }
 
         /// <summary>
         /// 制药公司ID

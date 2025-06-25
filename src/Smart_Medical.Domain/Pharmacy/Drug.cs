@@ -8,7 +8,7 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Smart_Medical.Pharmacy
 {
-    public class Drug : FullAuditedAggregateRoot<Guid>
+    public class Drug : FullAuditedAggregateRoot<int>
     {
 
        
@@ -108,6 +108,6 @@ namespace Smart_Medical.Pharmacy
         /// <summary>
         ///  供应商ID
         /// </summary>
-        //public Guid? PharmaceuticalCompanyId { get; set; }
+        public Guid? PharmaceuticalCompanyId { get; set; }
     }
 }

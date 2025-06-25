@@ -12,7 +12,7 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
         /// 药品ID
         /// </summary>
         [Required(ErrorMessage = "药品ID不能为空")]
-        public Guid DrugId { get; set; }
+        public int DrugId { get; set; }
 
         /// <summary>
         /// 入库数量

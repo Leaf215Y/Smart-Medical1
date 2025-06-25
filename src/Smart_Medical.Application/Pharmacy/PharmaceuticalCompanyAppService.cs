@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 namespace Smart_Medical.Pharmacy
 {
+    [ApiExplorerSettings(GroupName = "制药公司管理")]
     /// <summary>
     /// 制药公司服务实现
     /// </summary>

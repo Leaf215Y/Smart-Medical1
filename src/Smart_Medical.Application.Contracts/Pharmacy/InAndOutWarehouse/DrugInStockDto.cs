@@ -11,12 +11,12 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
     /// <summary>
     /// 药品入库记录DTO
     /// </summary>
-    public class DrugInStockDto : AuditedEntityDto<Guid>
+    public class DrugInStockDto 
     {
         /// <summary>
         /// 药品ID
         /// </summary>
-        public Guid DrugId { get; set; }
+        public int DrugId { get; set; }
 
         /// <summary>
         /// 药品名称

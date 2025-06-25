@@ -14,11 +14,11 @@ namespace Smart_Medical.Pharmacy
     public class DrugInStockAppService : ApplicationService, IDrugInStockAppService
     {
         private readonly IRepository<DrugInStock, Guid> _drugInStockRepository;
-        private readonly IRepository<Drug, Guid> _drugRepository;
+        private readonly IRepository<Drug, int> _drugRepository;
 
         public DrugInStockAppService(
             IRepository<DrugInStock, Guid> drugInStockRepository,
-            IRepository<Drug, Guid> drugRepository)
+            IRepository<Drug, int> drugRepository)
         {
             _drugInStockRepository = drugInStockRepository;
             _drugRepository = drugRepository;
@@ -88,7 +88,7 @@ namespace Smart_Medical.Pharmacy
             // 6. 映射为DrugInStockDto
             var dto = new DrugInStockDto
             {
-                Id = drugInStock.Id,
+              
                 DrugId = drugInStock.DrugId,
                 Quantity = drugInStock.Quantity,
                 UnitPrice = drugInStock.UnitPrice,

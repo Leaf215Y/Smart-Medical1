@@ -213,6 +213,7 @@ public class Smart_MedicalDbContext :
      {
          b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Drugs", Smart_MedicalConsts.DbSchema);
          b.ConfigureByConvention();
+       
          b.Property(x => x.DrugName).IsRequired().HasMaxLength(128);
          b.Property(x => x.DrugType).IsRequired().HasMaxLength(32);
          b.Property(x => x.FeeName).IsRequired().HasMaxLength(32);

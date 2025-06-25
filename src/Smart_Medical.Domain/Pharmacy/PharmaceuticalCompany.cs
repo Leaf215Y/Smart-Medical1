@@ -10,7 +10,10 @@ namespace Smart_Medical.Pharmacy
 {
     public class PharmaceuticalCompany : FullAuditedAggregateRoot<Guid>
     {
- 
+        /// <summary>
+        /// 公司id
+        /// </summary>
+        public Guid CommpanyId { get; set; }
         /// <summary>
         /// 公司名称
         /// </summary>
