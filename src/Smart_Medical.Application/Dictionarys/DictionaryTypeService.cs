@@ -29,7 +29,7 @@ namespace Smart_Medical.Dictionarys
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ApiResult> InsertDictionaryDataLAsync(CreateUpdateDictionaryTypeDto input)
+        public async Task<ApiResult> InsertDictionaryTypeLAsync(CreateUpdateDictionaryTypeDto input)
         {
             var res = ObjectMapper.Map<CreateUpdateDictionaryTypeDto, DictionaryType>(input);
             res = await dictionarytype.InsertAsync(res);
@@ -43,7 +43,7 @@ namespace Smart_Medical.Dictionarys
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<ApiResult> UpdateDictionaryDataLAsync(Guid id, CreateUpdateDictionaryTypeDto input)
+        public async Task<ApiResult> UpdateDictionaryTypeLAsync(Guid id, CreateUpdateDictionaryTypeDto input)
         {
             var typelist = await dictionarytype.FindAsync(id);
             if (typelist.DictionaryValue == input.DictionaryValue)
@@ -55,16 +55,19 @@ namespace Smart_Medical.Dictionarys
             return ApiResult.Success(ResultCode.Success);
         }
 
+       
+
+
         /// <summary>
         /// 获取字典数据类型
         /// </summary>
         /// <param name="search"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ApiResult<PageResult<List<GetDictionaryTypeDto>>>> GetDictionaryDataList([FromQuery] GetDictionaryTypeSearchDto search)
+        public async Task<ApiResult<PageResult<List<GetDictionaryTypeDto>>>> GetDictionaryTypeList(string datetype,[FromQuery] GetDictionaryTypeSearchDto search)
         {
             var typelist = await dictionarytype.GetQueryableAsync();
-            typelist = typelist.Where(x => x.DictionaryDataType.Contains(search.DictionaryTypeName));
+            typelist = typelist.WhereIf(!string.IsNullOrEmpty(search.DictionaryTypeName),x => x.DictionaryDataType.Contains(search.DictionaryTypeName));
             var res = typelist.PageResult(search.PageIndex, search.PageSize);
             var dto = ObjectMapper.Map<List<DictionaryType>, List<GetDictionaryTypeDto>>(res.Queryable.ToList());
             var pageinfo = new PageResult<List<GetDictionaryTypeDto>>
@@ -82,7 +85,7 @@ namespace Smart_Medical.Dictionarys
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<ApiResult> DeleteDoctorDepartment(Guid id)
+        public async Task<ApiResult> DeleteDictionaryType(Guid id)
         {
             var typelist = await dictionarytype.FindAsync(id);
             await dictionarytype.DeleteAsync(typelist);
