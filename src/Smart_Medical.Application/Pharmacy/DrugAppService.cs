@@ -15,9 +15,9 @@ namespace Smart_Medical.Pharmacy
 {
     public class DrugAppService : ApplicationService, IDrugAppService
     {
-        public IRepository<Drug, Guid> Repository { get; }
+        public IRepository<Drug, int> Repository { get; }
 
-        public DrugAppService(IRepository<Drug, Guid> repository)
+        public DrugAppService(IRepository<Drug, int> repository)
         {
             Repository = repository;
         }
@@ -26,7 +26,7 @@ namespace Smart_Medical.Pharmacy
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<ApiResult<DrugDto>> GetAsync(Guid id)
+        public async Task<ApiResult<DrugDto>> GetAsync(int id)
         {
             try
             {
@@ -140,7 +140,7 @@ namespace Smart_Medical.Pharmacy
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<ApiResult> UpdateAsync(Guid id, CreateUpdateDrugDto input)
+        public async Task<ApiResult> UpdateAsync(int id, CreateUpdateDrugDto input)
         {
             var drug = await Repository.GetAsync(id);
 
@@ -171,7 +171,7 @@ namespace Smart_Medical.Pharmacy
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete]
-        public async Task<ApiResult> DeleteAsync(Guid id)
+        public async Task<ApiResult> DeleteAsync(int id)
         {
             await Repository.DeleteAsync(id);
             return ApiResult.Success(ResultCode.Success);
