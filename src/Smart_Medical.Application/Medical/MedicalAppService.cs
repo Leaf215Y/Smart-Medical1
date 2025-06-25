@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,8 +61,8 @@ namespace Smart_Medical.Medical
 
             var totalCount = await AsyncExecuter.CountAsync(list);
             var items = await AsyncExecuter.ToListAsync(
-                list.OrderBy(nameof(Sick.CreationTime) + " desc")
-                    .Skip((search.pageIndex - 1) * search.pageSize)
+                list
+                .Skip((search.pageIndex - 1) * search.pageSize)
                     .Take(search.pageSize)
             );
 

@@ -17,7 +17,7 @@ namespace Smart_Medical.Application.Contracts.RBAC.Roles
         // public ICollection<UserRoleDto> UserRoles { get; set; }
 
     
-        public ICollection<UserRoleDto> UserRoles { get; set; }
-        public ICollection<RolePermissionDto> RolePermissions { get; set; }
+        /*public ICollection<UserRoleDto> UserRoles { get; set; }
+        public ICollection<RolePermissionDto> RolePermissions { get; set; }*/
     }
 }

@@ -105,6 +105,34 @@ public class Smart_MedicalDbContext :
             b.Property(x => x.PrescriptionName).IsRequired().HasMaxLength(128);
 
         });
+
+        builder.Entity<User>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Users",
+                Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.UserName).IsRequired().HasMaxLength(128);
+
+        });
+
+        builder.Entity<Role>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Roles",
+                Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.RoleName).IsRequired().HasMaxLength(128);
+
+        });
+        builder.Entity<Permission>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Permissions",
+                Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.PermissionName).IsRequired().HasMaxLength(128);
+
+        });
+
+
         /*  builder.Entity<Medication>(b =>
           {
               b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medications",
@@ -312,6 +340,8 @@ public class Smart_MedicalDbContext :
                 .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId);
         });
+
+
 
     }
 }

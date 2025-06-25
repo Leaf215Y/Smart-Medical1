@@ -11,7 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Smart_Medical.Application.Contracts.RBAC.RolePermissions; // 引用Contracts层的RolePermissions DTO和接口
 using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的Roles DTO
 using Smart_Medical.Application.Contracts.RBAC.Permissions; // 引用Contracts层的Permissions DTO
-using Smart_Medical; // 添加对 ResultCode 命名空间的引用
+using Smart_Medical;
+using Volo.Abp.Uow; // 添加对 ResultCode 命名空间的引用
 
 namespace Smart_Medical.RBAC.RolePermissions
 {

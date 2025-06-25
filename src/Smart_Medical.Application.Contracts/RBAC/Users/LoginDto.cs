@@ -5,13 +5,14 @@ namespace Smart_Medical.Application.Contracts.RBAC.Users
 {
     public class LoginDto
     {
-        [Required(ErrorMessage = "用户名是必填项。")]
         [DefaultValue("admin")]
+        [Required(ErrorMessage = "用户名是必填项。")]
         public string UserName { get; set; }
 
+        [DefaultValue("123456")] 
         [Required(ErrorMessage = "密码是必填项。")]
-        [DefaultValue("123456")]
+        public string UserPwd { get; set; }
 
-    
+
     }
 }

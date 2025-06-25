@@ -1,17 +1,18 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Smart_Medical; // 添加对 ResultCode 命名空间的引用
+using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的Roles DTO
+using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO和接口
+using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO
+using Smart_Medical.RBAC;
+using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using Smart_Medical.Until;
-using Smart_Medical.RBAC;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO和接口
-using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO
-using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的Roles DTO
-using Smart_Medical; // 添加对 ResultCode 命名空间的引用
+using Volo.Abp.Uow;
 
 namespace Smart_Medical.RBAC.UserRoles
 {
@@ -120,7 +121,7 @@ namespace Smart_Medical.RBAC.UserRoles
 
             return ApiResult<PageResult<List<UserRoleDto>>>.Success(pageResult, ResultCode.Success);
         }
-
+        
         [UnitOfWork] // 添加 [UnitOfWork] 特性，确保此方法的数据库操作在事务中执行
         public async Task<ApiResult> UpdateAsync(Guid userId, List<Guid> roleIds)
         {
