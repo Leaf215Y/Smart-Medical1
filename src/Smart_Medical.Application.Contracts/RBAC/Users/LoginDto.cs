@@ -11,6 +11,7 @@ namespace Smart_Medical.Application.Contracts.RBAC.Users
 
         [Required(ErrorMessage = "密码是必填项。")]
         [DefaultValue("123456")]
-        public string UserPwd { get; set; }
+
+    
     }
 }

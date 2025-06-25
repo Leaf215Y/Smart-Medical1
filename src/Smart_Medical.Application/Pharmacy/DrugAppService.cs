@@ -1,6 +1,4 @@
-﻿using AutoMapper.Internal.Mappers;
-using Smart_Medical.Until;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +11,10 @@ using System.Linq.Dynamic.Core;
 
 namespace Smart_Medical.Pharmacy
 {
-    public class DrugAppService : ApplicationService, IDrugAppService
+    [ApiExplorerSettings(GroupName = "药品管理")]
+    public class DrugAppService :
+        CrudAppService<Drug, DrugDto, int, PagedAndSortedResultRequestDto, CreateUpdateDrugDto>,
+        IDrugAppService
     {
         public IRepository<Drug, Guid> Repository { get; }
 

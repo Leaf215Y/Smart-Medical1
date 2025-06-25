@@ -12,7 +12,12 @@ namespace Smart_Medical.Pharmacy
     /// <summary>
     /// 制药公司服务接口
     /// </summary>
-    public interface IPharmaceuticalCompanyAppService : IApplicationService
+    public interface IPharmaceuticalCompanyAppService :
+         ICrudAppService<
+             PharmaceuticalCompanyDto,
+             Guid,
+             PagedAndSortedResultRequestDto,
+             CreateUpdatePharmaceuticalCompanyDto>
     {
         /// <summary>
         /// 根据公司名称查询

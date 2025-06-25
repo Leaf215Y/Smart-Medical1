@@ -12,10 +12,8 @@ using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Application.Contracts.RBAC.RolePermissions;
 using System.Collections.Generic;
 using Smart_Medical.Pharmacy;
-using Smart_Medical.Pharmacy.InAndOutWarehouse;
 using Smart_Medical.DoctorvVsit.DockerDepartments;
 using Smart_Medical.DoctorvVsit;
-using Smart_Medical.RBAC.Roles;
 
 namespace Smart_Medical;
 

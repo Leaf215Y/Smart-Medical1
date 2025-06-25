@@ -12,7 +12,6 @@ using Smart_Medical.Application.Contracts.RBAC.RolePermissions; // 引用Contrac
 using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的Roles DTO
 using Smart_Medical.Application.Contracts.RBAC.Permissions; // 引用Contracts层的Permissions DTO
 using Smart_Medical; // 添加对 ResultCode 命名空间的引用
-using Volo.Abp.Uow;
 
 namespace Smart_Medical.RBAC.RolePermissions
 {

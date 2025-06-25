@@ -1,13 +1,9 @@
 using System;
 using Volo.Abp.Application.Dtos;
-using Smart_Medical.Application.Contracts.RBAC.Users; // 引用 UserDto
-using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用 RoleDto
+using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的UserDto
 
 namespace Smart_Medical.Application.Contracts.RBAC.UserRoles
 {
-    /// <summary>
-    /// 用户角色关联响应Dto
-    /// </summary>
     public class UserRoleDto : AuditedEntityDto<Guid>
     {
         public Guid UserId { get; set; }

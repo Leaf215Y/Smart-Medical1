@@ -105,32 +105,6 @@ public class Smart_MedicalDbContext :
             b.Property(x => x.PrescriptionName).IsRequired().HasMaxLength(128);
 
         });
-        builder.Entity<User>(b =>
-        {
-            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Users",
-                Smart_MedicalConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
-            b.Property(x => x.UserName).IsRequired().HasMaxLength(128);
-
-        });
-        builder.Entity<Role>(b =>
-        {
-            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Roles",
-                Smart_MedicalConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
-            b.Property(x => x.RoleName).IsRequired().HasMaxLength(128);
-
-        });
-        builder.Entity<Permission>(b =>
-        {
-            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Permissions",
-                Smart_MedicalConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
-            b.Property(x => x.PermissionName).IsRequired().HasMaxLength(128);
-
-        });
-
-
         /*  builder.Entity<Medication>(b =>
           {
               b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Medications",
@@ -254,14 +228,9 @@ public class Smart_MedicalDbContext :
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "DrugInStocks", Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention();
             b.Property(x => x.BatchNumber).IsRequired().HasMaxLength(64);
-            b.Property(x => x.UnitPrice).HasColumnType("decimal(18,2)");
-            b.Property(x => x.TotalAmount).HasColumnType("decimal(18,2)");
-            b.Property(x => x.Status).HasMaxLength(32);
-            b.Property(x => x.Supplier).HasMaxLength(100);
-
-            // 配置外键关系
-            b.HasOne<Drug>().WithMany().HasForeignKey(x => x.DrugId).IsRequired();
-            b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.PharmaceuticalCompanyId).IsRequired();
+            /*
+                        b.HasOne<Drug>().WithMany().HasForeignKey(x => x.Id).IsRequired();
+                        b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.Id).IsRequired();*/
         });
 
         builder.Entity<DictionaryType>(b =>

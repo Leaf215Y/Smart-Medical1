@@ -14,4 +14,5 @@ namespace Smart_Medical.Application.Contracts.RBAC.Permissions
         public Guid? ParentId { get; set; }
     }
 
+    }
 }

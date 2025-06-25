@@ -7,7 +7,7 @@ using Volo.Abp.Application.Services;
 namespace Smart_Medical.Pharmacy
 {
     /// <summary>
-    /// 药品入库服务接口
+    /// 药品入库管理服务接口
     /// </summary>
     public interface IDrugInStockAppService : IApplicationService
     {
