@@ -88,7 +88,6 @@ namespace Smart_Medical.Pharmacy
             // 6. 映射为DrugInStockDto
             var dto = new DrugInStockDto
             {
-              
                 DrugId = drugInStock.DrugId,
                 Quantity = drugInStock.Quantity,
                 UnitPrice = drugInStock.UnitPrice,

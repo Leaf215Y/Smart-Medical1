@@ -179,20 +179,6 @@ namespace Smart_Medical.Pharmacy
             return ApiResult.Success(ResultCode.Success);
         }
 
-        public Task<ApiResult<DrugDto>> GetAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ApiResult> UpdateAsync(Guid id, CreateUpdateDrugDto input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ApiResult> DeleteAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 
