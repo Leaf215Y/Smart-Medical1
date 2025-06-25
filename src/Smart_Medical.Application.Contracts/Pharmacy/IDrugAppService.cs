@@ -8,6 +8,9 @@ using Volo.Abp.Application.Services;
 
 namespace Smart_Medical.Pharmacy
 {
+    /// <summary>
+    /// 药品服务接口
+    /// </summary>
     public interface IDrugAppService : IApplicationService
     {
         Task<DrugDto> GetAsync(int id);

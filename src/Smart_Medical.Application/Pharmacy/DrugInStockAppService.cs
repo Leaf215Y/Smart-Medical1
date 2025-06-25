@@ -1,16 +1,13 @@
-﻿using AutoMapper.Internal.Mappers;
+﻿using Microsoft.AspNetCore.Mvc;
 using Smart_Medical.Pharmacy.InAndOutWarehouse;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using Volo.Abp;
 
 namespace Smart_Medical.Pharmacy
 {
+    [ApiExplorerSettings(GroupName = "药品入库管理")]
     public class DrugInStockAppService : ApplicationService, IDrugInStockAppService
     {
         private readonly IRepository<DrugInStock, Guid> _drugInStockRepository;

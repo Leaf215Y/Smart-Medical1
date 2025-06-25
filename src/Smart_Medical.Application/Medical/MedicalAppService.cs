@@ -1,8 +1,7 @@
-﻿using AutoMapper.Internal.Mappers;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -10,6 +9,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Medical
 {
+    [ApiExplorerSettings(GroupName = "医疗管理")]
     public class MedicalAppService : ApplicationService
     {
         private readonly IRepository<Sick, Guid> _repository;
