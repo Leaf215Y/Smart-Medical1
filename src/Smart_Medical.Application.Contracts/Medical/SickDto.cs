@@ -9,7 +9,7 @@ using Volo.Abp.Application.Dtos;
 namespace Smart_Medical.Medical
 {
 
-    public class SickDto : AuditedEntityDto<Guid>
+    public class SickDto
     {
         /// <summary>
         /// 病历状态

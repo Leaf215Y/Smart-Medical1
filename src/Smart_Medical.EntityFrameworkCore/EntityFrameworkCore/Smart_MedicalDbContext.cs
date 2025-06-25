@@ -253,9 +253,14 @@ public class Smart_MedicalDbContext :
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "DrugInStocks", Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention();
             b.Property(x => x.BatchNumber).IsRequired().HasMaxLength(64);
-            /*
-                        b.HasOne<Drug>().WithMany().HasForeignKey(x => x.Id).IsRequired();
-                        b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.Id).IsRequired();*/
+            b.Property(x => x.UnitPrice).HasColumnType("decimal(18,2)");
+            b.Property(x => x.TotalAmount).HasColumnType("decimal(18,2)");
+            b.Property(x => x.Status).HasMaxLength(32);
+            b.Property(x => x.Supplier).HasMaxLength(100);
+
+            // 配置外键关系
+            b.HasOne<Drug>().WithMany().HasForeignKey(x => x.DrugId).IsRequired();
+            b.HasOne<PharmaceuticalCompany>().WithMany().HasForeignKey(x => x.PharmaceuticalCompanyId).IsRequired();
         });
 
         builder.Entity<DictionaryType>(b =>

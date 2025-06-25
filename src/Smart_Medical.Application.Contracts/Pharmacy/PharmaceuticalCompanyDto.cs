@@ -7,7 +7,7 @@ using Volo.Abp.Application.Dtos;
 
 namespace Smart_Medical.Pharmacy
 {
-    public class PharmaceuticalCompanyDto : AuditedEntityDto<Guid>
+    public class PharmaceuticalCompanyDto 
     {
         public string CompanyName { get; set; }
         public string ContactPerson { get; set; }

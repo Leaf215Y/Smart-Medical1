@@ -22,9 +22,14 @@ namespace Smart_Medical.Prescriptions
         }
         /// <summary>
         /// 创建处方
+        /// Create a prescription
         /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// POST /api/app/prescriptions/prescription
+        /// 创建新的处方模板。
+        /// </remarks>
+        /// <param name="input">处方参数</param>
+        /// <returns>操作结果</returns>
         [HttpPost]
         public async Task<ApiResult> CreateAsync(PrescriptionDto input)
         {
@@ -36,9 +41,14 @@ namespace Smart_Medical.Prescriptions
         }
         /// <summary>
         /// 获取处方树
+        /// Get prescription tree
         /// </summary>
-        /// <param name="pid"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// POST /api/app/prescriptions/prescription-tree
+        /// 获取所有处方的树形结构。
+        /// </remarks>
+        /// <param name="pid">父级ID</param>
+        /// <returns>处方树</returns>
         [HttpPost]
         public async Task<ApiResult<List<PrescriptionTree>>> GetPrescriptionTree(int pid)
         {
@@ -68,9 +78,14 @@ namespace Smart_Medical.Prescriptions
         }
         /// <summary>
         /// 根据不同的处方父级id，返回不同的处方对应的信息
+        /// Get prescriptions by parent id
         /// </summary>
-        /// <param name="pid"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// GET /api/app/prescriptions/start-prescriptions?pid={pid}
+        /// 根据父级ID获取对应的处方信息。
+        /// </remarks>
+        /// <param name="pid">父级ID</param>
+        /// <returns>处方列表</returns>
         [HttpGet]
         public async Task<ApiResult<List<PrescriptionDto>>> StartPrescriptions(int pid)
         {

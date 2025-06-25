@@ -1,16 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Medical
 {
-    [ApiExplorerSettings(GroupName = "医疗管理")]
-    public class MedicalAppService : ApplicationService
+    public class MedicalAppService : ApplicationService, IMedicalAppService
     {
         private readonly IRepository<Sick, Guid> _repository;
 
@@ -19,49 +21,166 @@ namespace Smart_Medical.Medical
             _repository = repository;
         }
 
-        // 查询单个
-        public async Task<SickDto> GetAsync(Guid id)
+        /// <summary>
+        /// 获取单个病历信息
+        /// </summary>
+        /// <param name="id">病历Id</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ApiResult<SickDto>> GetAsync(Guid id)
         {
-            var entity = await _repository.GetAsync(id);
-            return ObjectMapper.Map<Sick, SickDto>(entity);
+            try
+            {
+                var entity = await _repository.GetAsync(id);
+                if (entity == null)
+                {
+                    throw new UserFriendlyException("病历不存在！");
+                }
+                var dto = ObjectMapper.Map<Sick, SickDto>(entity);
+                return ApiResult<SickDto>.Success(dto, ResultCode.Success);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        // 分页查询
-        public async Task<PagedResultDto<SickDto>> GetListAsync(PagedAndSortedResultRequestDto input)
+        /// <summary>
+        /// 分页获取病历列表
+        /// </summary>
+        /// <param name="input">查询参数</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ApiResult<PagedResultDto<SickDto>>> GetListAsync([FromQuery] SickSearchDto search)
         {
-            var queryable = await _repository.GetQueryableAsync();
-            var totalCount = await AsyncExecuter.CountAsync(queryable);
+            var list = await _repository.GetQueryableAsync();
+            
+            list = list.WhereIf(!string.IsNullOrWhiteSpace(search.Name), x => x.Name.Contains(search.Name))
+                       .WhereIf(!string.IsNullOrWhiteSpace(search.InpatientNumber), x => x.InpatientNumber.Contains(search.InpatientNumber))
+                       .WhereIf(!string.IsNullOrWhiteSpace(search.AdmissionDiagnosis), x => x.AdmissionDiagnosis.Contains(search.AdmissionDiagnosis));
+
+            var totalCount = await AsyncExecuter.CountAsync(list);
             var items = await AsyncExecuter.ToListAsync(
-                queryable.Skip(input.SkipCount).Take(input.MaxResultCount)
+                list.OrderBy(nameof(Sick.CreationTime) + " desc")
+                    .Skip((search.pageIndex - 1) * search.pageSize)
+                    .Take(search.pageSize)
             );
-            return new PagedResultDto<SickDto>(
-                totalCount,
-                ObjectMapper.Map<List<Sick>, List<SickDto>>(items)
-            );
+
+            var dtos = ObjectMapper.Map<List<Sick>, List<SickDto>>(items);
+            var result = new PagedResultDto<SickDto>(totalCount, dtos);
+
+            return ApiResult<PagedResultDto<SickDto>>.Success(result, ResultCode.Success);
         }
 
-        // 新增
-        public async Task<SickDto> CreateAsync(CreateUpdateSickDto input)
+        /// <summary>
+        /// 添加病历
+        /// </summary>
+        /// <param name="input">病历信息</param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<ApiResult> CreateAsync(CreateUpdateSickDto input)
         {
+            // 验证住院号唯一性
+            var exists = await _repository.AnyAsync(s => s.InpatientNumber == input.InpatientNumber);
+            if (exists)
+            {
+                throw new UserFriendlyException($"住院号 '{input.InpatientNumber}' 已存在！");
+            }
+
+            // 验证体温范围
+            if (input.Temperature < 30 || input.Temperature > 45)
+            {
+                throw new UserFriendlyException("体温必须在30~45℃之间！");
+            }
+
+            // 验证脉搏范围
+            if (input.Pulse < 20 || input.Pulse > 200)
+            {
+                throw new UserFriendlyException("脉搏必须在20~200次/min之间！");
+            }
+
+            // 验证呼吸范围
+            if (input.Breath < 5 || input.Breath > 60)
+            {
+                throw new UserFriendlyException("呼吸必须在5~60次/min之间！");
+            }
+
+            // 验证出院时间：只有当状态不是"出院"时，才要求出院时间不能早于当前
+            if (input.Status != "出院" && input.DischargeTime < DateTime.Now)
+            {
+                throw new UserFriendlyException("对于非出院状态的病人，出院时间不能早于当前时间！");
+            }
+
             var entity = ObjectMapper.Map<CreateUpdateSickDto, Sick>(input);
-            entity = await _repository.InsertAsync(entity);
-            return ObjectMapper.Map<Sick, SickDto>(entity);
+            await _repository.InsertAsync(entity);
+
+            return ApiResult.Success(ResultCode.Success);
         }
 
-        // 修改
-        public async Task<SickDto> UpdateAsync(Guid id, CreateUpdateSickDto input)
+        /// <summary>
+        /// 更新病历信息
+        /// </summary>
+        /// <param name="id">病历Id</param>
+        /// <param name="input">更新参数</param>
+        /// <returns></returns>
+        [HttpPut]
+        public async Task<ApiResult> UpdateAsync(Guid id, CreateUpdateSickDto input)
         {
             var entity = await _repository.GetAsync(id);
+
+            // 验证住院号唯一性（排除自己）
+            var exists = await _repository.AnyAsync(s => s.InpatientNumber == input.InpatientNumber && s.Id != id);
+            if (exists)
+            {
+                throw new UserFriendlyException($"住院号 '{input.InpatientNumber}' 已存在！");
+            }
+
+            // 验证体温范围
+            if (input.Temperature < 30 || input.Temperature > 45)
+            {
+                throw new UserFriendlyException("体温必须在30~45℃之间！");
+            }
+
+            // 验证脉搏范围
+            if (input.Pulse < 20 || input.Pulse > 200)
+            {
+                throw new UserFriendlyException("脉搏必须在20~200次/min之间！");
+            }
+
+            // 验证呼吸范围
+            if (input.Breath < 5 || input.Breath > 60)
+            {
+                throw new UserFriendlyException("呼吸必须在5~60次/min之间！");
+            }
+
+            // 验证出院时间：只有当状态不是"出院"时，才要求出院时间不能早于当前
+            if (input.Status != "出院" && input.DischargeTime < DateTime.Now)
+            {
+                throw new UserFriendlyException("对于非出院状态的病人，出院时间不能早于当前时间！");
+            }
+
             ObjectMapper.Map(input, entity);
-            entity = await _repository.UpdateAsync(entity);
-            return ObjectMapper.Map<Sick, SickDto>(entity);
+            await _repository.UpdateAsync(entity);
+
+            return ApiResult.Success(ResultCode.Success);
         }
 
-        // 删除
-        public async Task DeleteAsync(Guid id)
+        /// <summary>
+        /// 删除病历
+        /// </summary>
+        /// <param name="id">病历Id</param>
+        /// <returns></returns>
+        [HttpDelete]
+        public async Task<ApiResult> DeleteAsync(Guid id)
         {
-            await _repository.DeleteAsync(id);
-        }
+            var entity = await _repository.GetAsync(id);
+            if (entity == null)
+            {
+                throw new UserFriendlyException("病历不存在！");
+            }
 
+            await _repository.DeleteAsync(id);
+            return ApiResult.Success(ResultCode.Success);
+        }
     }
 }

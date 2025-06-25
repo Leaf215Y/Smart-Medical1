@@ -14,7 +14,7 @@ namespace Smart_Medical.Pharmacy
        
 
         /// <summary>
-        /// 药品名称
+        /// 药品名称s
         /// </summary>
         [Required]
         [StringLength(128)]
@@ -33,6 +33,8 @@ namespace Smart_Medical.Pharmacy
         [Required]
         [StringLength(32)]
         public string FeeName { get; set; }
+
+
 
         /// <summary>
         ///  剂型
@@ -106,6 +108,6 @@ namespace Smart_Medical.Pharmacy
         /// <summary>
         ///  供应商ID
         /// </summary>
-        public Guid? PharmaceuticalCompanyId { get; set; }
+        //public Guid? PharmaceuticalCompanyId { get; set; }
     }
 }

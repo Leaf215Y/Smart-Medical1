@@ -19,6 +19,7 @@ using Smart_Medical.Dictionarys;
 using Smart_Medical.Dictionarys.DictionaryTypes;
 using Smart_Medical.DoctorvVsit.DockerDepartments;
 using Smart_Medical.DoctorvVsit;
+using Smart_Medical.Pharmacy.InAndOutWarehouse;
 
 namespace Smart_Medical;
 
@@ -77,5 +78,10 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<DictionaryData,GetDictionaryDataDto>().ReverseMap();
         CreateMap<CreateUpdateDictionaryTypeDto, DictionaryType>().ReverseMap();
         CreateMap<DictionaryType,GetDictionaryTypeDto>().ReverseMap();
+        CreateMap<DrugInStock, DrugInStockDto>();
+        CreateMap<CreateUpdateDrugInStockDto, DrugInStock>();
+
+        CreateMap<Sick, SickDto>().ReverseMap();
+        CreateMap<CreateUpdateSickDto, Sick>().ReverseMap();
     }
 }

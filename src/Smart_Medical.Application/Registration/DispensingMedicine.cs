@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Smart_Medical.DispensingMedicineForAFee.IServices;
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.Patient;
@@ -20,7 +19,7 @@ namespace Smart_Medical.Registration
     /// <summary>
     /// 收费发药
     /// </summary>
-    public class DispensingMedicine : ApplicationService, IDistri_MedicService
+    public class DispensingMedicine : ApplicationService
     {
         private readonly IUnitOfWorkManager _unitOfWorkManager;
         /// <summary>
@@ -42,7 +41,7 @@ namespace Smart_Medical.Registration
         /// <summary>
         /// 药品
         /// </summary>
-        private readonly IRepository<Drug, int> _drugRepo;
+        private readonly IRepository<Drug, Guid> _drugRepo;
         /// <summary>
         /// 构造函数注入
         /// </summary>
@@ -52,7 +51,7 @@ namespace Smart_Medical.Registration
         /// <param name="sickRepo"></param>
         /// <param name="prescriptionRepo"></param>
         public DispensingMedicine(
-            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug, int> drugRepo)
+            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug,Guid> drugRepo)
         {
             _unitOfWorkManager = unitOfWorkManager;
             _doctorclinRepo = doctorclinRepo;
