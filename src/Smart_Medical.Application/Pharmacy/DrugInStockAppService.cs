@@ -14,11 +14,11 @@ namespace Smart_Medical.Pharmacy
     public class DrugInStockAppService : ApplicationService, IDrugInStockAppService
     {
         private readonly IRepository<DrugInStock, Guid> _drugInStockRepository;
-        private readonly IRepository<Drug, int> _drugRepository;
+        private readonly IRepository<Drug, Guid> _drugRepository;
 
         public DrugInStockAppService(
             IRepository<DrugInStock, Guid> drugInStockRepository,
-            IRepository<Drug, int> drugRepository)
+            IRepository<Drug, Guid> drugRepository)
         {
             _drugInStockRepository = drugInStockRepository;
             _drugRepository = drugRepository;

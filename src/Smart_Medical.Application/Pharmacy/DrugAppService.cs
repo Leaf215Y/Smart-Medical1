@@ -26,6 +26,7 @@ namespace Smart_Medical.Pharmacy
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [HttpGet]
         public async Task<ApiResult<DrugDto>> GetAsync(Guid id)
         {
             try

@@ -7,7 +7,7 @@ using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Smart_Medical.Until;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Linq;
 namespace Smart_Medical.Pharmacy
 {
     /// <summary>
