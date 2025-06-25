@@ -11,7 +11,14 @@ namespace Smart_Medical.Application.Contracts.RBAC.Roles
         public string RoleName { get; set; }
         public string Description { get; set; }
 
-        public ICollection<UserRoleDto> UserRoles { get; set; }
-        public ICollection<RolePermissionDto> RolePermissions { get; set; }
+        // 导航属性的DTO，用于展示关联的用户角色信息
+        // 移除此属性以避免循环引用，因为 UserRoleDto 中已包含 RoleDto。
+        // 如果需要获取角色的用户列表，请通过 UserRoleAppService 查询。
+        // public ICollection<UserRoleDto> UserRoles { get; set; }
+
+        // 导航属性的DTO，用于展示关联的角色权限信息
+        // 移除此属性以避免循环引用，因为 RolePermissionDto 中已包含 RoleDto。
+        // 如果需要获取角色的权限列表，请通过 RolePermissionAppService 查询。
+        // public ICollection<RolePermissionDto> RolePermissions { get; set; }
     }
 }

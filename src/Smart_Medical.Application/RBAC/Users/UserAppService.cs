@@ -24,7 +24,7 @@ namespace Smart_Medical.RBAC.Users
 
         public async Task<ApiResult> CreateAsync(CreateUpdateUserDto input)
         {
-            input.UserPwd = input.UserPwd.GetHashCode().ToString();
+            input.UserPwd = input.UserPwd.GetMD5();
             var user = ObjectMapper.Map<CreateUpdateUserDto, User>(input);
             var result = await _userRepository.InsertAsync(user);
             return ApiResult.Success(ResultCode.Success);
@@ -59,6 +59,7 @@ namespace Smart_Medical.RBAC.Users
         public async Task<ApiResult<PageResult<List<UserDto>>>> GetListAsync([FromQuery] SeachUserDto input)
         {
             var queryable = await _userRepository.GetQueryableAsync();
+
 
             // 使用 Include 联查 UserRoles 及其关联的 Role 实体，确保在映射到 DTO 时包含关联数据
             //queryable = queryable.Include(u => u.UserRoles).ThenInclude(ur => ur.Role);
@@ -120,7 +121,7 @@ namespace Smart_Medical.RBAC.Users
             }
 
             // 验证密码
-            if (user.UserPwd != loginDto.UserPwd.GetHashCode().ToString())
+            if (user.UserPwd != loginDto.UserPwd.GetMD5())
             {
                 return ApiResult<UserDto>.Fail("密码错误", ResultCode.ValidationError);
             }

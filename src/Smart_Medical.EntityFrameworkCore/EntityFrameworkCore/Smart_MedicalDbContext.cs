@@ -62,6 +62,7 @@ public class Smart_MedicalDbContext :
     public DbSet<Drug> Drugs { get; set; }
     public DbSet<Sick> Sicks { get; set; }
 
+    //数据字典表 
     public DbSet<DictionaryData> DictionaryDatas { get; set; }
     public DbSet<DictionaryType> DictionaryTypes { get; set; }
 
@@ -269,13 +270,14 @@ public class Smart_MedicalDbContext :
                 Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention();
         });
-        //
+       
         builder.Entity<DictionaryData>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "DictionaryDatas",
                 Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention();
         });
+
         builder.Entity<Appointment>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Appointments",

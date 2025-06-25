@@ -19,11 +19,11 @@ namespace Smart_Medical.Pharmacy
 
  
 
-        Task<ApiResult<DrugDto>> GetAsync(Guid id);
+        Task<ApiResult<DrugDto>> GetAsync(int id);
         Task<ApiResult<PageResult<List<DrugDto>>>> GetListAsync([FromQuery] DrugSearchDto input);
         Task<ApiResult> CreateAsync(CreateUpdateDrugDto input);
-        Task<ApiResult> UpdateAsync(Guid id, CreateUpdateDrugDto input);
-        Task<ApiResult> DeleteAsync(Guid id);
+        Task<ApiResult> UpdateAsync(int id, CreateUpdateDrugDto input);
+        Task<ApiResult> DeleteAsync(int id);
 
     }
 }
