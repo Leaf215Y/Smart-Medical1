@@ -11,6 +11,7 @@ namespace Smart_Medical.Dictionarys.DictionaryDatas
     /// </summary>
     public class GetDictionaryDataDto
     {
+        public Guid Id { get; set; }
         /// <summary>
         /// 字典数据名称
         /// </summary>

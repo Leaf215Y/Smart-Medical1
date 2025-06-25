@@ -14,10 +14,10 @@ namespace Smart_Medical.Dictionarys.DictionaryTypes
     /// </summary>
     public interface IDictionaryTypeService : IApplicationService
     {
-        Task<ApiResult> InsertDictionaryDataLAsync(CreateUpdateDictionaryTypeDto input);
-        Task<ApiResult> UpdateDictionaryDataLAsync(Guid id, CreateUpdateDictionaryTypeDto input);
-        Task<ApiResult<PageResult<List<GetDictionaryTypeDto>>>> GetDictionaryDataList([FromQuery] GetDictionaryTypeSearchDto search);
-        Task<ApiResult> DeleteDoctorDepartment(Guid id);
+        Task<ApiResult> InsertDictionaryTypeLAsync(CreateUpdateDictionaryTypeDto input);
+        Task<ApiResult> UpdateDictionaryTypeLAsync(Guid id, CreateUpdateDictionaryTypeDto input);
+        Task<ApiResult<PageResult<List<GetDictionaryTypeDto>>>> GetDictionaryTypeList(string datetype, [FromQuery] GetDictionaryTypeSearchDto search);
+        Task<ApiResult> DeleteDictionaryType(Guid id);
 
     }
 }

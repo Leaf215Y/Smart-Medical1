@@ -269,7 +269,13 @@ public class Smart_MedicalDbContext :
                 Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention();
         });
-
+        //
+        builder.Entity<DictionaryData>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "DictionaryDatas",
+                Smart_MedicalConsts.DbSchema);
+            b.ConfigureByConvention();
+        });
         builder.Entity<Appointment>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "Appointments",
