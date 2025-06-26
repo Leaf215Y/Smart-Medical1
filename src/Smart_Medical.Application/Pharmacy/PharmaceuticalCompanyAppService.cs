@@ -75,5 +75,30 @@ namespace Smart_Medical.Pharmacy
                 return ApiResult.Fail($"获取公司列表失败: {ex.Message}", ResultCode.Error);
             }
         }
+
+        /// <summary>
+        /// 新增制药公司
+        /// </summary>
+        public async Task<ApiResult> CreateAsync(CreateUpdatePharmaceuticalCompanyDto input)
+        {
+            try
+            {
+                var entity = ObjectMapper.Map<CreateUpdatePharmaceuticalCompanyDto, PharmaceuticalCompany>(input);
+                if (input.CompanyId.HasValue)
+                {
+                    entity.CommpanyId = input.CompanyId.Value;
+                }
+                else
+                {
+                    entity.CommpanyId = GuidGenerator.Create();
+                }
+                await _repository.InsertAsync(entity);
+                return ApiResult.Success(ResultCode.Success);
+            }
+            catch (Exception ex)
+            {
+                return ApiResult.Fail($"新增公司失败: {ex.Message}", ResultCode.Error);
+            }
+        }
     }
 }
