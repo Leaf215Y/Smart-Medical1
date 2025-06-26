@@ -11,7 +11,7 @@ namespace Smart_Medical.Pharmacy
     public class MedicalHistory : FullAuditedAggregateRoot<Guid>
     {
         /// <summary>
-        /// 公司id
+        /// 公司id a
         /// </summary>
         public Guid CommpanyId { get; set; }
         /// <summary>
