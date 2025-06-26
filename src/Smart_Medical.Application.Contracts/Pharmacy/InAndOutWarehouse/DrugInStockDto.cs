@@ -13,7 +13,7 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
     /// </summary>
     public class DrugInStockDto 
     {
-        /// <summary>
+   /// <summary>
         /// 药品ID
         /// </summary>
         public int DrugId { get; set; }

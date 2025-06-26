@@ -66,6 +66,7 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
 
         CreateMap<PharmaceuticalCompany, PharmaceuticalCompanyDto>();
         CreateMap<CreateUpdatePharmaceuticalCompanyDto, PharmaceuticalCompany>();
+           
 
         // 药品相关映射
         CreateMap<CreateUpdateDrugDto, Drug>();

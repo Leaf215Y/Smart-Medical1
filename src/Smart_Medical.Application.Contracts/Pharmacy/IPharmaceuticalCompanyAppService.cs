@@ -26,5 +26,12 @@ namespace Smart_Medical.Pharmacy
         /// </summary>
         /// <returns></returns>
         Task<ApiResult> GetListAllAsync();
+
+        /// <summary>
+        /// 新增制药公司
+        /// </summary>
+        /// <param name="input">制药公司信息</param>
+        /// <returns></returns>
+        Task<ApiResult> CreateAsync(CreateUpdatePharmaceuticalCompanyDto input);
     }
 }
