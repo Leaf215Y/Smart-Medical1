@@ -88,7 +88,7 @@ namespace Smart_Medical.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DictionaryDatas");
+                    b.ToTable("AppDictionaryDatas", (string)null);
                 });
 
             modelBuilder.Entity("Smart_Medical.Dictionarys.DictionaryType", b =>
@@ -458,13 +458,14 @@ namespace Smart_Medical.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("CreatorId");
 
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("DeleterId");
+                    b.Property<string>("DischargeDepartment")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
 
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("DeletionTime");
+                    b.Property<string>("DischargeDiagnosis")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<DateTime>("DischargeTime")
                         .HasColumnType("datetime(6)");
@@ -479,12 +480,6 @@ namespace Smart_Medical.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("varchar(32)");
 
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
-
                     b.Property<DateTime?>("LastModificationTime")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("LastModificationTime");
@@ -492,6 +487,11 @@ namespace Smart_Medical.Migrations
                     b.Property<Guid?>("LastModifierId")
                         .HasColumnType("char(36)")
                         .HasColumnName("LastModifierId");
+
+                    b.Property<string>("PatientName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int>("Pulse")
                         .HasColumnType("int");
@@ -562,8 +562,8 @@ namespace Smart_Medical.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("LastModifierId");
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Remarks")
                         .IsRequired()
@@ -898,6 +898,12 @@ namespace Smart_Medical.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("DeletionTime");
 
+                    b.Property<int>("DrugId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("ExtraProperties")
                         .IsRequired()
                         .HasColumnType("longtext")
@@ -917,18 +923,35 @@ namespace Smart_Medical.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("LastModifierId");
 
+                    b.Property<Guid>("PharmaceuticalCompanyId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("ProductionDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("StockInDate")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Supplier")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(65,30)");
 
                     b.HasKey("Id");
 
                     b.ToTable("AppDrugInStocks", (string)null);
                 });
 
-            modelBuilder.Entity("Smart_Medical.Pharmacy.PharmaceuticalCompany", b =>
+            modelBuilder.Entity("Smart_Medical.Pharmacy.MedicalHistory", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("char(36)");
@@ -938,7 +961,7 @@ namespace Smart_Medical.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
-                    b.Property<Guid>("CompanyId")
+                    b.Property<Guid>("CommpanyId")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CompanyName")
@@ -1132,15 +1155,15 @@ namespace Smart_Medical.Migrations
 
                     b.Property<string>("PermissionName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions");
+                    b.ToTable("AppPermissions", (string)null);
                 });
 
             modelBuilder.Entity("Smart_Medical.RBAC.Role", b =>
@@ -1197,12 +1220,12 @@ namespace Smart_Medical.Migrations
 
                     b.Property<string>("RoleName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("AppRoles", (string)null);
                 });
 
             modelBuilder.Entity("Smart_Medical.RBAC.RolePermission", b =>
@@ -1319,8 +1342,8 @@ namespace Smart_Medical.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("UserPhone")
                         .IsRequired()
@@ -1337,7 +1360,7 @@ namespace Smart_Medical.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("AppUsers", (string)null);
                 });
 
             modelBuilder.Entity("Smart_Medical.RBAC.UserRole", b =>

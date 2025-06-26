@@ -1,17 +1,14 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO和接口
+using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using Smart_Medical.Until;
-using Smart_Medical.RBAC;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO和接口
-using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO
-using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的Roles DTO
-using Smart_Medical; // 添加对 ResultCode 命名空间的引用
+using Volo.Abp.Uow;
 
 namespace Smart_Medical.RBAC.UserRoles
 {
@@ -120,15 +117,78 @@ namespace Smart_Medical.RBAC.UserRoles
 
             return ApiResult<PageResult<List<UserRoleDto>>>.Success(pageResult, ResultCode.Success);
         }
-
-        // UpdateAsync 方法对于中间表通常不需要，因为关联的修改通常是删除旧关联再创建新关联。
-        // 如果需要修改 UserId 或 RoleId，通常会先删除再新增。
-        // 此处省略 UpdateAsync，如果确实需要，可以根据业务逻辑添加。
-        public Task<ApiResult> UpdateAsync(Guid id, CreateUpdateUserRoleDto input)
+        
+        [UnitOfWork] // 添加 [UnitOfWork] 特性，确保此方法的数据库操作在事务中执行
+        public async Task<ApiResult> UpdateAsync(Guid userId, List<Guid> roleIds)
         {
-            // 对于多对多中间表，通常通过删除旧记录和插入新记录来"更新"关联。
-            // 此处不实现具体的 Update 逻辑，因为其语义不如 Delete + Create 清晰。
-            throw new NotImplementedException("更新用户角色关联通常通过删除和重新创建实现。");
+            // 1. 验证用户是否存在
+            var userExists = await _userRepository.AnyAsync(u => u.Id == userId);
+            if (!userExists)
+            {
+                return ApiResult.Fail("用户不存在", ResultCode.NotFound);
+            }
+
+            // 2. 验证所有传入的角色ID是否存在
+            foreach (var roleId in roleIds)
+            {
+                var roleExists = await _roleRepository.AnyAsync(r => r.Id == roleId);
+                if (!roleExists)
+                {
+                    return ApiResult.Fail($"角色ID {roleId} 不存在", ResultCode.NotFound);
+                }
+            }
+
+            // 获取用户当前的角色关联 (只包含非删除的)
+            var activeUserRoles = (await _userRoleRepository.GetQueryableAsync()).Where(ur => ur.UserId == userId).ToList();
+            var activeRoleIds = activeUserRoles.Select(ur => ur.RoleId).ToList();
+
+            // 获取所有（包括软删除）该用户的角色关联
+            var queryableAllUserRoles = await _userRoleRepository.GetQueryableAsync();
+            var allUserRolesList = await queryableAllUserRoles.AsNoTracking().IgnoreQueryFilters()
+                                                                .Where(ur => ur.UserId == userId)
+                                                                .ToListAsync();
+
+            // 需要软删除的角色：当前活跃，但新传入的roleIds中没有的
+            var rolesToSoftDelete = activeRoleIds.Except(roleIds).ToList();
+
+            // 需要新增或恢复的角色：新传入的roleIds中，但当前不活跃的
+            var rolesToCreateOrRestore = roleIds.Except(activeRoleIds).ToList();
+
+            // 执行软删除操作
+            foreach (var roleId in rolesToSoftDelete)
+            {
+                var userRoleToSoftDelete = activeUserRoles.FirstOrDefault(ur => ur.RoleId == roleId);
+                if (userRoleToSoftDelete != null)
+                {
+                    await _userRoleRepository.DeleteAsync(userRoleToSoftDelete); // This performs soft delete
+                }
+            }
+
+            // 执行新增或恢复操作
+            foreach (var roleId in rolesToCreateOrRestore)
+            {
+                // 查找是否存在已存在的（包括软删除的）记录
+                var existingUserRole = allUserRolesList.FirstOrDefault(ur => ur.RoleId == roleId);
+
+                if (existingUserRole != null)
+                {
+                    // 如果存在且是软删除状态，则恢复
+                    if (existingUserRole.IsDeleted) // Assuming UserRole implements ISoftDelete
+                    {
+                        existingUserRole.IsDeleted = false;
+                        existingUserRole.DeletionTime = null;
+                        await _userRoleRepository.UpdateAsync(existingUserRole);
+                    }
+                    // 如果存在且不是软删除状态，则不做任何操作 (理论上不应该进入这个分支，因为 rolesToCreateOrRestore 已经排除了活跃的)
+                }
+                else
+                {
+                    // 不存在任何记录（包括软删除），则新增
+                    await _userRoleRepository.InsertAsync(new UserRole(GuidGenerator.Create()) { UserId = userId, RoleId = roleId });
+                }
+            }
+
+            return ApiResult.Success(ResultCode.Success);
         }
     }
 }

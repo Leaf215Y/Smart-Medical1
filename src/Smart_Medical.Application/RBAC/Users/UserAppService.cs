@@ -1,11 +1,11 @@
-﻿using AutoMapper.Internal.Mappers;
-using MD5Hash;
+﻿using MD5Hash;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO和接口
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;

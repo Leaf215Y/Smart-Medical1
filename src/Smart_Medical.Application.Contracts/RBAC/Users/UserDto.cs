@@ -21,6 +21,6 @@ namespace Smart_Medical.Application.Contracts.RBAC.Users
         public bool? UserSex { get; set; }
 
         // 导航属性的DTO，用于展示关联的用户角色信息
-        public ICollection<UserRoleDto> UserRoles { get; set; }
+        //public ICollection<UserRoleDto> UserRoles { get; set; }
     }
 }

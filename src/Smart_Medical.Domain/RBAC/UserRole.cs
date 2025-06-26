@@ -33,5 +33,14 @@ namespace Smart_Medical.RBAC
         /// 用于从 UserRole 实体导航到其对应的 Role 实体。
         /// </summary>
         public Role Role { get; set; }
+
+        public UserRole()
+        {
+            
+        }
+
+        public UserRole(Guid ID) : base()
+        {
+        }
     }
 }

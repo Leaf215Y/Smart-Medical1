@@ -8,6 +8,15 @@ namespace Smart_Medical.Dictionarys.DictionaryDatas
 {
     public class GetDictionaryDataSearchDto
     {
+        /// <summary>
+        /// 字典数据名称
+        /// </summary>
+        public string? DictionaryDataName { get; set; }
+
+        /// <summary>
+        /// 字典数据状态
+        /// </summary>
+        public int? DictionaryDataState { get; set; }
         public int PageIndex { get; set; }
         public int PageSize { get; set; }
 

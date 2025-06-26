@@ -1,7 +1,7 @@
 using System;
 using Volo.Abp.Application.Dtos;
-using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的UserDto
-using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的RoleDto
+using Smart_Medical.Application.Contracts.RBAC.Users;
+using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的UserDto
 
 namespace Smart_Medical.Application.Contracts.RBAC.UserRoles
 {

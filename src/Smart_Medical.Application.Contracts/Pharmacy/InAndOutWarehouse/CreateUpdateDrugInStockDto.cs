@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Volo.Abp.Domain.Entities.Auditing;
-using Volo.Abp.Domain.Entities;
 
 namespace Smart_Medical.Pharmacy.InAndOutWarehouse
 {
     /// <summary>
-    /// 药品入库记录
+    /// 药品入库参数
     /// </summary>
-    public class DrugInStock : FullAuditedAggregateRoot<Guid>
+    public class CreateUpdateDrugInStockDto
     {
         /// <summary>
         /// 药品ID
@@ -69,4 +63,4 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
         /// </summary>
         public DateTime CreationTime { get; set; } = DateTime.Now;
     }
-}
+} 
