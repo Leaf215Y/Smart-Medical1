@@ -86,7 +86,7 @@ namespace Smart_Medical.Dictionarys
         /// 获取字典数据缓存
         /// </summary>
         /// <returns></returns>
-        public async Task LoadDictionaryDataDto()
+        private async Task LoadDictionaryDataDto()
         {
             var datalist = await dictionaryData.GetQueryableAsync();
             var dtoList = ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(datalist.ToList());
