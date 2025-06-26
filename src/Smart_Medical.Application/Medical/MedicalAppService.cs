@@ -56,7 +56,7 @@ namespace Smart_Medical.Medical
         {
             var list = await _repository.GetQueryableAsync();
             
-            list = list.WhereIf(!string.IsNullOrWhiteSpace(search.Name), x => x.Name.Contains(search.Name))
+            list = list.WhereIf(!string.IsNullOrWhiteSpace(search.PatientName), x => x.PatientName.Contains(search.PatientName))
                        .WhereIf(!string.IsNullOrWhiteSpace(search.InpatientNumber), x => x.InpatientNumber.Contains(search.InpatientNumber))
                        .WhereIf(!string.IsNullOrWhiteSpace(search.AdmissionDiagnosis), x => x.AdmissionDiagnosis.Contains(search.AdmissionDiagnosis));
 

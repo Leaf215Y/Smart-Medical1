@@ -1,16 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Smart_Medical.Medical
 {
     public class SickSearchDto
     {
+
         /// <summary>
-        /// 姓名 (可选, 模糊查询)
+        /// 患者姓名（必填）
         /// </summary>
-        public string? Name { get; set; }
+        [Required(ErrorMessage = "患者姓名不能为空")]
+        [StringLength(50, ErrorMessage = "患者姓名长度不能超过50个字符")]
+        public string PatientName { get; set; } = string.Empty;
+
 
         /// <summary>
         /// 住院号 (可选, 模糊查询)

@@ -28,51 +28,11 @@ namespace Smart_Medical.Medical
         public string Status { get; set; }
 
         /// <summary>
-        /// 住院号
-        /// 唯一标识病人的住院记录，不可重复
+        /// 患者姓名（必填）
         /// </summary>
-        [Required(ErrorMessage = "住院号不能为空")]
-        [StringLength(32, ErrorMessage = "住院号长度不能超过32个字符")]
-        public string InpatientNumber { get; set; }
-
-        /// <summary>
-        /// 病人姓名
-        /// </summary>
-        [Required(ErrorMessage = "病人姓名不能为空")]
-        [StringLength(32, ErrorMessage = "病人姓名长度不能超过32个字符")]
-        public string Name { get; set; }
-
-        /// <summary>
-        /// 出院科室
-        /// 记录病人最后所在的科室
-        /// </summary>
-        [Required(ErrorMessage = "出院科室不能为空")]
-        [StringLength(64, ErrorMessage = "出院科室长度不能超过64个字符")]
-        public string DischargeDepartment { get; set; }
-
-        /// <summary>
-        /// 性别
-        /// 例如：男、女
-        /// </summary>
-        [Required(ErrorMessage = "性别不能为空")]
-        [StringLength(8, ErrorMessage = "性别长度不能超过8个字符")]
-        public string Gender { get; set; }
-
-        /// <summary>
-        /// 出院时间
-        /// 记录病人实际离院的时间
-        /// 不能早于当前时间
-        /// </summary>
-        [Required(ErrorMessage = "出院时间不能为空")]
-        public DateTime DischargeTime { get; set; }
-
-        /// <summary>
-        /// 入院诊断
-        /// 记录病人入院时的初步诊断结果
-        /// </summary>
-        [Required(ErrorMessage = "入院诊断不能为空")]
-        [StringLength(128, ErrorMessage = "入院诊断长度不能超过128个字符")]
-        public string AdmissionDiagnosis { get; set; }
+        [Required(ErrorMessage = "患者姓名不能为空")]
+        [StringLength(50, ErrorMessage = "患者姓名长度不能超过50个字符")]
+        public string PatientName { get; set; } = string.Empty;
 
         /// <summary>
         /// 体温
@@ -110,12 +70,41 @@ namespace Smart_Medical.Medical
         [StringLength(16, ErrorMessage = "血压长度不能超过16个字符")]
         public string BloodPressure { get; set; }
 
+
         /// <summary>
         /// 出院诊断
         /// 记录病人出院时的最终诊断结果
         /// </summary>
-        [Required(ErrorMessage = "出院诊断不能为空")]
+        //[Required(ErrorMessage = "出院诊断不能为空")]
         [StringLength(128, ErrorMessage = "出院诊断长度不能超过128个字符")]
-        public string DischargeDiagnosis { get; set; }
+        public string? DischargeDiagnosis { get; set; } = string.Empty;
+        /// <summary>
+        /// 住院号
+        /// 唯一标识病人的住院记录，不可重复
+        /// </summary>
+        //[Required(ErrorMessage = "住院号不能为空")]
+        [StringLength(32, ErrorMessage = "住院号长度不能超过32个字符")]
+        public string? InpatientNumber { get; set; } = string.Empty;
+        /// <summary>
+        /// 出院科室
+        /// 记录病人最后所在的科室
+        /// </summary>
+        [Required(ErrorMessage = "出院科室不能为空")]
+        [StringLength(64, ErrorMessage = "出院科室长度不能超过64个字符")]
+        public string? DischargeDepartment { get; set; } = string.Empty;
+        /// <summary>
+        /// 出院时间
+        /// 记录病人实际离院的时间
+        /// 不能早于当前时间
+        /// </summary>
+        //[Required(ErrorMessage = "出院时间不能为空")]
+        public DateTime? DischargeTime { get; set; } = null;
+        /// <summary>
+        /// 入院诊断
+        /// 记录病人入院时的初步诊断结果
+        /// </summary>
+        //[Required(ErrorMessage = "入院诊断不能为空")]
+        [StringLength(128, ErrorMessage = "入院诊断长度不能超过128个字符")]
+        public string? AdmissionDiagnosis { get; set; } = string.Empty;
     }
 }
