@@ -109,6 +109,7 @@ namespace Smart_Medical.Medical
         [StringLength(128, ErrorMessage = "入院诊断长度不能超过128个字符")]
         public string? AdmissionDiagnosis { get; set; } = string.Empty;
 
-         
+          
+
     }
 }

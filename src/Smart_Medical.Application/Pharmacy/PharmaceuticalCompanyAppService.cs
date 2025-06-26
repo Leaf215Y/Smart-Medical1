@@ -83,15 +83,8 @@ namespace Smart_Medical.Pharmacy
         {
             try
             {
-                var entity = ObjectMapper.Map<CreateUpdatePharmaceuticalCompanyDto, PharmaceuticalCompany>(input);
-                if (input.CompanyId.HasValue)
-                {
-                    entity.CommpanyId = input.CompanyId.Value;
-                }
-                else
-                {
-                    entity.CommpanyId = GuidGenerator.Create();
-                }
+                var entity = ObjectMapper.Map<CreateUpdatePharmaceuticalCompanyDto, MedicalHistory>(input);
+               
                 await _repository.InsertAsync(entity);
                 return ApiResult.Success(ResultCode.Success);
             }

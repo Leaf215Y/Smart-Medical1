@@ -24,6 +24,8 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
         /// </summary>
         public Guid PharmaceuticalCompanyId { get; set; }
 
+
+
         /// <summary>
         /// 入库数量
         /// </summary>
