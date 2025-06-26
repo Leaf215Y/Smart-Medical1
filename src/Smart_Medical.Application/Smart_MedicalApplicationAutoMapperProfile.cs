@@ -77,7 +77,7 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<CreateUpdateDictionaryTypeDto, DictionaryType>().ReverseMap();
         CreateMap<DictionaryType, GetDictionaryTypeDto>().ReverseMap();
         CreateMap<DrugInStock, DrugInStockDto>();
-        CreateMap<CreateUpdateDrugInStockDto, DrugInStock>();
+        //CreateMap<CreateUpdateDrugInStockDto, DrugInStock>();
 
         CreateMap<Sick, SickDto>().ReverseMap();
         CreateMap<CreateUpdateSickDto, Sick>().ReverseMap();
