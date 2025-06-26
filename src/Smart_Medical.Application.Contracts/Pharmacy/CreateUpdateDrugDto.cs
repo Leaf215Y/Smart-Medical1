@@ -12,99 +12,50 @@ namespace Smart_Medical.Pharmacy
     /// </summary>
     public class CreateUpdateDrugDto
     {
-        /// <summary>
-        /// 药品名称（必填）
-        /// </summary>
-        [Required]
-        [StringLength(128)]
-        public string DrugName { get; set; }
+        [Required(ErrorMessage = "药品名称不能为空")]
+        [StringLength(100, ErrorMessage = "药品名称长度不能超过100个字符")]
+        public string DrugName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 药品类型（必填）
-        /// </summary>
-        [Required]
-        [StringLength(32)]
-        public string DrugType { get; set; }
+        [StringLength(50, ErrorMessage = "药品类型长度不能超过50个字符")]
+        public string DrugType { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 费用名称（必填）
-        /// </summary>
-        [Required]
-        [StringLength(32)]
-        public string FeeName { get; set; }
+        [StringLength(50, ErrorMessage = "费用名称长度不能超过50个字符")]
+        public string FeeName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 剂型（必填）
-        /// </summary>
-        [Required]
-        [StringLength(32)]
-        public string DosageForm { get; set; }
+        [StringLength(30, ErrorMessage = "剂型长度不能超过30个字符")]
+        public string DosageForm { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 规格（必填）
-        /// </summary>
-        [Required]
-        [StringLength(64)]
-        public string Specification { get; set; }
+        [StringLength(64, ErrorMessage = "规格长度不能超过64个字符")]
+        public string Specification { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 进价（元，必填）
-        /// </summary>
-        [Required]
+        [Required(ErrorMessage = "进价不能为空")]
         public decimal PurchasePrice { get; set; }
 
-        /// <summary>
-        /// 售价（元，必填）
-        /// </summary>
-        [Required]
+        [Required(ErrorMessage = "售价不能为空")]
         public decimal SalePrice { get; set; }
 
-        /// <summary>
-        /// 当前库存（必填）
-        /// </summary>
-        [Required]
+        [Required(ErrorMessage = "库存不能为空")]
         public int Stock { get; set; }
 
-        /// <summary>
-        /// 库存上限（必填）
-        /// </summary>
-        [Required]
+        [Required(ErrorMessage = "库存上限不能为空")]
         public int StockUpper { get; set; }
 
-        /// <summary>
-        /// 库存下限（必填）
-        /// </summary>
-        [Required]
+        [Required(ErrorMessage = "库存下限不能为空")]
         public int StockLower { get; set; }
 
-        /// <summary>
-        /// 生产日期（必填）
-        /// </summary>
-        [Required]
+        [Required(ErrorMessage = "生产日期不能为空")]
         public DateTime ProductionDate { get; set; }
 
-        /// <summary>
-        /// 有效期（必填）
-        /// </summary>
-        [Required]
+        [Required(ErrorMessage = "有效期不能为空")]
         public DateTime ExpiryDate { get; set; }
 
-        /// <summary>
-        /// 药品功效（必填）
-        /// </summary>
-        [Required]
-        [StringLength(256)]
-        public string Effect { get; set; }
+        [StringLength(255, ErrorMessage = "药效长度不能超过255个字符")]
+        public string Effect { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 药品类别（必填，中药/西药等）
-        /// </summary>
-        [Required]
+        [Required(ErrorMessage = "药品类别不能为空")]
         public DrugCategory Category { get; set; }
 
-        /// <summary>
-        ///  供应商ID
-        /// </summary>
-        //public Guid? PharmaceuticalCompanyId { get; set; }
+        public Guid? PharmaceuticalCompanyId { get; set; } = null;
     }
 }
+

@@ -1,20 +1,32 @@
-﻿using System;
+﻿using Smart_Medical.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Volo.Abp.Domain.Entities.Auditing;
 
-namespace Smart_Medical.Patient
+namespace Smart_Medical.Appointment
 {
     /// <summary>
-    /// 患者基本信息类
+    /// 线上预约Dto
     /// </summary>
-    public class BasicPatientInfo : FullAuditedAggregateRoot<Guid>
+    public class MakeAppointmentDto
     {
+        //预约挂号记录表
+        public Guid? PatientId { get; set; } = null; // 外键：患者ID
+
+        public DateTime AppointmentDateTime { get; set; } // 预约时间 (从Schedule中获取) 哪天就诊
+
+        public AppointmentStatus Status { get; set; } = AppointmentStatus.Booked; // 挂号状态
+
+        public decimal ActualFee { get; set; } // 实际支付费用 (可能与排班费用不同，例如有优惠)
+        public string Remarks { get; set; } = string.Empty; // 备注信息
+
+
+        // 患者信息
         /// <summary>
-        /// 就诊ID（主键）
+        /// 就诊ID（主键）  默认为空
         /// </summary>
         //[Required(ErrorMessage = "就诊ID不能为空")]
         //[StringLength(20, ErrorMessage = "就诊ID长度不能超过20个字符")]
@@ -67,17 +79,17 @@ namespace Smart_Medical.Patient
         /// <summary>
         /// 是否为传染病 默认没有
         /// </summary>
-        public bool IsInfectiousDisease { get; set; }= false;
+        public bool IsInfectiousDisease { get; set; } 
 
         /// <summary>
         /// 发病时间
         /// </summary>
-        public DateTime? DiseaseOnsetTime { get; set; }
+        public DateTime? DiseaseOnsetTime { get; set; } = null;
 
         /// <summary>
         /// 急救时间
         /// </summary>
-        public DateTime? EmergencyTime { get; set; }
+        public DateTime? EmergencyTime { get; set; } = null;
 
         /// <summary>
         /// 就诊状态（待就诊/已就诊/已取消）
@@ -90,8 +102,5 @@ namespace Smart_Medical.Patient
         /// </summary>
         public DateTime VisitDate { get; set; } = DateTime.Now;
 
-
-
-     
     }
 }

@@ -11,17 +11,17 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
     /// <summary>
     /// 药品入库记录DTO
     /// </summary>
-    public class DrugInStockDto : AuditedEntityDto<Guid>
+    public class DrugInStockDto 
     {
-        /// <summary>
+   /// <summary>
         /// 药品ID
         /// </summary>
         public int DrugId { get; set; }
 
         /// <summary>
-        /// 药品名称
+        /// 制药公司ID
         /// </summary>
-        public string DrugName { get; set; }
+        public Guid PharmaceuticalCompanyId { get; set; }
 
         /// <summary>
         /// 入库数量
@@ -29,12 +29,12 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
         public int Quantity { get; set; }
 
         /// <summary>
-        /// 入库单价
+        /// 入库单价（元）
         /// </summary>
         public decimal UnitPrice { get; set; }
 
         /// <summary>
-        /// 入库总金额
+        /// 入库总金额（元）
         /// </summary>
         public decimal TotalAmount { get; set; }
 
@@ -64,8 +64,8 @@ namespace Smart_Medical.Pharmacy.InAndOutWarehouse
         public string Status { get; set; }
 
         /// <summary>
-        /// 备注
+        /// 入库时间
         /// </summary>
-        public string Remarks { get; set; }
+        public DateTime CreationTime { get; set; } = DateTime.Now;
     }
 }

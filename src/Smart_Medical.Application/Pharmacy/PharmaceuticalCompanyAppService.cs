@@ -7,17 +7,18 @@ using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Smart_Medical.Until;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Linq;
 namespace Smart_Medical.Pharmacy
 {
+    [ApiExplorerSettings(GroupName = "制药公司管理")]
     /// <summary>
     /// 制药公司服务实现
     /// </summary>
     public class PharmaceuticalCompanyAppService : ApplicationService, IPharmaceuticalCompanyAppService
     {
-        private readonly IRepository<PharmaceuticalCompany, Guid> _repository;
+        private readonly IRepository<MedicalHistory, Guid> _repository;
 
-        public PharmaceuticalCompanyAppService(IRepository<PharmaceuticalCompany, Guid> repository)
+        public PharmaceuticalCompanyAppService(IRepository<MedicalHistory, Guid> repository)
         {
             _repository = repository;
         }
@@ -40,7 +41,7 @@ namespace Smart_Medical.Pharmacy
                     return ApiResult.Success(ResultCode.NotFound);
                 }
 
-                var result = ObjectMapper.Map<List<PharmaceuticalCompany>, List<PharmaceuticalCompanyDto>>(companies);
+                var result = ObjectMapper.Map<List<MedicalHistory>, List<PharmaceuticalCompanyDto>>(companies);
                 return ApiResult<List<PharmaceuticalCompanyDto>>.Success(result, ResultCode.Success);
             }
             catch (Exception ex)
@@ -66,12 +67,30 @@ namespace Smart_Medical.Pharmacy
                     return ApiResult.Success(ResultCode.NotFound);
                 }
 
-                var result = ObjectMapper.Map<List<PharmaceuticalCompany>, List<PharmaceuticalCompanyDto>>(companies);
+                var result = ObjectMapper.Map<List<MedicalHistory>, List<PharmaceuticalCompanyDto>>(companies);
                 return ApiResult<List<PharmaceuticalCompanyDto>>.Success(result, ResultCode.Success);
             }
             catch (Exception ex)
             {
                 return ApiResult.Fail($"获取公司列表失败: {ex.Message}", ResultCode.Error);
+            }
+        }
+
+        /// <summary>
+        /// 新增制药公司
+        /// </summary>
+        public async Task<ApiResult> CreateAsync(CreateUpdatePharmaceuticalCompanyDto input)
+        {
+            try
+            {
+                var entity = ObjectMapper.Map<CreateUpdatePharmaceuticalCompanyDto, MedicalHistory>(input);
+               
+                await _repository.InsertAsync(entity);
+                return ApiResult.Success(ResultCode.Success);
+            }
+            catch (Exception ex)
+            {
+                return ApiResult.Fail($"新增公司失败: {ex.Message}", ResultCode.Error);
             }
         }
     }

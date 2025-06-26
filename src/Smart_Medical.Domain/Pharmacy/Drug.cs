@@ -108,6 +108,6 @@ namespace Smart_Medical.Pharmacy
         /// <summary>
         ///  供应商ID
         /// </summary>
-        //public Guid? PharmaceuticalCompanyId { get; set; }
+        public Guid? PharmaceuticalCompanyId { get; set; }
     }
 }

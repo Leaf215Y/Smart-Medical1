@@ -14,9 +14,7 @@ using Volo.Abp.Domain.Repositories;
 namespace Smart_Medical.Pharmacy
 {
     [ApiExplorerSettings(GroupName = "药品管理")]
-    public class DrugAppService :
-        ApplicationService,
-        IDrugAppService
+    public class DrugAppService : ApplicationService, IDrugAppService
     {
         public IRepository<Drug, int> Repository { get; }
 
@@ -179,6 +177,7 @@ namespace Smart_Medical.Pharmacy
             await Repository.DeleteAsync(id);
             return ApiResult.Success(ResultCode.Success);
         }
+
     }
 }
 

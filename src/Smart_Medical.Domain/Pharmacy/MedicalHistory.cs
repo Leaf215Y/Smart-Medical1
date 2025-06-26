@@ -8,11 +8,14 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Smart_Medical.Pharmacy
 {
-    public class PharmaceuticalCompany : FullAuditedAggregateRoot<Guid>
+    public class MedicalHistory : FullAuditedAggregateRoot<Guid>
     {
- 
         /// <summary>
-        /// 公司名称
+        /// 公司id a
+        /// </summary>
+        public Guid? CommpanyId { get; set; } = Guid.Empty;
+        /// <summary>
+        /// 公司名称////
         /// </summary>
         [Required]
         [StringLength(128)]

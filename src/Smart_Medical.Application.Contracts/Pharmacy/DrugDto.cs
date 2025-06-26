@@ -81,5 +81,10 @@ namespace Smart_Medical.Pharmacy
         /// 药品类别（中药/西药等）
         /// </summary>
         public DrugCategory Category { get; set; }
+
+        /// <summary>
+        ///  供应商ID
+        /// </summary>
+        public Guid? PharmaceuticalCompanyId { get; set; } 
     }
 }

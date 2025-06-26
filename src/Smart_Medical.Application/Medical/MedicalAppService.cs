@@ -11,10 +11,10 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Medical
 {
-    [ApiExplorerSettings(GroupName = "医疗管理")]
-    public class MedicalAppService : ApplicationService
+    [ApiExplorerSettings(GroupName = "病种管理")]
+    public class MedicalAppService : ApplicationService, IMedicalAppService
     {
-        private readonly IRepository<Sick, Guid> _repository;
+        private readonly IRepository<Sick,Guid> _repository;
 
         public MedicalAppService(IRepository<Sick, Guid> repository)
         {
@@ -54,8 +54,10 @@ namespace Smart_Medical.Medical
         public async Task<ApiResult<PagedResultDto<SickDto>>> GetListAsync([FromQuery] SickSearchDto search)
         {
             var list = await _repository.GetQueryableAsync();
+
+
             
-            list = list.WhereIf(!string.IsNullOrWhiteSpace(search.Name), x => x.Name.Contains(search.Name))
+            list = list.WhereIf(!string.IsNullOrWhiteSpace(search.PatientName), x => x.PatientName.Contains(search.PatientName))
                        .WhereIf(!string.IsNullOrWhiteSpace(search.InpatientNumber), x => x.InpatientNumber.Contains(search.InpatientNumber))
                        .WhereIf(!string.IsNullOrWhiteSpace(search.AdmissionDiagnosis), x => x.AdmissionDiagnosis.Contains(search.AdmissionDiagnosis));
 
@@ -105,11 +107,6 @@ namespace Smart_Medical.Medical
                 throw new UserFriendlyException("呼吸必须在5~60次/min之间！");
             }
 
-            // 验证出院时间：只有当状态不是"出院"时，才要求出院时间不能早于当前
-            if (input.Status != "出院" && input.DischargeTime < DateTime.Now)
-            {
-                throw new UserFriendlyException("对于非出院状态的病人，出院时间不能早于当前时间！");
-            }
 
             var entity = ObjectMapper.Map<CreateUpdateSickDto, Sick>(input);
             await _repository.InsertAsync(entity);
@@ -127,13 +124,6 @@ namespace Smart_Medical.Medical
         public async Task<ApiResult> UpdateAsync(Guid id, CreateUpdateSickDto input)
         {
             var entity = await _repository.GetAsync(id);
-
-            // 验证住院号唯一性（排除自己）
-            var exists = await _repository.AnyAsync(s => s.InpatientNumber == input.InpatientNumber && s.Id != id);
-            if (exists)
-            {
-                throw new UserFriendlyException($"住院号 '{input.InpatientNumber}' 已存在！");
-            }
 
             // 验证体温范围
             if (input.Temperature < 30 || input.Temperature > 45)
@@ -182,5 +172,9 @@ namespace Smart_Medical.Medical
             await _repository.DeleteAsync(id);
             return ApiResult.Success(ResultCode.Success);
         }
+
+        
+
+        
     }
 }
