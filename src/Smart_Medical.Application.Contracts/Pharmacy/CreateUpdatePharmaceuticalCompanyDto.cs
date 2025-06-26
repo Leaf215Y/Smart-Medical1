@@ -12,7 +12,7 @@ namespace Smart_Medical.Pharmacy
         /// <summary>
         /// 公司id
         /// </summary>
-        public Guid? CompanyId { get; set; }
+        public Guid? CompanyId { get; set; } = Guid.Empty;
         /// <summary>
         /// 公司名称
         /// </summary>

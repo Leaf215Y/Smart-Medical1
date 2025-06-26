@@ -67,9 +67,7 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<GetDoctorDepartmentSearchDto, DoctorDepartment>().ReverseMap();
 
 
-        //公司
-        CreateMap<PharmaceuticalCompany, PharmaceuticalCompanyDto>();
-        CreateMap<CreateUpdatePharmaceuticalCompanyDto, PharmaceuticalCompany>();
+     
            
         CreateMap<MedicalHistory, PharmaceuticalCompanyDto>();
         CreateMap<CreateUpdatePharmaceuticalCompanyDto, MedicalHistory>();
