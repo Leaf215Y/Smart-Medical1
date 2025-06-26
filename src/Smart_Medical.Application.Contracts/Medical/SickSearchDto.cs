@@ -16,7 +16,7 @@ namespace Smart_Medical.Medical
         [StringLength(50, ErrorMessage = "患者姓名长度不能超过50个字符")]
         public string PatientName { get; set; } = string.Empty;
 
-
+       
         /// <summary>
         /// 住院号 (可选, 模糊查询)
         /// </summary>
