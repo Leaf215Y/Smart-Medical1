@@ -106,7 +106,7 @@ namespace Smart_Medical.Dictionarys
                 datalist = await dictdatadto.GetAsync(CacheKey);//// 再次从缓存获取，确保拿到最新加载的数据
             }
             //// 确保即使缓存加载失败，allTypesFromCache 也不会是 null，避免后续操作出错
-            datalist ??= new List<GetDictionaryDataDto>();
+            //datalist ??= new List<GetDictionaryDataDto>();
 
             var datalistres= datalist.WhereIf(!string.IsNullOrEmpty(search.DictionaryDataName), x => x.DictionaryDataName.Contains(search.DictionaryDataName))
                 .WhereIf(search.DictionaryDataState!=null, x => x.DictionaryDataState == search.DictionaryDataState);
