@@ -15,7 +15,7 @@ namespace Smart_Medical.Pharmacy
         /// </summary>
         public Guid CommpanyId { get; set; }
         /// <summary>
-        /// 公司名称
+        /// 公司名称////
         /// </summary>
         [Required]
         [StringLength(128)]
