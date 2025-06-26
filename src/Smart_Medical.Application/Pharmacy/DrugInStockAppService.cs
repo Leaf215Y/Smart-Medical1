@@ -98,11 +98,9 @@ namespace Smart_Medical.Pharmacy
                 Supplier = drugInStock.Supplier,
                 Status = drugInStock.Status,
                 // CreationTime 字段在Dto基类AuditedEntityDto<Guid>中
-<<<<<<< Updated upstream
+
                 CreationTime = DateTime.Now
-=======
-                CreationTime=DateTime.Now   
->>>>>>> Stashed changes
+
             };
 
             return ApiResult<DrugInStockDto>.Success(dto, ResultCode.Success);

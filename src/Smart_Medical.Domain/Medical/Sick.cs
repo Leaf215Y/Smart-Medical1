@@ -30,16 +30,7 @@ namespace Smart_Medical.Medical
         /// <summary>
         /// 患者姓名（必填）
         /// </summary>
-<<<<<<< Updated upstream
-        [Required(ErrorMessage = "病历状态不能为空")]
-        [StringLength(32, ErrorMessage = "病历状态长度不能超过32个字符")]
-        public string Status { get; set; }
 
-        /// <summary>
-        /// 患者姓名（必填）
-        /// </summary>
-=======
->>>>>>> Stashed changes
         [Required(ErrorMessage = "患者姓名不能为空")]
         [StringLength(50, ErrorMessage = "患者姓名长度不能超过50个字符")]
         public string PatientName { get; set; } = string.Empty;
@@ -80,8 +71,6 @@ namespace Smart_Medical.Medical
             [StringLength(16, ErrorMessage = "血压长度不能超过16个字符")]
             public string BloodPressure { get; set; }
 
-
-<<<<<<< Updated upstream
         /// <summary>
         /// 出院诊断
         /// 记录病人出院时的最终诊断结果
@@ -117,7 +106,7 @@ namespace Smart_Medical.Medical
         //[Required(ErrorMessage = "入院诊断不能为空")]
         [StringLength(128, ErrorMessage = "入院诊断长度不能超过128个字符")]
         public string? AdmissionDiagnosis { get; set; } = string.Empty;
-=======
+
             /// <summary>
             /// 出院诊断
             /// 记录病人出院时的最终诊断结果
@@ -153,6 +142,6 @@ namespace Smart_Medical.Medical
             //[Required(ErrorMessage = "入院诊断不能为空")]
             [StringLength(128, ErrorMessage = "入院诊断长度不能超过128个字符")]
             public string? AdmissionDiagnosis { get; set; } = string.Empty;
->>>>>>> Stashed changes
+
     }
 }

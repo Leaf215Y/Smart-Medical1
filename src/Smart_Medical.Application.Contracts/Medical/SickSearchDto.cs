@@ -12,14 +12,10 @@ namespace Smart_Medical.Medical
         /// <summary>
         /// 患者姓名（必填）
         /// </summary>
-<<<<<<< Updated upstream
         [Required(ErrorMessage = "患者姓名不能为空")]
         [StringLength(50, ErrorMessage = "患者姓名长度不能超过50个字符")]
         public string PatientName { get; set; } = string.Empty;
 
-=======
-        public string? PatientName { get; set; }
->>>>>>> Stashed changes
 
         /// <summary>
         /// 住院号 (可选, 模糊查询)

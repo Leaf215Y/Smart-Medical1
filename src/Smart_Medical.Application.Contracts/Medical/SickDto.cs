@@ -25,16 +25,13 @@ namespace Smart_Medical.Medical
         [StringLength(32, ErrorMessage = "病历状态长度不能超过32个字符")]
         public string Status { get; set; }
 
-<<<<<<< Updated upstream
         /// <summary>
         /// 患者姓名（必填）
         /// </summary>
         [Required(ErrorMessage = "患者姓名不能为空")]
         [StringLength(50, ErrorMessage = "患者姓名长度不能超过50个字符")]
         public string PatientName { get; set; } = string.Empty;
-=======
 
->>>>>>> Stashed changes
 
         /// <summary>
         /// 体温
