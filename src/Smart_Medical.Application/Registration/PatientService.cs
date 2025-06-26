@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Smart_Medical.Appointment;
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
@@ -49,9 +50,20 @@ namespace Smart_Medical.Registration
         /// 药品
         /// </summary>
         private readonly IRepository<Drug, int> _drugRepo;
+        /// <summary>
+        /// / 预约挂号
+        /// </summary>
+        private readonly IRepository<Patient.Appointment, Guid> _appointment;
 
         public PatientService(
-            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug, int> drugRepo)
+            IUnitOfWorkManager unitOfWorkManager,
+            IRepository<DoctorClinic, Guid> doctorclinRepo,
+            IRepository<BasicPatientInfo, Guid> basicpatientRepo,
+            IRepository<Sick, Guid> sickRepo,
+            IRepository<PatientPrescription, Guid> prescriptionRepo,
+            IRepository<Drug, int> drugRepo,
+            IRepository<Smart_Medical.Patient.Appointment, Guid> appointment
+            )
         {
             _unitOfWorkManager = unitOfWorkManager;
             _doctorclinRepo = doctorclinRepo;
@@ -59,6 +71,7 @@ namespace Smart_Medical.Registration
             _sickRepo = sickRepo;
             _prescriptionRepo = prescriptionRepo;
             _drugRepo = drugRepo;
+            _appointment = appointment;
         }
 
         /// <summary>
@@ -369,10 +382,10 @@ namespace Smart_Medical.Registration
                 //保存处方记录
                 await _prescriptionRepo.InsertAsync(prescription);
 
-                //更新患者状态为“已就诊”
+                //更新患者状态为"已就诊"
                 patient.VisitStatus = "已就诊";
                 //更新 DoctorClinic 表的状态字段 
-                //判断状态为“待就诊”
+                //判断状态为"待就诊"
                 var doctorClinic = await _doctorclinRepo.FirstOrDefaultAsync(
                     x => x.PatientId == input.PatientNumber &&
                     x.ExecutionStatus == ExecutionStatus.PendingConsultation
@@ -381,7 +394,7 @@ namespace Smart_Medical.Registration
                 if (doctorClinic == null)
                     return ApiResult.Fail("未找到就诊记录！", ResultCode.NotFound);
 
-                // 更新就诊记录状态为“已就诊”
+                // 更新就诊记录状态为"已就诊"
                 doctorClinic.ExecutionStatus = ExecutionStatus.Completed;
                 await _doctorclinRepo.UpdateAsync(doctorClinic);
 
@@ -392,6 +405,62 @@ namespace Smart_Medical.Registration
                 return ApiResult.Fail("系统错误：" + ex.Message, ResultCode.Error);
             }
         }
+
+
+        /// <summary>
+        /// 线上预约
+        /// </summary>
+        /// <returns></returns>
+        [UnitOfWork]// 添加 [UnitOfWork] 特性，确保此方法的数据库操作在事务中执行
+        public async Task<ApiResult> InsertMakeAppointment(MakeAppointmentDto make)
+        {
+            if (make == null)
+            {
+                return ApiResult.Fail("预约信息不能为空！", ResultCode.Error);
+            }
+
+            //检查患者信息是否存在
+            var res = await _patientRepo.FirstOrDefaultAsync(x => x.IdNumber == make.IdNumber);
+            //查询数据库是否存在此患者  没有此患者信息则添加
+            if (res == null)
+            {
+                //1 先添加患者信息 
+                var basicPatientInfo = ObjectMapper.Map<MakeAppointmentDto, BasicPatientInfo>(make);
+
+                //检查患者信息是否完整
+                if (string.IsNullOrWhiteSpace(basicPatientInfo.PatientName) ||
+                    string.IsNullOrWhiteSpace(basicPatientInfo.IdNumber) ||
+                    string.IsNullOrWhiteSpace(basicPatientInfo.ContactPhone))
+                {
+                    return ApiResult.Fail("患者信息不完整，请检查后重试！", ResultCode.Error);
+                }
+
+                //添加患者信息
+                var patient = await _patientRepo.InsertAsync(basicPatientInfo);
+
+                //拿到刚刚添加的患者信息的id
+                make.PatientId = patient?.Id;
+            }
+            // 如果患者信息已经存在，则直接使用现有的 PatientId
+            else
+            {
+                make.PatientId = res.Id;
+            }
+            //2 添加预约挂号记录
+            Smart_Medical.Patient.Appointment appointment = new Smart_Medical.Patient.Appointment
+            {
+                PatientId = make.PatientId,   
+                AppointmentDateTime = make.AppointmentDateTime,
+                Status = make.Status,
+                ActualFee = make.ActualFee,
+                Remarks = make.Remarks
+            };
+            var appointmentResult = await _appointment.InsertAsync(appointment);
+
+            return ApiResult.Success(ResultCode.Success);
+        }
+
+
     }
 }
 

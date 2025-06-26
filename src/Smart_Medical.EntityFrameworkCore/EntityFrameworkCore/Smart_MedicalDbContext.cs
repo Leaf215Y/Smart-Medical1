@@ -55,7 +55,7 @@ public class Smart_MedicalDbContext :
     public DbSet<BasicPatientInfo> BasicPatientInfos { get; set; }
     public DbSet<PatientPrescription> PatientPrescriptions { get; set; }
 
-    public DbSet<PharmaceuticalCompany> PharmaceuticalCompanies { get; set; }
+    public DbSet<MedicalHistory> MedicalHistorys { get; set; }
     public DbSet<DrugInStock> DrugInStocks { get; set; }
     #endregion
 
@@ -242,7 +242,7 @@ public class Smart_MedicalDbContext :
             /*b.Property(x => x.DischargeDiagnosis).IsRequired().HasMaxLength(128);*/
         });
 
-        builder.Entity<PharmaceuticalCompany>(b =>
+        builder.Entity<MedicalHistory>(b =>
         {
             b.ToTable(Smart_MedicalConsts.DbTablePrefix + "PharmaceuticalCompanies", Smart_MedicalConsts.DbSchema);
             b.ConfigureByConvention();

@@ -16,9 +16,9 @@ namespace Smart_Medical.Pharmacy
     /// </summary>
     public class PharmaceuticalCompanyAppService : ApplicationService, IPharmaceuticalCompanyAppService
     {
-        private readonly IRepository<PharmaceuticalCompany, Guid> _repository;
+        private readonly IRepository<MedicalHistory, Guid> _repository;
 
-        public PharmaceuticalCompanyAppService(IRepository<PharmaceuticalCompany, Guid> repository)
+        public PharmaceuticalCompanyAppService(IRepository<MedicalHistory, Guid> repository)
         {
             _repository = repository;
         }
@@ -41,7 +41,7 @@ namespace Smart_Medical.Pharmacy
                     return ApiResult.Success(ResultCode.NotFound);
                 }
 
-                var result = ObjectMapper.Map<List<PharmaceuticalCompany>, List<PharmaceuticalCompanyDto>>(companies);
+                var result = ObjectMapper.Map<List<MedicalHistory>, List<PharmaceuticalCompanyDto>>(companies);
                 return ApiResult<List<PharmaceuticalCompanyDto>>.Success(result, ResultCode.Success);
             }
             catch (Exception ex)
@@ -67,7 +67,7 @@ namespace Smart_Medical.Pharmacy
                     return ApiResult.Success(ResultCode.NotFound);
                 }
 
-                var result = ObjectMapper.Map<List<PharmaceuticalCompany>, List<PharmaceuticalCompanyDto>>(companies);
+                var result = ObjectMapper.Map<List<MedicalHistory>, List<PharmaceuticalCompanyDto>>(companies);
                 return ApiResult<List<PharmaceuticalCompanyDto>>.Success(result, ResultCode.Success);
             }
             catch (Exception ex)

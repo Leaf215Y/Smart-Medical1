@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Smart_Medical.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Smart_Medical.Patient
     {
         //public int AppointmentId { get; set; } // 挂号ID，主键  abp有默认主键 为id
 
-        public int PatientId { get; set; } // 外键：患者ID
+        public Guid? PatientId { get; set; } = null; // 外键：患者ID
 
         public DateTime AppointmentDateTime { get; set; } // 预约时间 (从Schedule中获取) 哪天就诊
 
@@ -28,18 +29,7 @@ namespace Smart_Medical.Patient
         // public string TransactionId { get; set; } // 支付交易ID
     }
 
-    /// <summary>
-    /// 挂号状态枚举
-    /// </summary>
-    public enum AppointmentStatus
-    {
-        Booked,      // 已预约
-        Confirmed,   // 已确认 (例如，患者抵达医院)
-        Completed,   // 已完成 (就诊结束)
-        Canceled,    // 已取消
-        NoShow,      // 未按时就诊
-        Rescheduled  // 已改期
-    }
+   
 
 
 
