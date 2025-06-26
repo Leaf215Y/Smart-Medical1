@@ -8,6 +8,7 @@ namespace Smart_Medical;
     typeof(Smart_MedicalDomainModule),
     typeof(Smart_MedicalApplicationContractsModule),
     typeof(AbpSettingManagementApplicationModule)
+
     )]
 public class Smart_MedicalApplicationModule : AbpModule
 {
@@ -17,5 +18,6 @@ public class Smart_MedicalApplicationModule : AbpModule
         {
             options.AddMaps<Smart_MedicalApplicationModule>();
         });
+
     }
 }

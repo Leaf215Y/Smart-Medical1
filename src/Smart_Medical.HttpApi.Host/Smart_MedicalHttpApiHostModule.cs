@@ -23,10 +23,14 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Auditing;
 using Volo.Abp.Autofac;
+using StackExchange.Redis;
+using Volo.Abp.Caching;
+using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Smart_Medical;
 
@@ -37,7 +41,8 @@ namespace Smart_Medical;
     typeof(Smart_MedicalEntityFrameworkCoreModule),
     typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
     typeof(AbpSwashbuckleModule),
-    typeof(AbpAspNetCoreSerilogModule)
+    typeof(AbpAspNetCoreSerilogModule),
+    typeof(AbpCachingStackExchangeRedisModule)
 )]
 public class Smart_MedicalHttpApiHostModule : AbpModule
 {
@@ -60,15 +65,7 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
         var services = context.Services;
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
-
-        /*services.AddAbpSwaggerGen(
-            options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "权限管理", Version = "权限管理" });
-                options.SwaggerDoc("v2", new OpenApiInfo { Title = "角色权限关联管理", Version = "角色权限关联管理" });
-                options.DocInclusionPredicate((docName, description) => true);
-                options.CustomSchemaIds(type => type.FullName);
-            });*/
+        
 
 
         Configure<AbpAntiForgeryOptions>(options =>
@@ -76,6 +73,17 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
             options.TokenCookie.Expiration = TimeSpan.FromDays(365);
             options.AutoValidate = false;
         });
+        Configure<AbpDistributedCacheOptions>(options =>
+        {
+            options.KeyPrefix = "SmartMedical:"; // 推荐设置一个项目特有的前缀
+                                                 // 可以设置默认的缓存过期时间等
+            options.GlobalCacheEntryOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+            };
+        });
+
+        
 
         ConfigureAuthentication(context);
         ConfigureBundles();
