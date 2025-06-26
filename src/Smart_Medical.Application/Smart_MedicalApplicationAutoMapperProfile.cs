@@ -1,21 +1,24 @@
 ﻿using AutoMapper;
-
+using Smart_Medical.Application.Contracts.RBAC.Permissions;
+using Smart_Medical.Application.Contracts.RBAC.RolePermissions;
+using Smart_Medical.Application.Contracts.RBAC.Roles;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
+using Smart_Medical.Application.Contracts.RBAC.Users;
+using Smart_Medical.Dictionarys;
+using Smart_Medical.Dictionarys.DictionaryDatas;
+using Smart_Medical.Dictionarys.DictionaryTypes;
+using Smart_Medical.DoctorvVsit;
+using Smart_Medical.DoctorvVsit.DockerDepartments;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
 using Smart_Medical.OutpatientClinic.Dtos.Parameter;
 using Smart_Medical.Patient;
-
+using Smart_Medical.Pharmacy;
+using Smart_Medical.Pharmacy.InAndOutWarehouse;
 using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
-using Smart_Medical.Application.Contracts.RBAC.Roles;
-using Smart_Medical.Application.Contracts.RBAC.Users;
-using Smart_Medical.Application.Contracts.RBAC.Permissions;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles;
-using Smart_Medical.Application.Contracts.RBAC.RolePermissions;
+using Smart_Medical.UserLoginECC;
 using System.Collections.Generic;
-using Smart_Medical.Pharmacy;
-using Smart_Medical.DoctorvVsit.DockerDepartments;
-using Smart_Medical.DoctorvVsit;
 
 namespace Smart_Medical;
 
@@ -53,6 +56,7 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<Sick, InsertPatientDto>().ReverseMap();
         CreateMap<BasicPatientInfo, GetVisitingDto>().ReverseMap();
         CreateMap<BasicPatientInfo, BasicPatientInfoDto>().ReverseMap();
+        CreateMap<User, ResultLoginDto>().ReverseMap();
         #endregion
 
         //CreateMap<List<Medication>, List<MedicationDto>>().ReverseMap();
@@ -67,5 +71,15 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         // 药品相关映射
         CreateMap<CreateUpdateDrugDto, Drug>();
         CreateMap<Drug, DrugDto>();
+        //数据字典
+        CreateMap<CreateUpdateDictionaryDataDto, DictionaryData>().ReverseMap();
+        CreateMap<DictionaryData, GetDictionaryDataDto>().ReverseMap();
+        CreateMap<CreateUpdateDictionaryTypeDto, DictionaryType>().ReverseMap();
+        CreateMap<DictionaryType, GetDictionaryTypeDto>().ReverseMap();
+        CreateMap<DrugInStock, DrugInStockDto>();
+        CreateMap<CreateUpdateDrugInStockDto, DrugInStock>();
+
+        CreateMap<Sick, SickDto>().ReverseMap();
+        CreateMap<CreateUpdateSickDto, Sick>().ReverseMap();
     }
 }
