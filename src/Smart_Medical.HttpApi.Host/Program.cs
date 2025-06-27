@@ -33,7 +33,7 @@ public class Program
                 .UseAutofac()
                 .UseSerilog();
             await builder.AddApplicationAsync<Smart_MedicalHttpApiHostModule>();
-            var app = builder.Build();
+            var app = builder.Build();            
             await app.InitializeApplicationAsync();
             await app.RunAsync();
             return 0;

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Smart_Medical.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
@@ -12,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc;
@@ -27,7 +31,6 @@ using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
-
 namespace Smart_Medical;
 
 [DependsOn(
@@ -38,6 +41,7 @@ namespace Smart_Medical;
     typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule)
+    //typeof(AbpCachingStackExchangeRedisModule)
 )]
 public class Smart_MedicalHttpApiHostModule : AbpModule
 {
@@ -77,6 +81,11 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
             options.AutoValidate = false;
         });
 
+        //Configure<AbpRedisCacheOptions>(options =>
+        //{
+        //    options.Configuration = "localhost:6379"; // 改成你自己的 Redis 地址
+        //});
+
         ConfigureAuthentication(context);
         ConfigureBundles();
         ConfigureUrls(configuration);
@@ -88,15 +97,41 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
-        //context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
-        //context.Services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
-        //{
-        //    options.IsDynamicClaimsEnabled = true;
-        //});
+        var configuration = context.Services.GetConfiguration();
+        var secretKey = configuration["Jwt:SecretKey"];
 
+        context.Services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
 
+                    ValidateIssuer = true,
+                    ValidIssuer = configuration["Jwt:Issuer"],
 
+                    ValidateAudience = true,
+                    ValidAudience = configuration["Jwt:Audience"],
+
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(2) // 允许2分钟时间误差
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"JWT认证失败：{context.Exception.Message}");
+                        if (context.Exception.InnerException != null)
+                        {
+                            Console.WriteLine($"  Inner Exception: {context.Exception.InnerException.Message}");
+                        }
+                        return Task.CompletedTask;
+                    },                    
+                };
+            });
     }
+
 
     private void ConfigureBundles()
     {
@@ -194,6 +229,29 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
                 options.OperationFilter<SecurityRequirementsOperationFilter>();
                 options.CustomSchemaIds(type => type.FullName);
 
+
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "输入 Bearer + 空格 + JWT，例如：Bearer eyJhbGciOi...",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
                 //就是这里！！！！！！！！！
                 var basePath = AppDomain.CurrentDomain.BaseDirectory;
                 var xmlPath = Path.Combine(basePath, "Smart_Medical.Application.xml");//这个就是刚刚配置的xml文件名

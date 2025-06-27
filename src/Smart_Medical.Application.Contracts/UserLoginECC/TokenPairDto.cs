@@ -3,25 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Volo.Abp.Application.Dtos;
 
 namespace Smart_Medical.UserLoginECC
 {
-    public class ResultLoginDto
+    public class TokenPairDto
     {
-        public string UserName { get; set; }
-        public string UserEmail { get; set; }
-        public string UserPhone { get; set; }
-        public bool? UserSex { get; set; }
         /// <summary>
         /// 访问令牌（Access Token），用于接口认证的 JWT 字符串
         /// </summary>
         public string AccessToken { get; set; } = string.Empty;
-    }
-
-    public class ResultLoginDtor : ResultLoginDto
-    {
-        
 
         /// <summary>
         /// 刷新令牌（Refresh Token），用于在 Access Token 过期后换取新 Token

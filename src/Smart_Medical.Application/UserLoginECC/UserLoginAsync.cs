@@ -21,6 +21,7 @@ namespace Smart_Medical.UserLoginECC
     [ApiExplorerSettings(GroupName = "用户登录")]
     public class UserLoginAsync : ApplicationService , IUserLoginAsyncService
     {
+        //private readonly 
         private readonly IRepository<User, Guid> _userRepository;
         private readonly IConfiguration configuration;
 
@@ -35,7 +36,7 @@ namespace Smart_Medical.UserLoginECC
         /// </summary>
         /// <param name="loginDto"></param>
         /// <returns></returns>
-        public async Task<ApiResult<ResultLoginDto>> LoginAsync(LoginDto loginDto)
+        public async Task<ApiResult<ResultLoginDtor>> LoginAsync(LoginDto loginDto)
         {
             // 根据用户名查找用户
             var users = await _userRepository.GetQueryableAsync();
@@ -44,22 +45,56 @@ namespace Smart_Medical.UserLoginECC
             // 检查用户是否存在
             if (user == null)
             {
-                return ApiResult<ResultLoginDto>.Fail("用户名不存在", ResultCode.NotFound);
+                return ApiResult<ResultLoginDtor>.Fail("用户名不存在", ResultCode.NotFound);
             }
 
             // 验证密码
             if (user.UserPwd != loginDto.UserPwd.GetMD5())
             {
-                return ApiResult<ResultLoginDto>.Fail("密码错误", ResultCode.ValidationError);
+                return ApiResult<ResultLoginDtor>.Fail("密码错误", ResultCode.ValidationError);
             }
-
-            
-
+           
             // 登录成功，返回用户信息
-            var userDto = ObjectMapper.Map<User, ResultLoginDto>(user);
-            return ApiResult<ResultLoginDto>.Success(userDto, ResultCode.Success);
+            //var userDto = ObjectMapper.Map<User, ResultLoginDto>(user);
+            var userDtos = ObjectMapper.Map<User,ResultLoginDtor>(user);
+
+            var tokens = await GenerateTokensAsync<User>(user);
+
+            userDtos.AccessToken = tokens.AccessToken;
+            userDtos.AccessTokenExpires = tokens.AccessTokenExpires;
+            userDtos.RefreshToken = tokens.RefreshToken;
+            userDtos.RefreshTokenExpires = tokens.RefreshTokenExpires;
+
+            //userDto.AccessToken = token.CreateJwtToken(user);
+
+            return ApiResult<ResultLoginDtor>.Success(userDtos, ResultCode.Success);
         }
 
-        
+
+        public async Task<ResultLoginDtor> GenerateTokensAsync<T>(T user)
+        {
+            LMZTokenHelper token = new LMZTokenHelper(configuration);
+
+            // 1. AccessToken
+            var accessToken = token.CreateJwtToken(user);
+            var accessTokenExpires = DateTime.UtcNow.AddMinutes(10); // access token 10分钟有效
+
+            // 2. RefreshToken
+            var refreshToken = token.GenerateRefreshToken();
+            var refreshTokenExpires = DateTime.UtcNow.AddDays(7); // refresh token 7天有效
+
+            // 3. 把 refresh token 存入 Redis（或数据库）
+            //await _cache.SetAsync($"RefreshToken:{user.Id}", refreshToken, TimeSpan.FromDays(7));
+
+            // 4. 返回前端
+            return new ResultLoginDtor
+            {
+                AccessToken = accessToken,
+                AccessTokenExpires = accessTokenExpires,
+                RefreshToken = refreshToken,
+                RefreshTokenExpires = refreshTokenExpires
+            };
+        }
+
     }
 }
