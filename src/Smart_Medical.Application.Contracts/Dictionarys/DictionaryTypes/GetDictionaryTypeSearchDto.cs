@@ -9,7 +9,11 @@ namespace Smart_Medical.Dictionarys.DictionaryTypes
 {
     public class GetDictionaryTypeSearchDto:Seach
     {
-       
-        public string DictionaryTypeName { get; set; }
+
+        /// <summary>
+        /// 字典标签/字典值
+        /// </summary>
+        public string? DictionaryLabel { get; set; }
+
     }
 }

@@ -18,6 +18,6 @@ namespace Smart_Medical.Dictionarys.DictionaryTypes
         Task<ApiResult> UpdateDictionaryTypeLAsync(Guid id, CreateUpdateDictionaryTypeDto input);
         Task<ApiResult<PageResult<List<GetDictionaryTypeDto>>>> GetDictionaryTypeList(string datetype, [FromQuery] GetDictionaryTypeSearchDto search);
         Task<ApiResult> DeleteDictionaryType(Guid id);
-
+        Task<ApiResult> DeleteDictionaryType(string ids);
     }
 }
