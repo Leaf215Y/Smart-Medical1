@@ -38,7 +38,7 @@ namespace Smart_Medical.Dictionarys
         }
         
 
-        public async Task LoadDictionaryTypeDto()
+        private async Task LoadDictionaryTypeDto()
         {
             var typelist = await dictionarytype.GetQueryableAsync();
             var dtoList = ObjectMapper.Map<List<DictionaryType>, List<GetDictionaryTypeDto>>(typelist.ToList());
@@ -117,7 +117,7 @@ namespace Smart_Medical.Dictionarys
             }
             //// 确保即使缓存加载失败，allTypesFromCache 也不会是 null，避免后续操作出错
             typelist ??= new List<GetDictionaryTypeDto>();
-            var filteredTypes = typelist.WhereIf(!string.IsNullOrEmpty(search.DictionaryTypeName),x => x.DictionaryDataType.Contains(search.DictionaryTypeName)).Where(x=>x.DictionaryDataType== datetype);
+            var filteredTypes = typelist.WhereIf(!string.IsNullOrEmpty(search.DictionaryLabel), x => x.DictionaryValue.Contains(search.DictionaryLabel) || x.DictionaryLabel.Contains(search.DictionaryLabel)).Where(x=>x.DictionaryDataType== datetype);
             var res = filteredTypes.AsQueryable().PageResult(search.PageIndex, search.PageSize);
             //var dto = ObjectMapper.Map<List<DictionaryType>, List<GetDictionaryTypeDto>>(res.Queryable.ToList());
             var pageinfo = new PageResult<List<GetDictionaryTypeDto>>
