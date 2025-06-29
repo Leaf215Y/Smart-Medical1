@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Domain.Entities.Auditing;
+using Smart_Medical.Enums;
 
 namespace Smart_Medical.RBAC
 {
@@ -59,21 +60,21 @@ namespace Smart_Medical.RBAC
     }
 
     // 权限类型枚举，用于区分权限是菜单、按钮还是其他类型
-    public enum PermissionType
-    {
-        /// <summary>
-        /// 菜单权限（用于控制菜单的显示）
-        /// </summary>
-        Menu = 0,
+    //public enum PermissionType
+    //{
+    //    /// <summary>
+    //    /// 菜单权限（用于控制菜单的显示）
+    //    /// </summary>
+    //    Menu = 0,
 
-        /// <summary>
-        /// 按钮权限（用于控制页面内按钮的显示和操作）
-        /// </summary>
-        Button = 1,
+    //    /// <summary>
+    //    /// 按钮权限（用于控制页面内按钮的显示和操作）
+    //    /// </summary>
+    //    Button = 1,
 
-        /// <summary>
-        /// 其他操作权限（例如API访问权限等）
-        /// </summary>
-        Operation = 2
-    }
+    //    /// <summary>
+    //    /// 其他操作权限（例如API访问权限等）
+    //    /// </summary>
+    //    Operation = 2
+    //}
 }

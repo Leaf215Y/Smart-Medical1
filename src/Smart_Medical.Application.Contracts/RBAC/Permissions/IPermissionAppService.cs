@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Smart_Medical.Until;
 using Volo.Abp.Application.Dtos;
+using Smart_Medical.RBAC.Permissions;
 
 namespace Smart_Medical.Application.Contracts.RBAC.Permissions
 {
@@ -21,5 +22,6 @@ namespace Smart_Medical.Application.Contracts.RBAC.Permissions
         Task<ApiResult> UpdateAsync(Guid id, CreateUpdatePermissionDto input);
 
         Task<ApiResult> DeleteAsync(Guid id);
+        Task<ApiResult<List<GetMenuPermissionTree>>> GetMenuPermissionTreeList(Guid? parentId=null);
     }
 }

@@ -45,7 +45,6 @@ namespace Smart_Medical.Dictionarys
         {
             var res = ObjectMapper.Map<CreateUpdateDictionaryDataDto, DictionaryData>(input);
             res = await dictionaryData.InsertAsync(res);
-            
             await dictdatadto.RemoveAsync(CacheKey);//删除缓存
             return ApiResult.Success(ResultCode.Success);
 
