@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Smart_Medical.Appointment;
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
@@ -26,6 +26,8 @@ namespace Smart_Medical.Registration
     /// 医疗管理
     /// </summary>
     [ApiExplorerSettings(GroupName = "医疗管理")]
+    [Authorize]
+    [IgnoreAntiforgeryToken]
     public class PatientService : ApplicationService, IPatientService
     {
         private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -50,20 +52,9 @@ namespace Smart_Medical.Registration
         /// 药品
         /// </summary>
         private readonly IRepository<Drug, int> _drugRepo;
-        /// <summary>
-        /// / 预约挂号
-        /// </summary>
-        private readonly IRepository<Patient.Appointment, Guid> _appointment;
 
         public PatientService(
-            IUnitOfWorkManager unitOfWorkManager,
-            IRepository<DoctorClinic, Guid> doctorclinRepo,
-            IRepository<BasicPatientInfo, Guid> basicpatientRepo,
-            IRepository<Sick, Guid> sickRepo,
-            IRepository<PatientPrescription, Guid> prescriptionRepo,
-            IRepository<Drug, int> drugRepo,
-            IRepository<Smart_Medical.Patient.Appointment, Guid> appointment
-            )
+            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug, int> drugRepo)
         {
             _unitOfWorkManager = unitOfWorkManager;
             _doctorclinRepo = doctorclinRepo;
@@ -71,7 +62,6 @@ namespace Smart_Medical.Registration
             _sickRepo = sickRepo;
             _prescriptionRepo = prescriptionRepo;
             _drugRepo = drugRepo;
-            _appointment = appointment;
         }
 
         /// <summary>
@@ -119,7 +109,7 @@ namespace Smart_Medical.Registration
                         var doctorClinic = ObjectMapper.Map<InsertPatientDto, DoctorClinic>(input);
 
                         doctorClinic.PatientId = patient.Id;
-                        doctorClinic.VisitDateTime = input.VisitDate ?? DateTime.Now;
+                        doctorClinic.VisitDateTime = patient.VisitDate;
                         doctorClinic.ExecutionStatus = ExecutionStatus.PendingConsultation;
                         doctorClinic.DispensingStatus = 0;
                         doctorClinic.VisitType = existingPatient == null ? "初诊" : "复诊";
@@ -139,7 +129,7 @@ namespace Smart_Medical.Registration
 
                             AdmissionDiagnosis = "",
                             DischargeTime = DateTime.Now,
-
+                            CreationTime = patient.VisitDate,
                             Temperature = 36.5M,
                             Pulse = 75,
                             Breath = 18,
@@ -180,6 +170,7 @@ namespace Smart_Medical.Registration
         /// </summary>
         /// <param name="input">参数列表，包含分页和关键词</param>
         /// <returns></returns>
+        //[Authorize]
         public async Task<ApiResult<PagedResultDto<GetVisitingDto>>> VisitingPatientsAsync(GetVistingParameterDtos input)
         {
             try
@@ -265,13 +256,12 @@ namespace Smart_Medical.Registration
         /// 患者所有病历信息
         /// </summary>
         /// <param name="patientId">患者id</param>
-        /// <returns></returns>
+        /// <returns></returns>        
         public async Task<ApiResult<List<GetSickInfoDto>>> GetPatientSickInfoAsync(Guid patientId)
         {
             try
             {
                 //查询流程表是否为初诊，初诊没有病历信息
-
 
                 // 获取患者基本信息数据
                 var patients = await _patientRepo.GetQueryableAsync();
@@ -288,24 +278,22 @@ namespace Smart_Medical.Registration
                 //详细的处方信息需要读取存储的json数据                
 
                 //linq联查本身没有问题，在病历表中如果有数据才能执行
-                var query = from patient in patients
-                            where patient.Id == patientId
-                            join sicks1 in sicks
-                            on patient.Id equals sicks1.BasicPatientId
-                            join clinic in clinics
-                            on patient.Id equals clinic.PatientId
-                            join prescription in prescriptions
-                            on patientId equals prescription.PatientNumber
-                            select new GetSickInfoDto
-                            {
 
-                            };
 
 
                 //查询
-                var result = await AsyncExecuter.ToListAsync(query);
-                if (result == null)
-                    ApiResult.Fail("患者病历不存在", ResultCode.NotFound);
+                //var result = await AsyncExecuter.ToListAsync(query);
+                //if (result == null)
+                //    ApiResult.Fail("患者病历不存在", ResultCode.NotFound);
+                var result = (from p in patients
+                              join c in clinics on p.Id equals c.PatientId
+                              join s in sicks on p.Id equals s.BasicPatientId
+                              join pr in prescriptions on p.Id equals pr.PatientNumber
+                              where p.Id == patientId
+                              select new GetSickInfoDto
+                              {
+                                  //保留
+                              }).ToList();
                 return ApiResult<List<GetSickInfoDto>>.Success(result, ResultCode.Success);
             }
             catch (Exception ex)
@@ -323,144 +311,92 @@ namespace Smart_Medical.Registration
         {
             try
             {
-                //判断输入参数是否完整
-                if (input == null || input.PatientNumber == Guid.Empty)
-                    return ApiResult.Fail("患者信息不完整！", ResultCode.Error);
-
-                //如果使用处方模板，则必须提供模板编号
-                if (input.IsActive)
+                using (var uow = _unitOfWorkManager.Begin(requiresNew: true))
                 {
-                    if (input.PrescriptionItems == null)
+                    //判断输入参数是否完整
+                    if (input == null || input.PatientNumber == Guid.Empty)
+                        return ApiResult.Fail("患者信息不完整！", ResultCode.Error);
+
+                    //如果使用处方模板，则必须提供模板编号
+                    if (input.IsActive)
                     {
-                        return ApiResult.Fail("处方项不能为空！", ResultCode.Error);
+                        if (input.PrescriptionItems == null)
+                        {
+                            return ApiResult.Fail("处方项不能为空！", ResultCode.Error);
+                        }
                     }
+
+                    // 获取患者基本信息
+                    var patient = await _patientRepo.FindAsync(input.PatientNumber);
+                    if (patient == null)
+                        return ApiResult.Fail("未找到该患者信息！", ResultCode.NotFound);
+
+                    // =============================================
+                    // 根据 PrescriptionItems 插入处方明细表
+                    // =============================================
+
+                    //判断每种药品是否存在、库存是否充足
+                    foreach (var item in input.PrescriptionItems)
+                    {
+                        // 获取药品信息
+                        var drug = await _drugRepo.FirstOrDefaultAsync(d => d.Id == item.DrugId);
+                        //药品不存在返回错误信息
+                        if (drug == null)
+                            return ApiResult.Fail($"未找到药品ID为 {item.DrugId} 的药品信息", ResultCode.Error);
+
+                        //查找的药品库存是否充足
+                        int remainingStock = drug.Stock - item.Number;
+                        if (remainingStock < 0)
+                            return ApiResult.Fail($"药品 {drug.DrugName} 库存不足，无法开具处方", ResultCode.Error);
+
+                        //提前 return，但没有调用 uow.CompleteAsync()，那事务是不会提交的，会自动回滚
+
+                        // 更新药品库存
+                        drug.Stock = remainingStock;
+                        await _drugRepo.UpdateAsync(drug);
+                    }
+
+                    //创建处方记录
+                    var prescription = new PatientPrescription
+                    {
+                        PrescriptionTemplateNumber = input.PrescriptionTemplateNumber,
+                        PatientNumber = input.PatientNumber,
+                        IsActive = input.IsActive,
+                        // 序列化处方明细
+                        DrugIds = JsonConvert.SerializeObject(input.PrescriptionItems),
+                        MedicalAdvice = input.MedicalAdvice
+                    };
+                    //保存处方记录
+                    await _prescriptionRepo.InsertAsync(prescription);
+
+                    //更新患者状态为“已就诊”
+                    patient.VisitStatus = "已就诊";
+                    await _patientRepo.UpdateAsync(patient);//保留
+
+                    //更新 DoctorClinic 表的状态字段 
+                    //判断状态为“待就诊”
+                    var doctorClinic = await _doctorclinRepo.FirstOrDefaultAsync(
+                        x => x.PatientId == input.PatientNumber &&
+                        x.ExecutionStatus == ExecutionStatus.PendingConsultation
+                        );
+
+                    if (doctorClinic == null)
+                        return ApiResult.Fail("未找到就诊记录！", ResultCode.NotFound);
+
+                    // 更新就诊记录状态为“已就诊”
+                    doctorClinic.ExecutionStatus = ExecutionStatus.Completed;
+                    await _doctorclinRepo.UpdateAsync(doctorClinic);
+
+                    await uow.CompleteAsync();
+
+                    return ApiResult.Success(ResultCode.Success);
                 }
-
-                // 获取患者基本信息
-                var patient = await _patientRepo.FindAsync(input.PatientNumber);
-                if (patient == null)
-                    return ApiResult.Fail("未找到该患者信息！", ResultCode.NotFound);
-
-                //生成统一的处方 ID
-                var prescriptionId = Guid.NewGuid();
-
-                // =============================================
-                // 根据 PrescriptionItems 插入处方明细表
-                // =============================================
-
-                //判断每种药品是否存在、库存是否充足
-                foreach (var item in input.PrescriptionItems)
-                {
-                    // 获取药品信息
-                    var drug = await _drugRepo.FirstOrDefaultAsync(d => d.Id == item.DrugId);
-                    //药品不存在返回错误信息
-                    if (drug == null)
-                        return ApiResult.Fail($"未找到药品ID为 {item.DrugId} 的药品信息", ResultCode.Error);
-
-                    //查找的药品库存是否充足
-                    int remainingStock = drug.Stock - item.Number;
-                    if (remainingStock < 0)
-                        return ApiResult.Fail($"药品 {drug.DrugName} 库存不足，无法开具处方", ResultCode.Error);
-
-                    //提前 return，但没有调用 uow.CompleteAsync()，那事务是不会提交的，会自动回滚
-
-                    // 更新药品库存
-                    drug.Stock = remainingStock;
-                    await _drugRepo.UpdateAsync(drug);
-                }
-
-                //创建处方记录
-                var prescription = new PatientPrescription
-                {
-                    PrescriptionTemplateNumber = input.PrescriptionTemplateNumber,
-                    PatientNumber = input.PatientNumber,
-                    IsActive = input.IsActive,
-                    // 序列化处方明细
-                    DrugIds = JsonConvert.SerializeObject(input.PrescriptionItems),
-                    MedicalAdvice = input.MedicalAdvice
-                };
-                //保存处方记录
-                await _prescriptionRepo.InsertAsync(prescription);
-
-                //更新患者状态为"已就诊"
-                patient.VisitStatus = "已就诊";
-                //更新 DoctorClinic 表的状态字段 
-                //判断状态为"待就诊"
-                var doctorClinic = await _doctorclinRepo.FirstOrDefaultAsync(
-                    x => x.PatientId == input.PatientNumber &&
-                    x.ExecutionStatus == ExecutionStatus.PendingConsultation
-                    );
-
-                if (doctorClinic == null)
-                    return ApiResult.Fail("未找到就诊记录！", ResultCode.NotFound);
-
-                // 更新就诊记录状态为"已就诊"
-                doctorClinic.ExecutionStatus = ExecutionStatus.Completed;
-                await _doctorclinRepo.UpdateAsync(doctorClinic);
-
-                return ApiResult.Success(ResultCode.Success);
             }
             catch (Exception ex)
             {
                 return ApiResult.Fail("系统错误：" + ex.Message, ResultCode.Error);
             }
         }
-
-
-        /// <summary>
-        /// 线上预约
-        /// </summary>
-        /// <returns></returns>
-        [UnitOfWork]// 添加 [UnitOfWork] 特性，确保此方法的数据库操作在事务中执行
-        public async Task<ApiResult> InsertMakeAppointment(MakeAppointmentDto make)
-        {
-            if (make == null)
-            {
-                return ApiResult.Fail("预约信息不能为空！", ResultCode.Error);
-            }
-
-            //检查患者信息是否存在
-            var res = await _patientRepo.FirstOrDefaultAsync(x => x.IdNumber == make.IdNumber);
-            //查询数据库是否存在此患者  没有此患者信息则添加
-            if (res == null)
-            {
-                //1 先添加患者信息 
-                var basicPatientInfo = ObjectMapper.Map<MakeAppointmentDto, BasicPatientInfo>(make);
-
-                //检查患者信息是否完整
-                if (string.IsNullOrWhiteSpace(basicPatientInfo.PatientName) ||
-                    string.IsNullOrWhiteSpace(basicPatientInfo.IdNumber) ||
-                    string.IsNullOrWhiteSpace(basicPatientInfo.ContactPhone))
-                {
-                    return ApiResult.Fail("患者信息不完整，请检查后重试！", ResultCode.Error);
-                }
-
-                //添加患者信息
-                var patient = await _patientRepo.InsertAsync(basicPatientInfo);
-
-                //拿到刚刚添加的患者信息的id
-                make.PatientId = patient?.Id;
-            }
-            // 如果患者信息已经存在，则直接使用现有的 PatientId
-            else
-            {
-                make.PatientId = res.Id;
-            }
-            //2 添加预约挂号记录
-            Smart_Medical.Patient.Appointment appointment = new Smart_Medical.Patient.Appointment
-            {
-                PatientId = make.PatientId,   
-                AppointmentDateTime = make.AppointmentDateTime,
-                Status = make.Status,
-                ActualFee = make.ActualFee,
-                Remarks = make.Remarks
-            };
-            var appointmentResult = await _appointment.InsertAsync(appointment);
-
-            return ApiResult.Success(ResultCode.Success);
-        }
-
-
     }
 }
 

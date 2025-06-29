@@ -48,6 +48,11 @@ namespace Smart_Medical.OutpatientClinic.Dtos
         public string? ChiefComplaint { get; set; }
 
         /// <summary>
+        /// 不使用处方模版时，  药品ID集合【PatientPrescription】
+        /// </summary>
+        public string? DrugIds { get; set; } = string.Empty;
+
+        /// <summary>
         /// 处方模板编号0【无模板（非模板录入）】1【西药处方】2【中药处方】【PatientPrescription】
         /// </summary>
         public int PrescriptionTemplateNumber { get; set; } = 0;

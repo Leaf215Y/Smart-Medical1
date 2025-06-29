@@ -20,6 +20,7 @@ using Smart_Medical.Pharmacy;
 using Smart_Medical.Pharmacy.InAndOutWarehouse;
 using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
+using Smart_Medical.UserLoginECC;
 using System.Collections.Generic;
 
 namespace Smart_Medical;
@@ -58,6 +59,7 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<Sick, InsertPatientDto>().ReverseMap();
         CreateMap<BasicPatientInfo, GetVisitingDto>().ReverseMap();
         CreateMap<BasicPatientInfo, BasicPatientInfoDto>().ReverseMap();
+        CreateMap<User, ResultLoginDto>().ReverseMap();
         #endregion
 
         //CreateMap<List<Medication>, List<MedicationDto>>().ReverseMap();

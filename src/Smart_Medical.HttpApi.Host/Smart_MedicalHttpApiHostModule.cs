@@ -1,17 +1,24 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Smart_Medical.EntityFrameworkCore;
+using StackExchange.Redis;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc;
@@ -23,14 +30,12 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Auditing;
 using Volo.Abp.Autofac;
-using StackExchange.Redis;
 using Volo.Abp.Caching;
 using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace Smart_Medical;
 
@@ -65,8 +70,9 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
         var services = context.Services;
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
-        
 
+        services.AddTransient<LMZTokenHelper>();
+        services.AddSingleton<JwtSecurityTokenHandler>();
 
         Configure<AbpAntiForgeryOptions>(options =>
         {
@@ -79,11 +85,14 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
                                                  // 可以设置默认的缓存过期时间等
             options.GlobalCacheEntryOptions = new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
             };
         });
-
-        
+       
+        //Configure<AbpRedisCacheOptions>(options =>
+        //{
+        //    options.Configuration = "localhost:6379"; // 改成你自己的 Redis 地址
+        //});
 
         ConfigureAuthentication(context);
         ConfigureBundles();
@@ -96,15 +105,43 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
-        //context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
-        //context.Services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
-        //{
-        //    options.IsDynamicClaimsEnabled = true;
-        //});
+        var configuration = context.Services.GetConfiguration();
+        var secretKey = configuration["Jwt:SecretKey"];
+
+        context.Services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+
+                    ValidateIssuer = true,
+                    ValidIssuer = configuration["Jwt:Issuer"],
+
+                    ValidateAudience = true,
+                    ValidAudience = configuration["Jwt:Audience"],
+
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(0), // 允许2分钟时间误差
+                };
 
 
-
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"JWT认证失败：{context.Exception.Message}");
+                        if (context.Exception.InnerException != null)
+                        {
+                            Console.WriteLine($"  Inner Exception: {context.Exception.InnerException.Message}");
+                        }
+                        return Task.CompletedTask;
+                    },                    
+                };
+            });
     }
+
 
     private void ConfigureBundles()
     {
@@ -185,6 +222,7 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
                 options.SwaggerDoc("收费发药管理", new OpenApiInfo { Title = "收费发药管理", Version = "收费发药管理" });
                 options.SwaggerDoc("字典管理", new OpenApiInfo { Title = "字典管理", Version = "字典管理" });
                 options.SwaggerDoc("医疗管理", new OpenApiInfo { Title = "医疗管理", Version = "医疗管理" });
+                options.SwaggerDoc("用户登录", new OpenApiInfo { Title = "用户登录", Version = "用户登录" });
 
                 options.DocInclusionPredicate((doc, desc) =>
                 {
@@ -201,6 +239,29 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
                 options.OperationFilter<SecurityRequirementsOperationFilter>();
                 options.CustomSchemaIds(type => type.FullName);
 
+
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "输入 Bearer + 空格 + JWT，例如：Bearer eyJhbGciOi...",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
                 //就是这里！！！！！！！！！
                 var basePath = AppDomain.CurrentDomain.BaseDirectory;
                 var xmlPath = Path.Combine(basePath, "Smart_Medical.Application.xml");//这个就是刚刚配置的xml文件名
@@ -281,6 +342,7 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
             c.SwaggerEndpoint("/swagger/收费发药管理/swagger.json", "收费发药管理");
             c.SwaggerEndpoint("/swagger/字典管理/swagger.json", "字典管理");
             c.SwaggerEndpoint("/swagger/医疗管理/swagger.json", "医疗管理");
+            c.SwaggerEndpoint("/swagger/用户登录/swagger.json", "用户登录");
 
             // 模型的默认扩展深度，设置为 -1 完全隐藏模型
             c.DefaultModelsExpandDepth(1);
