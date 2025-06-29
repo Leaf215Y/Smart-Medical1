@@ -2,16 +2,19 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Smart_Medical.EntityFrameworkCore;
+using StackExchange.Redis;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,14 +30,12 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Auditing;
 using Volo.Abp.Autofac;
-using StackExchange.Redis;
 using Volo.Abp.Caching;
 using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace Smart_Medical;
 
@@ -45,8 +46,6 @@ namespace Smart_Medical;
     typeof(Smart_MedicalEntityFrameworkCoreModule),
     typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
     typeof(AbpSwashbuckleModule),
-    typeof(AbpAspNetCoreSerilogModule)
-    //typeof(AbpCachingStackExchangeRedisModule)
     typeof(AbpAspNetCoreSerilogModule),
     typeof(AbpCachingStackExchangeRedisModule)
 )]
@@ -71,8 +70,9 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
         var services = context.Services;
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
-        
 
+        services.AddTransient<LMZTokenHelper>();
+        services.AddSingleton<JwtSecurityTokenHandler>();
 
         Configure<AbpAntiForgeryOptions>(options =>
         {
@@ -85,12 +85,10 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
                                                  // 可以设置默认的缓存过期时间等
             options.GlobalCacheEntryOptions = new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
             };
         });
-
-        
-
+       
         //Configure<AbpRedisCacheOptions>(options =>
         //{
         //    options.Configuration = "localhost:6379"; // 改成你自己的 Redis 地址
@@ -125,8 +123,10 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
                     ValidAudience = configuration["Jwt:Audience"],
 
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.FromMinutes(2) // 允许2分钟时间误差
+                    ClockSkew = TimeSpan.FromMinutes(0), // 允许2分钟时间误差
                 };
+
+
                 options.Events = new JwtBearerEvents
                 {
                     OnAuthenticationFailed = context =>

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -54,7 +55,7 @@ namespace Smart_Medical
                         audience: _configuration["Jwt:Audience"],//接收者
                         claims: claimList,//存放的用户信息
                         notBefore: beijingTime,//发布时间
-                        expires: beijingTime.AddMinutes(2),//有效期设置
+                        expires: beijingTime.AddMinutes(0.5),//有效期设置
                         signingCredentials: signingCredentials//数字签名
                     );
 
@@ -68,6 +69,58 @@ namespace Smart_Medical
                 throw new Exception($"创建加密JwtToken{ex.Message}");
             }
         }
+
+
+        /// <summary>
+        /// 创建加密JwtToken
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="generateUser">登录成功的用户信息</param>
+        /// <param name="expiresMinutes">过期时间，默认60分钟</param>
+        /// <returns></returns>
+        public string CreateJwtToken<T>(T generateUser, int expiresMinutes = 60)
+        {
+            try
+            {
+                // 1. 签名算法（比如HS256）
+                var signingAlgorithm = SecurityAlgorithms.HmacSha256;
+
+                // 2. 把用户信息转换成声明（Claim）列表，放到Token里
+                var claimList = CreateClaimList(generateUser);
+
+                // 3. 从配置里拿秘钥字符串，转成字节数组
+                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]);
+
+                // 4. 把字节数组包装成 SymmetricSecurityKey，这个是JWT库用来代表密钥的类型
+                var signingKey = new SymmetricSecurityKey(key);
+
+                // 5. 创建签名凭证，告诉JWT“用这个密钥和这个算法签名”
+                var signingCredentials = new SigningCredentials(signingKey, signingAlgorithm);
+
+
+                var beijingTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "China Standard Time");
+                // 6. 准备“身份信息”（Claims）准备“签名秘钥和算法”
+                var token = new JwtSecurityToken(
+                        issuer: _configuration["Jwt:Issuer"],//发布者
+                        audience: _configuration["Jwt:Audience"],//接收者
+                        claims: claimList,//存放的用户信息
+                        notBefore: beijingTime,//发布时间
+                        expires: beijingTime.AddMinutes(expiresMinutes),//有效期设置
+                        signingCredentials: signingCredentials//数字签名
+                    );
+
+                // 6. 拼接JWT的各个部分
+                string tokenStr = new JwtSecurityTokenHandler().WriteToken(token);
+
+                return tokenStr;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"创建加密JwtToken{ex.Message}");
+            }
+        }
+
+
         /// <summary>
         /// 创建包含用户信息的Claim列表
         /// 把对象所有属性转换成一堆键值对（声明），写进 JWT 里，方便验证和识别用户信息
@@ -89,14 +142,19 @@ namespace Smart_Medical
 
                 // 获取类型信息
                 var classType = typeof(T);
-                //p.Name属性名称
-                //p.GetValue(authUser)时获取属性值
-                //p.GetValue(authUser)?.ToString() ?? string.Empty时获取属性值并转换为字符串，如果为null则返回空字符串
-                return classType.GetProperties()
-                    .Select(
-                        p => new Claim(
-                            p.Name, p.GetValue(authUser)?.ToString() ?? string.Empty)
-                        ).ToList();
+                var claims = classType.GetProperties()
+                    .Select(p => new Claim(
+                        p.Name,
+                        p.GetValue(authUser)?.ToString() ?? string.Empty
+                    )).ToList();
+
+                // 添加一个随机的 Claim（保证 token 每次都不同）
+                claims.Add(new Claim("LoginSessionId", Guid.NewGuid().ToString()));
+
+                // 加入签发时间
+                claims.Add(new Claim("IssuedAt", DateTime.UtcNow.ToString("o"))); // ISO 8601 格式
+
+                return claims;
             }
             catch (Exception ex)
             {
@@ -151,6 +209,33 @@ namespace Smart_Medical
             }
         }
 
-        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="SecurityTokenException"></exception>
+        public ClaimsPrincipal GetPrincipalFromRefreshToken(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = true,
+                ValidAudience = _configuration["Jwt:Audience"],
+                ValidateIssuer = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"])),
+                ValidateLifetime = false
+            };
+
+            SecurityToken securityToken;
+            var principal = _jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+
+            if (!(securityToken is JwtSecurityToken jwtSecurityToken) || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("无效的刷新令牌或签名不匹配。");
+            }
+            return principal;
+        }
     }
 }

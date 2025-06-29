@@ -7,35 +7,12 @@ using Volo.Abp.Application.Dtos;
 
 namespace Smart_Medical.UserLoginECC
 {
-    public class ResultLoginDto
+    public class ResultLoginDto : TokenPairDtos
     {
         public string UserName { get; set; }
         public string UserEmail { get; set; }
         public string UserPhone { get; set; }
         public bool? UserSex { get; set; }
-        /// <summary>
-        /// 访问令牌（Access Token），用于接口认证的 JWT 字符串
-        /// </summary>
-        public string AccessToken { get; set; } = string.Empty;
-    }
-
-    public class ResultLoginDtor : ResultLoginDto
-    {
         
-
-        /// <summary>
-        /// 刷新令牌（Refresh Token），用于在 Access Token 过期后换取新 Token
-        /// </summary>
-        public string RefreshToken { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Access Token 的过期时间（服务器东八区时间）
-        /// </summary>
-        public DateTime AccessTokenExpires { get; set; } = DateTime.UtcNow;
-
-        /// <summary>
-        /// Refresh Token 的过期时间（服务器东八区时间）
-        /// </summary>
-        public DateTime RefreshTokenExpires { get; set; } = DateTime.UtcNow;
     }
 }
