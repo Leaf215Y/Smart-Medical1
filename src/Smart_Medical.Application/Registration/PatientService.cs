@@ -406,12 +406,12 @@ namespace Smart_Medical.Registration
             }
         }
 
-
         /// <summary>
         /// 线上预约
         /// </summary>
         /// <returns></returns>
         [UnitOfWork]// 添加 [UnitOfWork] 特性，确保此方法的数据库操作在事务中执行
+        [HttpPost]
         public async Task<ApiResult> InsertMakeAppointment(MakeAppointmentDto make)
         {
             if (make == null)
@@ -458,6 +458,87 @@ namespace Smart_Medical.Registration
             var appointmentResult = await _appointment.InsertAsync(appointment);
 
             return ApiResult.Success(ResultCode.Success);
+        }
+
+
+        /// <summary>
+        /// 获取预约挂号分页列表
+        /// </summary>
+        /// <param name="input">查询参数（包含就诊状态、就诊日期、分页信息）</param>
+        /// <returns>ApiResult 分页结果</returns>
+        public async Task<ApiResult<PageResult<List<AppointmentReponseDto>>>> GetAppointment([FromQuery] AppointmentDto input)
+        {
+            try
+            {
+                // 1. 获取预约挂号表的 IQueryable
+                var queryable = await _appointment.GetQueryableAsync();
+                queryable= queryable.Where(x => x.PatientId == input.PatientId); // 只查询当前患者的预约信息
+                // 2. 联查患者基本信息（外键 PatientId -> BasicPatientInfo.Id）
+                var patientQueryable = await _patientRepo.GetQueryableAsync();
+
+                var query = from a in queryable
+                            join p in patientQueryable on a.PatientId equals p.Id
+                            select new { Appointment = a, Patient = p };
+
+                // 3. 条件过滤
+                if (!string.IsNullOrWhiteSpace(input.VisitStatus))
+                {
+                    query = query.Where(x => x.Appointment.Status.ToString() == input.VisitStatus);
+                }
+                if (input.VisitDate != null)
+                {
+                    var date = input.VisitDate;
+                    query = query.Where(x => x.Appointment.AppointmentDateTime.Date == date);
+                }
+
+                // 4. 获取总数
+                var totalCount = await AsyncExecuter.CountAsync(query);
+
+                // 5. 分页
+                var pageData = await AsyncExecuter.ToListAsync(
+                    query
+                        .OrderByDescending(x => x.Appointment.AppointmentDateTime)
+                        .Skip(input.SkipCount)
+                        .Take(input.MaxResultCount)
+                );
+
+                // 6. 映射到响应 DTO
+                var resultList = pageData.Select(x => new AppointmentReponseDto
+                {
+                    PatientId = x.Patient.Id,
+                    AppointmentDateTime = x.Appointment.AppointmentDateTime,
+                    Status = x.Appointment.Status,
+                    ActualFee = x.Appointment.ActualFee,
+                    Remarks = x.Appointment.Remarks,
+                    VisitId = x.Patient.VisitId,
+                    PatientName = x.Patient.PatientName,
+                    Gender = x.Patient.Gender,
+                    Age = x.Patient.Age,
+                    AgeUnit = x.Patient.AgeUnit,
+                    ContactPhone = x.Patient.ContactPhone,
+                    IdNumber = x.Patient.IdNumber,
+                    VisitType = x.Patient.VisitType,
+                    IsInfectiousDisease = x.Patient.IsInfectiousDisease,
+                    DiseaseOnsetTime = x.Patient.DiseaseOnsetTime,
+                    EmergencyTime = x.Patient.EmergencyTime,
+                    VisitStatus = x.Appointment.Status.ToString(),
+                    VisitDate = x.Appointment.AppointmentDateTime.Date
+                }).ToList();
+
+                // 7. 构造分页结果
+                var pageResult = new PageResult<List<AppointmentReponseDto>>
+                {
+                    TotleCount = totalCount,
+                    TotlePage = (int)Math.Ceiling((double)totalCount / input.MaxResultCount),
+                    Data = resultList
+                };
+
+                return ApiResult<PageResult<List<AppointmentReponseDto>>>.Success(pageResult, ResultCode.Success);
+            }
+            catch (Exception ex)
+            {
+                return ApiResult<PageResult<List<AppointmentReponseDto>>>.Fail("获取预约列表失败：" + ex.Message, ResultCode.Error);
+            }
         }
 
 
