@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Smart_Medical.Appointment;
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
@@ -52,9 +53,20 @@ namespace Smart_Medical.Registration
         /// 药品
         /// </summary>
         private readonly IRepository<Drug, int> _drugRepo;
+        /// <summary>
+        /// 预约记录
+        /// </summary>
+        private readonly IRepository<Smart_Medical.Patient.Appointment, Guid> _appointment;
 
         public PatientService(
-            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug, int> drugRepo)
+            IUnitOfWorkManager unitOfWorkManager,
+            IRepository<DoctorClinic, Guid> doctorclinRepo,
+            IRepository<BasicPatientInfo, Guid> basicpatientRepo,
+            IRepository<Sick, Guid> sickRepo,
+            IRepository<PatientPrescription, Guid> prescriptionRepo
+            , IRepository<Drug, int> drugRepo
+            , IRepository<Smart_Medical.Patient.Appointment, Guid> appointmentRep 
+            )
         {
             _unitOfWorkManager = unitOfWorkManager;
             _doctorclinRepo = doctorclinRepo;
@@ -62,6 +74,7 @@ namespace Smart_Medical.Registration
             _sickRepo = sickRepo;
             _prescriptionRepo = prescriptionRepo;
             _drugRepo = drugRepo;
+            _appointment= appointmentRep;
         }
 
         /// <summary>
