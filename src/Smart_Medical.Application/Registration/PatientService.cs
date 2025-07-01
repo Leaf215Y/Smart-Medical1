@@ -69,6 +69,7 @@ namespace Smart_Medical.Registration
         /// </summary>
         /// <param name="input">患者就诊登记信息</param>
         /// <returns>接口返回结果</returns>
+        //[UnitOfWork]
         public async Task<ApiResult> RegistrationPatientAsync(InsertPatientDto input)
         {
             try
@@ -170,7 +171,6 @@ namespace Smart_Medical.Registration
         /// </summary>
         /// <param name="input">参数列表，包含分页和关键词</param>
         /// <returns></returns>
-        //[Authorize]
         public async Task<ApiResult<PagedResultDto<GetVisitingDto>>> VisitingPatientsAsync(GetVistingParameterDtos input)
         {
             try
@@ -213,7 +213,6 @@ namespace Smart_Medical.Registration
 
                 // 7. 实体转 DTO
                 var result = ObjectMapper.Map<List<BasicPatientInfo>, List<GetVisitingDto>>(pagedPatients);
-
                 // 8. 返回分页结果
                 return ApiResult<PagedResultDto<GetVisitingDto>>.Success(
                     new PagedResultDto<GetVisitingDto>(totalCount, result),
@@ -306,7 +305,7 @@ namespace Smart_Medical.Registration
         /// 开具处方
         /// </summary>
         /// <param name="input"></param>
-        /// <returns></returns>
+        /// <returns></returns>        
         public async Task<ApiResult> DoctorsPrescription(DoctorPrescriptionDto input)
         {
             try
