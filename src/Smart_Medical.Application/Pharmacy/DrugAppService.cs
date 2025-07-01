@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
@@ -17,10 +18,11 @@ namespace Smart_Medical.Pharmacy
     public class DrugAppService : ApplicationService, IDrugAppService
     {
         public IRepository<Drug, int> Repository { get; }
-
-        public DrugAppService(IRepository<Drug, int> repository)
+        public IRepository<MedicalHistory> GetRepository { get; }
+        public DrugAppService(IRepository<Drug, int> repository, IRepository<MedicalHistory> GetRepository)
         {
             Repository = repository;
+            this.GetRepository = GetRepository;
         }
         /// <summary>
         /// 根据Id获取药品
@@ -55,7 +57,7 @@ namespace Smart_Medical.Pharmacy
         public async Task<ApiResult<PageResult<List<DrugDto>>>> GetListAsync([FromQuery] DrugSearchDto search)
         {
             var list = await Repository.GetQueryableAsync();
-
+            var lists = await GetRepository.GetQueryableAsync();
             // 按药品名称模糊查询
             if (!string.IsNullOrWhiteSpace(search.DrugName))
             {
@@ -91,10 +93,34 @@ namespace Smart_Medical.Pharmacy
             {
                 list = list.Where(x => x.Stock <= search.StockMax.Value);
             }
+            // 联表查公司名称
+            var query = from drug in list
+                        join company in lists
+                            on drug.PharmaceuticalCompanyId equals company.Id
+                        select new DrugDto
+                        {
+                            DrugID = drug.Id,
+                            DrugName = drug.DrugName,
+                            DrugType = drug.DrugType,
+                            PharmaceuticalCompanyId = company.Id,
+                            PharmaceuticalCompanyName = company.CompanyName,
 
+                            FeeName = drug.FeeName,
+                            DosageForm = drug.DosageForm,
+                            Specification = drug.Specification,
+                            PurchasePrice = drug.PurchasePrice,
+                            SalePrice = drug.SalePrice,
+                            Stock = drug.Stock,
+                            StockUpper = drug.StockUpper,
+                            StockLower = drug.StockLower,
+                            ProductionDate = drug.ProductionDate,
+                            ExpiryDate = drug.ExpiryDate,
+                            Effect = drug.Effect,
+                            Category = drug.Category
+                        };
             // 分页处理
-            var res = list.PageResult(search.pageIndex, search.pageSize);
-            var dto = ObjectMapper.Map<List<Drug>, List<DrugDto>>(res.Queryable.ToList());
+            var res = query.PageResult(search.pageIndex, search.pageSize);
+            var dto = res.Queryable.ToList();
             var pageInfo = new PageResult<List<DrugDto>>
             {
                 Data = dto,
