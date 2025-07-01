@@ -25,15 +25,12 @@ public class Smart_MedicalApplicationModule : AbpModule
         // 注册泛型接口实现（推荐方式，支持所有T）
         context.Services.AddScoped(typeof(IRedisHelper<>), typeof(RedisHelper<>));
 
-        // 或者针对特定类型单独注册（如果有特殊需求）
-        //context.Services.AddScoped<IRedisHelper<List<GetDictionaryDataDto>>, RedisHelper<List<GetDictionaryDataDto>>>();
+       
         Configure<AbpAutoMapperOptions>(options =>
         {
             options.AddMaps<Smart_MedicalApplicationModule>();
         });
-        // 如果 MyRedisHelper 和 DictionaryTypeCacheHelper 没有使用 [Dependency] 特性，则需要在这里手动注册
-        // context.Services.AddScoped(typeof(IMyRedisHelper<>), typeof(MyRedisHelper<>));
-        // context.Services.AddScoped<IDictionaryTypeCacheHelper, DictionaryTypeCacheHelper>();
+       
 
         // 配置 ABP 分布式缓存选项
         Configure<AbpDistributedCacheOptions>(options =>

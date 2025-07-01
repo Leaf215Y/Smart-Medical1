@@ -6,7 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoleDto
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
+using Smart_Medical.Application.Contracts.RBAC.Permissions; // 引用Contracts层的UserRoleDto
 
 namespace Smart_Medical.Application.Contracts.RBAC.Users
 {
@@ -15,10 +16,13 @@ namespace Smart_Medical.Application.Contracts.RBAC.Users
     /// </summary>
     public class UserDto : AuditedEntityDto<Guid>
     {
+        public Guid Id { get; set; }
         public string UserName { get; set; }
         public string UserEmail { get; set; }
         public string UserPhone { get; set; }
         public bool? UserSex { get; set; }
+        public List<string> Permissions { get; set; }
+        public List<string> Roles { get; set; }
 
         // 导航属性的DTO，用于展示关联的用户角色信息
         //public ICollection<UserRoleDto> UserRoles { get; set; }

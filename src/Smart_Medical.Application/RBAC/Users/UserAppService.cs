@@ -13,18 +13,27 @@ using Microsoft.EntityFrameworkCore;
 using Smart_Medical.RBAC; // 引入Domain层的RBAC实体
 using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO和接口
 using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO
-using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的Roles DTO
+using Smart_Medical.Application.Contracts.RBAC.Roles;
+using Smart_Medical.Until.Redis;
+using Smart_Medical.Application.Contracts.RBAC.Permissions; // 引用Contracts层的Roles DTO
 
 namespace Smart_Medical.RBAC.Users
 {
     [ApiExplorerSettings(GroupName = "用户管理")]
     public class UserAppService : ApplicationService, IUserAppService
     {
+        // 定义一个常量作为缓存键，这是这个特定缓存项在 Redis 中的唯一标识。
+        // 使用一个清晰且唯一的键很重要。
+        private const string CacheKey = "permission:All"; // 建议使用更具体的键名和前缀
         private readonly IRepository<User, Guid> _userRepository;
+        private readonly IRedisHelper<List<PermissionDto>> redisHelper;
+        private readonly IRepository<Permission, Guid> permission;
 
-        public UserAppService(IRepository<User, Guid> userRepository)
+        public UserAppService(IRepository<User, Guid> userRepository, IRedisHelper<List<PermissionDto>> redisHelper,IRepository<Permission,Guid> permission)
         {
             _userRepository = userRepository;
+            this.redisHelper = redisHelper;
+            this.permission = permission;
         }
 
         public async Task<ApiResult> CreateAsync(CreateUpdateUserDto input)
@@ -45,7 +54,7 @@ namespace Smart_Medical.RBAC.Users
             await _userRepository.DeleteAsync(user);
             return ApiResult.Success(ResultCode.Success);
         }
-
+       
         public async Task<ApiResult<UserDto>> GetAsync(Guid id)
         {
             // 使用 WithDetailsAsync 联查 UserRoles 及其关联的 Role 实体
@@ -114,24 +123,46 @@ namespace Smart_Medical.RBAC.Users
 
         public async Task<ApiResult<UserDto>> LoginAsync(LoginDto loginDto)
         {
-            // 根据用户名查找用户
+            // 1. 根据用户名查找用户
             var users = await _userRepository.GetQueryableAsync();
-            var user = users.FirstOrDefault(u => u.UserName == loginDto.UserName);
+            // 联查用户-角色-权限
+            var user = await users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                        .ThenInclude(r => r.RolePermissions)
+                            .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(u => u.UserName == loginDto.UserName);
 
-            // 检查用户是否存在
+            // 2. 检查用户是否存在
             if (user == null)
             {
                 return ApiResult<UserDto>.Fail("用户名不存在", ResultCode.NotFound);
             }
 
-            // 验证密码
+            // 3. 验证密码
             if (user.UserPwd != loginDto.UserPwd.GetMD5())
             {
                 return ApiResult<UserDto>.Fail("密码错误", ResultCode.ValidationError);
             }
 
-            // 登录成功，返回用户信息
+            // 4. 登录成功，组装用户信息
             var userDto = ObjectMapper.Map<User, UserDto>(user);
+
+            // 5. 角色列表
+            userDto.Roles = user.UserRoles?
+                .Select(ur => ur.Role?.RoleName)
+                .Where(rn => !string.IsNullOrEmpty(rn))
+                .Distinct()
+                .ToList() ?? new List<string>();
+
+            // 6. 权限列表（去重，返回权限编码或名称均可）
+            userDto.Permissions = user.UserRoles?
+                .SelectMany(ur => ur.Role?.RolePermissions ?? new List<RolePermission>())
+                .Select(rp => rp.Permission?.PermissionCode)
+                .Where(pc => !string.IsNullOrEmpty(pc))
+                .Distinct()
+                .ToList() ?? new List<string>();
+
             return ApiResult<UserDto>.Success(userDto, ResultCode.Success);
         }
 

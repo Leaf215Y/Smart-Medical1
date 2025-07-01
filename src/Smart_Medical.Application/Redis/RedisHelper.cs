@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Smart_Medical.Until.Redis;
 using System;
 using System.Collections.Generic;
@@ -47,18 +48,26 @@ namespace Smart_Medical.Redis
             return value != null;
         }
 
-        public async Task<T> GetAsync(string key)
+        public async Task<T> GetAsync(string key, Func<Task<T>> func)
         {
+            // 1. 先查缓存
             var value = await cache.GetAsync(key);
-            if (value == null)
+            if (value != null)
             {
                 logger.LogInformation($"[RedisHelper] 缓存命中 key: {key}");
+                return value;
             }
-            else
+
+            logger.LogInformation($"[RedisHelper] 缓存无命中 key: {key}");
+
+            // 2. 缓存无命中，调用委托获取数据
+            var result = await func();
+            if (result != null)
             {
-                logger.LogInformation($"[RedisHelper] 缓存命中 key: {key}");
+                // 3. 写入缓存
+                await cache.SetAsync(key, result);
             }
-            return value;
+            return result;
         }
 
         public async Task RemoveAsync(string key)

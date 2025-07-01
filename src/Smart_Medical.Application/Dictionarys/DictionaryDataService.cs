@@ -81,16 +81,7 @@ namespace Smart_Medical.Dictionarys
             await dictionaryData.UpdateAsync(dto);
             return ApiResult.Success(ResultCode.Success);
         }
-        /// <summary>
-        /// 获取字典数据缓存
-        /// </summary>
-        /// <returns></returns>
-        private async Task LoadDictionaryDataDto()
-        {
-            var datalist = await dictionaryData.GetQueryableAsync();
-            var dtoList = ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(datalist.ToList());
-            await dictdatadto.SetAsync(CacheKey, dtoList);
-        }
+        
         /// <summary>
         /// 获取字典数据
         /// </summary>
@@ -98,16 +89,18 @@ namespace Smart_Medical.Dictionarys
         [HttpGet]
         public async Task<ApiResult<PageResult<List<GetDictionaryDataDto>>>> GetDictionaryDataList([FromQuery] GetDictionaryDataSearchDto search)
         {
-            var datalist = await dictdatadto.GetAsync(CacheKey);
-            if (datalist == null)// 检查是否为null或空列表
+            // 利用缓存穿透，自动加载缓存
+            var datalist = await dictdatadto.GetAsync(CacheKey, async () =>
             {
-                await LoadDictionaryDataDto(); // 字典类型缓存中没有数据（或已过期)就调用内部方法加载数据到缓存
-                datalist = await dictdatadto.GetAsync(CacheKey);//// 再次从缓存获取，确保拿到最新加载的数据
-            }
-            //// 确保即使缓存加载失败，allTypesFromCache 也不会是 null，避免后续操作出错
-            //datalist ??= new List<GetDictionaryDataDto>();
+                var query = await dictionaryData.GetQueryableAsync();
+                return ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(query.ToList());
+            });
 
-            var datalistres= datalist.WhereIf(!string.IsNullOrEmpty(search.DictionaryDataName), x => x.DictionaryDataName.Contains(search.DictionaryDataName))
+            // 防御性处理，确保 datalist 不为 null
+            datalist ??= new List<GetDictionaryDataDto>();
+
+            // 过滤和分页
+            var datalistres = datalist.WhereIf(!string.IsNullOrEmpty(search.DictionaryDataName), x => x.DictionaryDataName.Contains(search.DictionaryDataName))
                 .WhereIf(search.DictionaryDataState!=null, x => x.DictionaryDataState == search.DictionaryDataState);
             var res = datalistres.AsQueryable().PageResult(search.PageIndex, search.PageSize);
             //var dto = ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(res.Queryable.ToList());
