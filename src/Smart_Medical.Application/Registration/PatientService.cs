@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Smart_Medical.Appointment;
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
@@ -52,9 +53,20 @@ namespace Smart_Medical.Registration
         /// 药品
         /// </summary>
         private readonly IRepository<Drug, int> _drugRepo;
+        /// <summary>
+        /// 预约记录
+        /// </summary>
+        private readonly IRepository<Smart_Medical.Patient.Appointment, Guid> _appointment;
 
         public PatientService(
-            IUnitOfWorkManager unitOfWorkManager, IRepository<DoctorClinic, Guid> doctorclinRepo, IRepository<BasicPatientInfo, Guid> basicpatientRepo, IRepository<Sick, Guid> sickRepo, IRepository<PatientPrescription, Guid> prescriptionRepo, IRepository<Drug, int> drugRepo)
+            IUnitOfWorkManager unitOfWorkManager,
+            IRepository<DoctorClinic, Guid> doctorclinRepo,
+            IRepository<BasicPatientInfo, Guid> basicpatientRepo,
+            IRepository<Sick, Guid> sickRepo,
+            IRepository<PatientPrescription, Guid> prescriptionRepo
+            , IRepository<Drug, int> drugRepo
+            , IRepository<Smart_Medical.Patient.Appointment, Guid> appointmentRep 
+            )
         {
             _unitOfWorkManager = unitOfWorkManager;
             _doctorclinRepo = doctorclinRepo;
@@ -62,6 +74,7 @@ namespace Smart_Medical.Registration
             _sickRepo = sickRepo;
             _prescriptionRepo = prescriptionRepo;
             _drugRepo = drugRepo;
+            _appointment= appointmentRep;
         }
 
         /// <summary>
@@ -396,6 +409,143 @@ namespace Smart_Medical.Registration
                 return ApiResult.Fail("系统错误：" + ex.Message, ResultCode.Error);
             }
         }
+
+        /// <summary>
+        /// 线上预约
+        /// </summary>
+        /// <returns></returns>
+        [UnitOfWork]// 添加 [UnitOfWork] 特性，确保此方法的数据库操作在事务中执行
+        [HttpPost]
+        public async Task<ApiResult> InsertMakeAppointment(MakeAppointmentDto make)
+        {
+            if (make == null)
+            {
+                return ApiResult.Fail("预约信息不能为空！", ResultCode.Error);
+            }
+
+            //检查患者信息是否存在
+            var res = await _patientRepo.FirstOrDefaultAsync(x => x.IdNumber == make.IdNumber);
+            //查询数据库是否存在此患者  没有此患者信息则添加
+            if (res == null)
+            {
+                //1 先添加患者信息 
+                var basicPatientInfo = ObjectMapper.Map<MakeAppointmentDto, BasicPatientInfo>(make);
+
+                //检查患者信息是否完整
+                if (string.IsNullOrWhiteSpace(basicPatientInfo.PatientName) ||
+                    string.IsNullOrWhiteSpace(basicPatientInfo.IdNumber) ||
+                    string.IsNullOrWhiteSpace(basicPatientInfo.ContactPhone))
+                {
+                    return ApiResult.Fail("患者信息不完整，请检查后重试！", ResultCode.Error);
+                }
+
+                //添加患者信息
+                var patient = await _patientRepo.InsertAsync(basicPatientInfo);
+
+                //拿到刚刚添加的患者信息的id
+                make.PatientId = patient?.Id;
+            }
+            // 如果患者信息已经存在，则直接使用现有的 PatientId
+            else
+            {
+                make.PatientId = res.Id;
+            }
+            //2 添加预约挂号记录
+            Smart_Medical.Patient.Appointment appointment = new Smart_Medical.Patient.Appointment
+            {
+                PatientId = make.PatientId,   
+                AppointmentDateTime = make.AppointmentDateTime,
+                Status = make.Status,
+                ActualFee = make.ActualFee,
+                Remarks = make.Remarks
+            };
+            var appointmentResult = await _appointment.InsertAsync(appointment);
+
+            return ApiResult.Success(ResultCode.Success);
+        }
+
+
+        /// <summary>
+        /// 获取预约挂号分页列表
+        /// </summary>
+        /// <param name="input">查询参数（包含就诊状态、就诊日期、分页信息）</param>
+        /// <returns>ApiResult 分页结果</returns>
+        public async Task<ApiResult<PageResult<List<AppointmentReponseDto>>>> GetAppointment([FromQuery] AppointmentDto input)
+        {
+            try
+            {
+                // 1. 获取预约挂号表的 IQueryable
+                var queryable = await _appointment.GetQueryableAsync();
+                queryable= queryable.Where(x => x.PatientId == input.PatientId); // 只查询当前患者的预约信息
+                // 2. 联查患者基本信息（外键 PatientId -> BasicPatientInfo.Id）
+                var patientQueryable = await _patientRepo.GetQueryableAsync();
+
+                var query = from a in queryable
+                            join p in patientQueryable on a.PatientId equals p.Id
+                            select new { Appointment = a, Patient = p };
+
+                // 3. 条件过滤
+                if (!string.IsNullOrWhiteSpace(input.VisitStatus))
+                {
+                    query = query.Where(x => x.Appointment.Status.ToString() == input.VisitStatus);
+                }
+                if (input.VisitDate != null)
+                {
+                    var date = input.VisitDate;
+                    query = query.Where(x => x.Appointment.AppointmentDateTime.Date == date);
+                }
+
+                // 4. 获取总数
+                var totalCount = await AsyncExecuter.CountAsync(query);
+
+                // 5. 分页
+                var pageData = await AsyncExecuter.ToListAsync(
+                    query
+                        .OrderByDescending(x => x.Appointment.AppointmentDateTime)
+                        .Skip(input.SkipCount)
+                        .Take(input.MaxResultCount)
+                );
+
+                // 6. 映射到响应 DTO
+                var resultList = pageData.Select(x => new AppointmentReponseDto
+                {
+                    PatientId = x.Patient.Id,
+                    AppointmentDateTime = x.Appointment.AppointmentDateTime,
+                    Status = x.Appointment.Status,
+                    ActualFee = x.Appointment.ActualFee,
+                    Remarks = x.Appointment.Remarks,
+                    VisitId = x.Patient.VisitId,
+                    PatientName = x.Patient.PatientName,
+                    Gender = x.Patient.Gender,
+                    Age = x.Patient.Age,
+                    AgeUnit = x.Patient.AgeUnit,
+                    ContactPhone = x.Patient.ContactPhone,
+                    IdNumber = x.Patient.IdNumber,
+                    VisitType = x.Patient.VisitType,
+                    IsInfectiousDisease = x.Patient.IsInfectiousDisease,
+                    DiseaseOnsetTime = x.Patient.DiseaseOnsetTime,
+                    EmergencyTime = x.Patient.EmergencyTime,
+                    VisitStatus = x.Appointment.Status.ToString(),
+                    VisitDate = x.Appointment.AppointmentDateTime.Date
+                }).ToList();
+
+                // 7. 构造分页结果
+                var pageResult = new PageResult<List<AppointmentReponseDto>>
+                {
+                    TotleCount = totalCount,
+                    TotlePage = (int)Math.Ceiling((double)totalCount / input.MaxResultCount),
+                    Data = resultList
+                };
+
+                return ApiResult<PageResult<List<AppointmentReponseDto>>>.Success(pageResult, ResultCode.Success);
+            }
+            catch (Exception ex)
+            {
+                return ApiResult<PageResult<List<AppointmentReponseDto>>>.Fail("获取预约列表失败：" + ex.Message, ResultCode.Error);
+            }
+        }
+
+
     }
 }
 
