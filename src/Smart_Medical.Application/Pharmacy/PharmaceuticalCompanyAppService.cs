@@ -93,6 +93,5 @@ namespace Smart_Medical.Pharmacy
         }
 
 
-     
     }
 }
