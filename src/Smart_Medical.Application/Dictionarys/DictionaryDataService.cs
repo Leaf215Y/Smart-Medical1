@@ -1,17 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Dictionarys.DictionaryDatas;
-using Smart_Medical.Dictionarys.DictionaryTypes;
 using Smart_Medical.Until;
 using Smart_Medical.Until.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Linq.Dynamic.Core.Util.Cache;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Dictionarys
@@ -29,7 +28,7 @@ namespace Smart_Medical.Dictionarys
         private readonly IRepository<DictionaryType, Guid> dictionarytype;
         private readonly IRedisHelper<List<GetDictionaryDataDto>> dictdatadto;
 
-        public DictionaryDataService(IRepository<DictionaryData, Guid> dictionaryData, IRepository<DictionaryType, Guid> dictionarytype,IRedisHelper<List<GetDictionaryDataDto>> dictdatadto)
+        public DictionaryDataService(IRepository<DictionaryData, Guid> dictionaryData, IRepository<DictionaryType, Guid> dictionarytype, IRedisHelper<List<GetDictionaryDataDto>> dictdatadto)
         {
             this.dictionaryData = dictionaryData;
             this.dictionarytype = dictionarytype;
@@ -60,7 +59,7 @@ namespace Smart_Medical.Dictionarys
         {
             var datalist = await dictionaryData.FindAsync(id);
 
-           
+
             if (datalist == null)
             {
                 return ApiResult.Fail("未找到对应的字典数据", ResultCode.NotFound);
@@ -107,8 +106,8 @@ namespace Smart_Medical.Dictionarys
             //// 确保即使缓存加载失败，allTypesFromCache 也不会是 null，避免后续操作出错
             //datalist ??= new List<GetDictionaryDataDto>();
 
-            var datalistres= datalist.WhereIf(!string.IsNullOrEmpty(search.DictionaryDataName), x => x.DictionaryDataName.Contains(search.DictionaryDataName))
-                .WhereIf(search.DictionaryDataState!=null, x => x.DictionaryDataState == search.DictionaryDataState);
+            var datalistres = datalist.WhereIf(!string.IsNullOrEmpty(search.DictionaryDataName), x => x.DictionaryDataName.Contains(search.DictionaryDataName))
+                .WhereIf(search.DictionaryDataState != null, x => x.DictionaryDataState == search.DictionaryDataState);
             var res = datalistres.AsQueryable().PageResult(search.PageIndex, search.PageSize);
             //var dto = ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(res.Queryable.ToList());
             var pageinfo = new PageResult<List<GetDictionaryDataDto>>

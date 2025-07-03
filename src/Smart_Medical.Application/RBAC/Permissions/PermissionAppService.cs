@@ -11,7 +11,11 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.RBAC.Permissions
 {
+    /// <summary>
+    /// 权限管理服务，负责权限的增删改查及菜单树的构建
+    /// </summary>
     [ApiExplorerSettings(GroupName = "权限管理")]
+    //[ExposeServices(typeof(IPrescriptionService))]
     public class PermissionAppService : ApplicationService, IPermissionAppService
     {
         private readonly IRepository<Permission, Guid> _permissionRepository;
@@ -21,10 +25,10 @@ namespace Smart_Medical.RBAC.Permissions
             _permissionRepository = permissionRepository;
         }
         /// <summary>
-        /// 创建权限
+        /// 创建一个新权限
         /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
+        /// <param name="input">创建权限所需的数据传输对象</param>
+        /// <returns>操作结果</returns>
         public async Task<ApiResult> CreateAsync(CreateUpdatePermissionDto input)
         {
             var permission = ObjectMapper.Map<CreateUpdatePermissionDto, Permission>(input);
@@ -32,10 +36,10 @@ namespace Smart_Medical.RBAC.Permissions
             return ApiResult.Success(ResultCode.Success);
         }
         /// <summary>
-        /// 删除权限
+        /// 根据ID删除一个权限
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="id">要删除的权限ID</param>
+        /// <returns>操作结果</returns>
         public async Task<ApiResult> DeleteAsync(Guid id)
         {
             var permission = await _permissionRepository.GetAsync(id);
@@ -47,10 +51,10 @@ namespace Smart_Medical.RBAC.Permissions
             return ApiResult.Success(ResultCode.Success);
         }
         /// <summary>
-        /// 根据Id获取权限信息
+        /// 根据ID获取单个权限的详细信息
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="id">要查询的权限ID</param>
+        /// <returns>包含权限详细信息的ApiResult</returns>
         public async Task<ApiResult<PermissionDto>> GetAsync(Guid id)
         {
             var permission = await _permissionRepository.GetAsync(id);
@@ -62,10 +66,10 @@ namespace Smart_Medical.RBAC.Permissions
             return ApiResult<PermissionDto>.Success(permissionDto, ResultCode.Success);
         }
         /// <summary>
-        /// 获取权限列表
+        /// 根据查询条件分页获取权限列表
         /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
+        /// <param name="input">包含分页和筛选信息的查询DTO</param>
+        /// <returns>包含权限列表和分页信息的ApiResult</returns>
         public async Task<ApiResult<PageResult<List<PermissionDto>>>> GetListAsync([FromQuery] SeachPermissionDto input)
         {
             var queryable = await _permissionRepository.GetQueryableAsync();
@@ -95,11 +99,11 @@ namespace Smart_Medical.RBAC.Permissions
             return ApiResult<PageResult<List<PermissionDto>>>.Success(pageResult, ResultCode.Success);
         }
         /// <summary>
-        /// 修改权限详情
+        /// 根据ID更新一个已有的权限
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
+        /// <param name="id">要更新的权限ID</param>
+        /// <param name="input">包含新权限信息的数据传输对象</param>
+        /// <returns>操作结果</returns>
         public async Task<ApiResult> UpdateAsync(Guid id, CreateUpdatePermissionDto input)
         {
             var permission = await _permissionRepository.GetAsync(id);
@@ -117,7 +121,7 @@ namespace Smart_Medical.RBAC.Permissions
         /// </summary>
         /// <param name="parentId">可选，父级菜单Id，当前未用到</param>
         /// <returns>菜单权限树列表</returns>
-        public async Task<ApiResult<List<GetMenuPermissionTree>>> GetMenuPermissionTreeList(Guid? parentId=null)
+        public async Task<ApiResult<List<GetMenuPermissionTree>>> GetMenuPermissionTreeList(Guid? parentId = null)
         {
             // 1. 获取所有权限数据的 IQueryable
             var permissionList = await _permissionRepository.GetQueryableAsync();
@@ -147,7 +151,7 @@ namespace Smart_Medical.RBAC.Permissions
                             Type = x.Type,
                             PagePath = x.PagePath,
                             ParentId = x.ParentId,
-                            Children= new List<GetMenuPermissionTree>()
+                            Children = new List<GetMenuPermissionTree>()
                             //    Children = permissionEntityList
                             //.Where(c => c.ParentId == x.Id)
                             //.Select(c => new GetMenuPermissionTree

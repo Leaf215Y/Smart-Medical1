@@ -1,19 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
+using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
-using Smart_Medical.Until;
-using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 namespace Smart_Medical.Pharmacy
 {
-    [ApiExplorerSettings(GroupName = "制药公司管理")]
     /// <summary>
-    /// 制药公司服务实现
+    /// 制药公司服务
     /// </summary>
+    [ApiExplorerSettings(GroupName = "制药公司管理")]
     public class PharmaceuticalCompanyAppService : ApplicationService, IPharmaceuticalCompanyAppService
     {
         private readonly IRepository<MedicalHistory, Guid> _repository;
@@ -36,7 +35,7 @@ namespace Smart_Medical.Pharmacy
                 // 从数据库中获取包含指定名称的公司列表
                 var companies = await _repository.GetListAsync(c => c.CompanyName.Contains(name));
 
-                if (companies!=null)
+                if (companies != null)
                 {
                     return ApiResult.Success(ResultCode.NotFound);
                 }
@@ -62,7 +61,7 @@ namespace Smart_Medical.Pharmacy
                 // 获取所有公司列表
                 var companies = await _repository.GetListAsync();
 
-                if (companies!=null)
+                if (companies != null)
                 {
                     return ApiResult.Success(ResultCode.NotFound);
                 }
@@ -84,7 +83,7 @@ namespace Smart_Medical.Pharmacy
             try
             {
                 var entity = ObjectMapper.Map<CreateUpdatePharmaceuticalCompanyDto, MedicalHistory>(input);
-               
+
                 await _repository.InsertAsync(entity);
                 return ApiResult.Success(ResultCode.Success);
             }

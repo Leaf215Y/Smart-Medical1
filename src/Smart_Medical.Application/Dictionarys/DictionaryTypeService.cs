@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Dictionarys.DictionaryTypes;
 using Smart_Medical.Until;
 using System;
@@ -11,8 +10,8 @@ using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Caching;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
-using Volo.Abp.ObjectMapping;
 
 namespace Smart_Medical.Dictionarys
 {
@@ -36,7 +35,7 @@ namespace Smart_Medical.Dictionarys
             this.dicttype = dicttype;
             this.dictypedto = dictypedto;
         }
-        
+
 
         private async Task LoadDictionaryTypeDto()
         {
@@ -67,7 +66,7 @@ namespace Smart_Medical.Dictionarys
         public async Task<ApiResult> InsertDictionaryTypeLAsync(CreateUpdateDictionaryTypeDto input)
         {
 
-           
+
             var res = ObjectMapper.Map<CreateUpdateDictionaryTypeDto, DictionaryType>(input);
             res = await dictionarytype.InsertAsync(res);
             await RemoveAllDictionaryTypesCacheAsync(); // 新增后清除缓存
@@ -107,9 +106,9 @@ namespace Smart_Medical.Dictionarys
         /// <param name="search"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ApiResult<PageResult<List<GetDictionaryTypeDto>>>> GetDictionaryTypeList(string datetype,[FromQuery] GetDictionaryTypeSearchDto search)
+        public async Task<ApiResult<PageResult<List<GetDictionaryTypeDto>>>> GetDictionaryTypeList(string datetype, [FromQuery] GetDictionaryTypeSearchDto search)
         {
-            var typelist=await dictypedto.GetAsync(CacheKey);
+            var typelist = await dictypedto.GetAsync(CacheKey);
             if (typelist == null || !typelist.Any())// 检查是否为null或空列表
             {
                 await LoadDictionaryTypeDto(); // 字典类型缓存中没有数据（或已过期)就调用内部方法加载数据到缓存
@@ -117,7 +116,7 @@ namespace Smart_Medical.Dictionarys
             }
             //// 确保即使缓存加载失败，allTypesFromCache 也不会是 null，避免后续操作出错
             typelist ??= new List<GetDictionaryTypeDto>();
-            var filteredTypes = typelist.WhereIf(!string.IsNullOrEmpty(search.DictionaryLabel), x => x.DictionaryValue.Contains(search.DictionaryLabel) || x.DictionaryLabel.Contains(search.DictionaryLabel)).Where(x=>x.DictionaryDataType== datetype);
+            var filteredTypes = typelist.WhereIf(!string.IsNullOrEmpty(search.DictionaryLabel), x => x.DictionaryValue.Contains(search.DictionaryLabel) || x.DictionaryLabel.Contains(search.DictionaryLabel)).Where(x => x.DictionaryDataType == datetype);
             var res = filteredTypes.AsQueryable().PageResult(search.PageIndex, search.PageSize);
             //var dto = ObjectMapper.Map<List<DictionaryType>, List<GetDictionaryTypeDto>>(res.Queryable.ToList());
             var pageinfo = new PageResult<List<GetDictionaryTypeDto>>

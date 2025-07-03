@@ -74,6 +74,8 @@ public class Smart_MedicalHttpApiHostModule : AbpModule
         services.AddTransient<LMZTokenHelper>();
         services.AddSingleton<JwtSecurityTokenHandler>();
 
+        //services.addsc
+
         Configure<AbpAntiForgeryOptions>(options =>
         {
             options.TokenCookie.Expiration = TimeSpan.FromDays(365);

@@ -1,15 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Pharmacy.InAndOutWarehouse;
+using Smart_Medical.Until;
 using System;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
-using Volo.Abp;
-using Smart_Medical.Until;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Smart_Medical.Pharmacy
 {
+    /// <summary>
+    /// 药品入库
+    /// </summary>
     [ApiExplorerSettings(GroupName = "药品入库管理")]
     public class DrugInStockAppService : ApplicationService, IDrugInStockAppService
     {

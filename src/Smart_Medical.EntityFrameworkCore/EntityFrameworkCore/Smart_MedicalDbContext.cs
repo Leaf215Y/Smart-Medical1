@@ -42,6 +42,7 @@ public class Smart_MedicalDbContext :
     /// 角色-权限关联实体的 DbSet。（新增）
     /// </summary>
     public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<UserPatient> UserPatients { get; set; }
 
     public DbSet<Prescription> Prescriptions { get; set; }
     //public DbSet<Medication> Medications { get; set; }
@@ -342,7 +343,28 @@ public class Smart_MedicalDbContext :
                 .HasForeignKey(rp => rp.PermissionId);
         });
 
+        //配置用户和患者的多对多关系
+        builder.Entity<UserPatient>(b =>
+        {
+            b.ToTable(Smart_MedicalConsts.DbTablePrefix + "UserPatients",
+                Smart_MedicalConsts.DbSchema);
 
+            // 配置复合主键
+            b.HasKey(up => new { up.UserId, up.PatientId });
+
+            // 配置与 User 的关系
+            b.HasOne(up => up.User)
+                .WithMany(u => u.UserPatients)
+                .HasForeignKey(up => up.UserId);
+
+            // 配置与 BasicPatientInfo 的关系
+            b.HasOne(up => up.Patient)
+                .WithMany(p => p.UserPatients)
+                .HasForeignKey(up => up.PatientId);
+
+          /*  // 应用 ABP 框架的约定配置
+            b.ConfigureByConvention();*/
+        });
 
     }
 }

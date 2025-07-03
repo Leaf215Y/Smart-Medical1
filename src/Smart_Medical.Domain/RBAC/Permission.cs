@@ -40,6 +40,11 @@ namespace Smart_Medical.RBAC
         public PermissionType Type { get; set; }
 
         /// <summary>
+        /// 自定义属性 (例如：用于存储额外的权限信息) 只有顶级菜单权限需要指定自定义属性。
+        /// </summary>
+        public string? Icon { get; set; } = string.Empty;
+
+        /// <summary>
         /// 对应的页面路径或路由地址 (仅当Type为Menu时有效)  只有菜单权限需要指定页面路径。
         /// </summary>
         [StringLength(200, ErrorMessage = "页面路径长度不能超过 200 个字符。")]

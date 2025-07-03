@@ -41,6 +41,9 @@ namespace Smart_Medical.RBAC
 
         public UserRole(Guid ID) : base()
         {
+
         }
+
+
     }
 }

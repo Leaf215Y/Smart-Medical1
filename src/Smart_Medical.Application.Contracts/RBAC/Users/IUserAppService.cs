@@ -15,10 +15,11 @@ namespace Smart_Medical.Application.Contracts.RBAC.Users
     {
         Task<ApiResult<UserDto>> GetAsync(Guid id);
         Task<ApiResult<PageResult<List<UserDto>>>> GetListAsync(SeachUserDto input);
-        Task<ApiResult> CreateAsync(CreateUpdateUserDto input);
+        Task<ApiResult> InsertUserPTAsync(CreateUpdateUserDto input);
         Task<ApiResult> UpdateAsync(Guid id, CreateUpdateUserDto input);
         Task<ApiResult> DeleteAsync(Guid id);
         Task<ApiResult<UserDto>> GetByUserNameAsync(string username);
         Task<ApiResult<UserDto>> LoginAsync(LoginDto loginDto);
+        Task<ApiResult> AddPatientInfoAsync(Guid userId, AddPatientInfoDto input);
     }
 }

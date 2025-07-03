@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.DoctorvVsit.DockerDepartments;
 using Smart_Medical.Until;
 using System;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.DoctorvVsit
@@ -122,7 +124,7 @@ namespace Smart_Medical.DoctorvVsit
             // 查找所有需要删除的科室实体
 
             var deptListToDelete = await dept.GetQueryableAsync();
-            deptListToDelete=deptListToDelete.Where(d => ids.Contains(d.Id));
+            deptListToDelete = deptListToDelete.Where(d => ids.Contains(d.Id));
             if (!deptListToDelete.Any())
             {
                 return ApiResult.Fail("没有找到匹配的科室信息。", ResultCode.NotFound);
