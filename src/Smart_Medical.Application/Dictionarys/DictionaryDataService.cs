@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Dictionarys.DictionaryDatas;
 using Smart_Medical.Until;
 using Smart_Medical.Until.Redis;

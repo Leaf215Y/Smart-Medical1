@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Dictionarys.DictionaryTypes;
 using Smart_Medical.Until;
 using System;

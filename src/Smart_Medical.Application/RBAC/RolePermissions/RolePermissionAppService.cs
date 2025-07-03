@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Smart_Medical;
 using Volo.Abp.Uow;
+using Volo.Abp.DependencyInjection;
 
 namespace Smart_Medical.RBAC.RolePermissions
 {
