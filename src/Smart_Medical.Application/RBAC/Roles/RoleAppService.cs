@@ -114,7 +114,7 @@ namespace Smart_Medical.RBAC.Roles
                     RoleName = r.RoleName,
                     Description = r.Description,
                     CreationTime = r.CreationTime,
-                     CreatorId = r.CreatorId,
+                     //CreatorId = r.CreatorId,
                     // LastModificationTime = r.LastModificationTime,
                      LastModifierId = r.LastModifierId
                 })
