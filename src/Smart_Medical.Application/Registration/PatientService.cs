@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json;
 using Smart_Medical.Appointment;
 using Smart_Medical.DoctorvVsit;
@@ -46,7 +47,6 @@ namespace Smart_Medical.Registration
         /// 患者开具处方
         /// </summary>
         private readonly IRepository<PatientPrescription, Guid> _prescriptionRepo;
-
         /// <summary>
         /// 药品
         /// </summary>
@@ -62,10 +62,9 @@ namespace Smart_Medical.Registration
             IRepository<DoctorClinic, Guid> doctorclinRepo,
             IRepository<BasicPatientInfo, Guid> basicpatientRepo,
             IRepository<Sick, Guid> sickRepo,
-            IRepository<PatientPrescription, Guid> prescriptionRepo,
-            IRepository<Drug, int> drugRepo,
-            IRepository<Smart_Medical.Patient.Appointment, Guid> appointmentRep,
-            IRepository<UserPatient, Guid> userPatientRepo
+            IRepository<PatientPrescription, Guid> prescriptionRepo
+            , IRepository<Drug, int> drugRepo
+            , IRepository<Smart_Medical.Patient.Appointment, Guid> appointmentRep
             )
         {
             _unitOfWorkManager = unitOfWorkManager;
@@ -75,7 +74,6 @@ namespace Smart_Medical.Registration
             _prescriptionRepo = prescriptionRepo;
             _drugRepo = drugRepo;
             _appointment = appointmentRep;
-            _userPatientRepo = userPatientRepo;
         }
 
         /// <summary>
@@ -83,6 +81,7 @@ namespace Smart_Medical.Registration
         /// </summary>
         /// <param name="input">患者就诊登记信息</param>
         /// <returns>接口返回结果</returns>
+        //[UnitOfWork]
         public async Task<ApiResult> RegistrationPatientAsync(InsertPatientDto input)
         {
             try
@@ -184,7 +183,6 @@ namespace Smart_Medical.Registration
         /// </summary>
         /// <param name="input">参数列表，包含分页和关键词</param>
         /// <returns></returns>
-        //[Authorize]
         public async Task<ApiResult<PagedResultDto<GetVisitingDto>>> VisitingPatientsAsync(GetVistingParameterDtos input)
         {
             try
@@ -227,7 +225,6 @@ namespace Smart_Medical.Registration
 
                 // 7. 实体转 DTO
                 var result = ObjectMapper.Map<List<BasicPatientInfo>, List<GetVisitingDto>>(pagedPatients);
-
                 // 8. 返回分页结果
                 return ApiResult<PagedResultDto<GetVisitingDto>>.Success(
                     new PagedResultDto<GetVisitingDto>(totalCount, result),
@@ -275,39 +272,62 @@ namespace Smart_Medical.Registration
         {
             try
             {
-                //查询流程表是否为初诊，初诊没有病历信息
-
-                // 获取患者基本信息数据
+                // 获取所有患者、就诊记录、病历记录、处方记录的 IQueryable 数据源
                 var patients = await _patientRepo.GetQueryableAsync();
-
-                // 获取就诊记录数据
                 var clinics = await _doctorclinRepo.GetQueryableAsync();
-
-                // 获取病历数据
                 var sicks = await _sickRepo.GetQueryableAsync();
-
-                // 获取处方数据
                 var prescriptions = await _prescriptionRepo.GetQueryableAsync();
 
-                //详细的处方信息需要读取存储的json数据                
+                // 执行联表查询：基于 patientId 联合就诊记录、病历记录、处方记录
+                var query = from p in patients
+                            where p.Id == patientId
+                            join c in clinics on p.Id equals c.PatientId
+                            where c.ExecutionStatus == ExecutionStatus.Completed ||
+                                  c.ExecutionStatus == ExecutionStatus.Cancelled ||
+                                  c.ExecutionStatus == ExecutionStatus.PendingEvaluation
+                            // Left join 病历
+                            join s in sicks on p.Id equals s.BasicPatientId into sickGroup
+                            from s in sickGroup.DefaultIfEmpty()
+                                // Left join 处方
+                            join pr in prescriptions on p.Id equals pr.PatientNumber into presGroup
+                            from pr in presGroup.DefaultIfEmpty()
 
-                //linq联查本身没有问题，在病历表中如果有数据才能执行
+                                // 构建返回的 DTO
+                            select new GetSickInfoDto
+                            {
+                                BasicPatientId = s.Id,
+                                Temperature = s.Temperature, // 体温
+                                Pulse = s.Pulse,             // 脉搏
+                                Breath = s.Breath,           // 呼吸
+                                BloodPressure = s.BloodPressure, // 血压
+                                ChiefComplaint = c.ChiefComplaint, // 主诉
+                                DrugIds = pr.DrugIds,                   // 药品 ID 字符串
+                                PrescriptionTemplateNumber = pr.PrescriptionTemplateNumber, // 模板编号
+                                MedicalAdvice = pr.MedicalAdvice ?? ""      // 医嘱
+                            };
+
+                var result = query
+                            .AsEnumerable()
+                            .GroupBy(item => new
+                            {
+                                item.BasicPatientId,
+                            })
+                            .Select(g => g.First()) // 每组只保留第一个
+                            .Select(item => new GetSickInfoDto
+                            {
+                                Temperature = item.Temperature,
+                                Pulse = item.Pulse,
+                                Breath = item.Breath,
+                                BloodPressure = item.BloodPressure,
+                                ChiefComplaint = item.ChiefComplaint,
+                                PrescriptionTemplateNumber = item.PrescriptionTemplateNumber,
+                                MedicalAdvice = item.MedicalAdvice,
+                                DrugItems = JsonConvert.DeserializeObject<List<DrugItemDto>>(item.DrugIds ?? "") ?? new List<DrugItemDto>(),
+                            })
+                            .ToList();
 
 
-
-                //查询
-                //var result = await AsyncExecuter.ToListAsync(query);
-                //if (result == null)
-                //    ApiResult.Fail("患者病历不存在", ResultCode.NotFound);
-                var result = (from p in patients
-                              join c in clinics on p.Id equals c.PatientId
-                              join s in sicks on p.Id equals s.BasicPatientId
-                              join pr in prescriptions on p.Id equals pr.PatientNumber
-                              where p.Id == patientId
-                              select new GetSickInfoDto
-                              {
-                                  //保留
-                              }).ToList();
+                // 返回成功结果
                 return ApiResult<List<GetSickInfoDto>>.Success(result, ResultCode.Success);
             }
             catch (Exception ex)
@@ -320,7 +340,7 @@ namespace Smart_Medical.Registration
         /// 开具处方
         /// </summary>
         /// <param name="input"></param>
-        /// <returns></returns>
+        /// <returns></returns>        
         public async Task<ApiResult> DoctorsPrescription(DoctorPrescriptionDto input)
         {
             try
