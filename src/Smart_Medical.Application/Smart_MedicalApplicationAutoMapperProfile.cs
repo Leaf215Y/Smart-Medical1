@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Smart_Medical.Application.Contracts.RBAC.Users;
 using Smart_Medical.Appointment;
 using Smart_Medical.Dictionarys;
 using Smart_Medical.Dictionarys.DictionaryDatas;

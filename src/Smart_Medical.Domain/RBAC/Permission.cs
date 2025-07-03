@@ -62,10 +62,6 @@ namespace Smart_Medical.RBAC
         /// 这是一个集合导航属性，用于从 Permission 实体导航到与之关联的所有 RolePermission 实体。
         /// </summary>
         public ICollection<RolePermission> RolePermissions { get; set; }
-        /// <summary>
-        /// 自定义属性
-        /// </summary>
-        public string? Icon { get; set; } = string.Empty;
     }
 
 }

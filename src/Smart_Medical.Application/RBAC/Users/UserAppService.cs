@@ -12,6 +12,9 @@ using Microsoft.EntityFrameworkCore;
 using Smart_Medical.RBAC; // 引入Domain层的RBAC实体
 using Smart_Medical.Until.Redis;
 using Smart_Medical.RBAC.Permissions;
+using Smart_Medical.Patient;
+using Volo.Abp.Uow;
+using Smart_Medical.Application.Contracts.RBAC.Users;
 
 namespace Smart_Medical.RBAC.Users
 {
@@ -32,14 +35,13 @@ namespace Smart_Medical.RBAC.Users
             IRepository<User, Guid> userRepository,
             IRepository<UserPatient, Guid> userPatientRepo,
             IRepository<UserRole, Guid> userRoleRepo,
-            IRepository<BasicPatientInfo, Guid> patientRepo,IRepository<User, Guid> userRepository, IRedisHelper<List<PermissionDto>> redisHelper,IRepository<Permission,Guid> permission
+            IRepository<BasicPatientInfo, Guid> patientRepo,IRedisHelper<List<PermissionDto>> redisHelper,IRepository<Permission,Guid> permission
             )
         {
             _userRepository = userRepository;
             _userPatientRepo = userPatientRepo;
             _userRoleRepo = userRoleRepo;
             _patientRepo = patientRepo;
-             _userRepository = userRepository;
             this.redisHelper = redisHelper;
             this.permission = permission;
         }

@@ -5,6 +5,7 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Smart_Medical.Until;
 using System.Threading.Tasks;
+using Smart_Medical.Application.Contracts.RBAC.Users;
 
 namespace Smart_Medical.RBAC.Users
 {
