@@ -6,7 +6,7 @@ using Volo.Abp.Application.Services;
 using Smart_Medical.Until;
 using System.Threading.Tasks;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Users
+namespace Smart_Medical.RBAC.Users
 {
     /// <summary>
     /// 用户接口服务

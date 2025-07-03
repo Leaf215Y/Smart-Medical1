@@ -27,7 +27,7 @@ namespace Smart_Medical.DoctorvVsit
         public string DepartmentCategory { get; set; } = string.Empty;
 
         /// <summary>
-        /// 科室地址ss
+        /// 科室地址
         /// </summary>
         [StringLength(100, ErrorMessage = "科室地址长度不能超过100个字符")]
         public string Address { get; set; } = string.Empty;

@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.ObjectMapping;
+using Microsoft.EntityFrameworkCore;
+using Smart_Medical.RBAC; // 引入Domain层的RBAC实体
 
 namespace Smart_Medical.RBAC.Roles
 {

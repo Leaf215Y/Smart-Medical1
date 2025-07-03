@@ -1,15 +1,11 @@
 ﻿using AutoMapper;
-using Smart_Medical.Application.Contracts.RBAC.Permissions;
-using Smart_Medical.Application.Contracts.RBAC.RolePermissions;
-using Smart_Medical.Application.Contracts.RBAC.Roles;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles;
-using Smart_Medical.Application.Contracts.RBAC.Users;
 using Smart_Medical.Appointment;
 using Smart_Medical.Dictionarys;
 using Smart_Medical.Dictionarys.DictionaryDatas;
 using Smart_Medical.Dictionarys.DictionaryTypes;
 using Smart_Medical.DoctorvVsit;
 using Smart_Medical.DoctorvVsit.DockerDepartments;
+using Smart_Medical.DoctorvVsit.DoctorAccounts;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
 using Smart_Medical.Patient;
@@ -17,6 +13,10 @@ using Smart_Medical.Pharmacy;
 using Smart_Medical.Pharmacy.InAndOutWarehouse;
 using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
+using Smart_Medical.RBAC.Permissions;
+using Smart_Medical.RBAC.RolePermissions;
+using Smart_Medical.RBAC.Roles;
+using Smart_Medical.RBAC.UserRoles;
 using Smart_Medical.RBAC.Users;
 using Smart_Medical.UserLoginECC;
 
@@ -71,7 +71,6 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<PrescriptionDto, Prescription>().ReverseMap();
         CreateMap<CreateUpdateMedicationDto, Medication>();
         CreateMap<Medication, MedicationDto>().ReverseMap();
-
         #region 
 
         CreateMap<DoctorClinic, InsertPatientDto>().ReverseMap();
@@ -81,16 +80,16 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<BasicPatientInfo, BasicPatientInfoDto>().ReverseMap();
         CreateMap<User, ResultLoginDto>().ReverseMap();
         #endregion
-
         //CreateMap<List<Medication>, List<MedicationDto>>().ReverseMap();
         //科室
         CreateMap<CreateUpdateDoctorDepartmentDto, DoctorDepartment>().ReverseMap();
         CreateMap<DoctorDepartment, GetDoctorDepartmentListDto>().ReverseMap();
         CreateMap<GetDoctorDepartmentSearchDto, DoctorDepartment>().ReverseMap();
-
-
-
-
+        //医生
+        CreateMap<CreateUpdateDoctorAccountDto, DoctorAccount>().ReverseMap();
+        CreateMap<DoctorAccount, DoctorAccountListDto>().ReverseMap();
+     
+           
         CreateMap<MedicalHistory, PharmaceuticalCompanyDto>();
         CreateMap<CreateUpdatePharmaceuticalCompanyDto, MedicalHistory>();
 

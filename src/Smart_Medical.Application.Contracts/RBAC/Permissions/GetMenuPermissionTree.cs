@@ -49,13 +49,12 @@ namespace Smart_Medical.RBAC.Permissions
         /// 可以为空，表示顶级权限。
         /// </summary>
         public Guid? ParentId { get; set; } = null;
-        public IList<GetMenuPermissionTree> Children { get; set; }=new List<GetMenuPermissionTree>();
-        /// <summary>
-        /// 权限和角色之间的多对多关联导航属性。
-        /// ICollection<RolePermission> 表示一个权限可以被多个角色通过 RolePermission 关联。
-        /// 这是一个集合导航属性，用于从 Permission 实体导航到与之关联的所有 RolePermission 实体。
-        /// </summary>
-       // public ICollection<RolePermission> RolePermissions { get; set; }
 
+        public IList<GetMenuPermissionTree> Children { get; set; }=new List<GetMenuPermissionTree>();
+
+        /// <summary>
+        /// 自定义属性
+        /// </summary>
+        public string? Icon { get; set; } = string.Empty;
     }
 }

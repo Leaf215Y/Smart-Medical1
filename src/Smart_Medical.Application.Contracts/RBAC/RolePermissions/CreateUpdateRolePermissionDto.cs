@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Smart_Medical.Application.Contracts.RBAC.RolePermissions
+namespace Smart_Medical.RBAC.RolePermissions
 {
     public class CreateUpdateRolePermissionDto
     {

@@ -1,9 +1,9 @@
 using System;
 using Volo.Abp.Application.Dtos;
-using Smart_Medical.Application.Contracts.RBAC.Roles; // 引用Contracts层的RoleDto
-using Smart_Medical.Application.Contracts.RBAC.Permissions; // 引用Contracts层的PermissionDto
+using Smart_Medical.RBAC.Roles;
+using Smart_Medical.RBAC.Permissions;
 
-namespace Smart_Medical.Application.Contracts.RBAC.RolePermissions
+namespace Smart_Medical.RBAC.RolePermissions
 {
     public class RolePermissionDto : AuditedEntityDto<Guid>
     {

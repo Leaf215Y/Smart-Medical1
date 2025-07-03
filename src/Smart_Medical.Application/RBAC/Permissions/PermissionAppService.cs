@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Smart_Medical.Application.Contracts.RBAC.Permissions;
 using Smart_Medical.Enums;
 using Smart_Medical.Until;
 using System;
@@ -32,6 +31,7 @@ namespace Smart_Medical.RBAC.Permissions
         public async Task<ApiResult> CreateAsync(CreateUpdatePermissionDto input)
         {
             var permission = ObjectMapper.Map<CreateUpdatePermissionDto, Permission>(input);
+
             await _permissionRepository.InsertAsync(permission);
             return ApiResult.Success(ResultCode.Success);
         }
@@ -73,12 +73,8 @@ namespace Smart_Medical.RBAC.Permissions
         public async Task<ApiResult<PageResult<List<PermissionDto>>>> GetListAsync([FromQuery] SeachPermissionDto input)
         {
             var queryable = await _permissionRepository.GetQueryableAsync();
-
-            if (!string.IsNullOrWhiteSpace(input.PermissionName))
-            {
-                queryable = queryable.Where(p => p.PermissionName.Contains(input.PermissionName));
-            }
-
+           
+            queryable = queryable.WhereIf(!string.IsNullOrWhiteSpace(input.PermissionName), x => x.PermissionName.Contains(input.PermissionName) || x.PagePath.Contains(input.PermissionName)|| x.PermissionCode.Contains(input.PermissionName));
             var totalCount = await AsyncExecuter.CountAsync(queryable);
 
             queryable = queryable
@@ -140,6 +136,7 @@ namespace Smart_Medical.RBAC.Permissions
                     Type = p.Type,
                     PagePath = p.PagePath,
                     ParentId = p.ParentId,
+                    Icon = p.Icon,
                     // 4. 查找该顶级菜单下的所有子菜单（ParentId==当前菜单Id，且&& x.Type == PermissionType.Menu）
                     Children = permissionEntityList
                         .Where(x => x.ParentId == p.Id && x.Type == PermissionType.Menu)
@@ -151,7 +148,8 @@ namespace Smart_Medical.RBAC.Permissions
                             Type = x.Type,
                             PagePath = x.PagePath,
                             ParentId = x.ParentId,
-                            Children = new List<GetMenuPermissionTree>()
+                            Icon = x.Icon,
+                            Children= new List<GetMenuPermissionTree>()
                             //    Children = permissionEntityList
                             //.Where(c => c.ParentId == x.Id)
                             //.Select(c => new GetMenuPermissionTree
@@ -170,5 +168,6 @@ namespace Smart_Medical.RBAC.Permissions
             // 5. 返回树形结构结果
             return ApiResult<List<GetMenuPermissionTree>>.Success(menuPermissionList, ResultCode.Success);
         }
+       
     }
 }

@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO和接口
-using Smart_Medical.Application.Contracts.RBAC.Users; // 修复：添加对UserDto的引用
-using Smart_Medical.Application.Contracts.RBAC.Roles; // 修复：添加对RoleDto的引用
+using Smart_Medical.RBAC.Roles;
+using Smart_Medical.RBAC.Users;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;

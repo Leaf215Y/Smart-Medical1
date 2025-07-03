@@ -33,13 +33,14 @@ public class Smart_MedicalApplicationModule : AbpModule
         context.Services.AddScoped(typeof(IRedisHelper<>), typeof(RedisHelper<>));
 
         // 显式注册 DictionaryDataService
-        context.Services.AddScoped<IDictionaryDataService, DictionaryDataService>();
+        //context.Services.AddScoped<IDictionaryDataService, DictionaryDataService>();
 
         // 配置自动映射
         Configure<AbpAutoMapperOptions>(options =>
         {
             options.AddMaps<Smart_MedicalApplicationModule>();
         });
+       
 
         // 配置 ABP 分布式缓存选项
         Configure<AbpDistributedCacheOptions>(options =>

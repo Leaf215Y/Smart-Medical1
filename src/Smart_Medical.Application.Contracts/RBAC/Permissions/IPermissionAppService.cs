@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Smart_Medical.Until;
 using Volo.Abp.Application.Dtos;
-using Smart_Medical.RBAC.Permissions;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Permissions
+namespace Smart_Medical.RBAC.Permissions
 {
     /// <summary>
     /// 权限接口服务

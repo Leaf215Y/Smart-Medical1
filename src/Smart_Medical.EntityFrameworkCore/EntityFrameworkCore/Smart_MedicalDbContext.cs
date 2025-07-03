@@ -76,7 +76,11 @@ public class Smart_MedicalDbContext :
     {
 
     }
-
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.EnableSensitiveDataLogging(); // 添加此行
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

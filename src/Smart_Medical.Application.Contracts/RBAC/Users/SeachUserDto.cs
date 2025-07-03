@@ -1,6 +1,6 @@
 using Volo.Abp.Application.Dtos;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Users
+namespace Smart_Medical.RBAC.Users
 {
     public class SeachUserDto : PagedAndSortedResultRequestDto
     {

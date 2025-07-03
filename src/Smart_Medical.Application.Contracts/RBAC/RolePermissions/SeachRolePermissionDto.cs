@@ -1,7 +1,7 @@
 using System;
 using Volo.Abp.Application.Dtos;
 
-namespace Smart_Medical.Application.Contracts.RBAC.RolePermissions
+namespace Smart_Medical.RBAC.RolePermissions
 {
     public class SeachRolePermissionDto : PagedAndSortedResultRequestDto
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Roles
+namespace Smart_Medical.RBAC.Roles
 {
     /// <summary>
     /// 角色接口服务

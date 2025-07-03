@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Users
+namespace Smart_Medical.RBAC.Users
 {
     public class LoginDto
     {

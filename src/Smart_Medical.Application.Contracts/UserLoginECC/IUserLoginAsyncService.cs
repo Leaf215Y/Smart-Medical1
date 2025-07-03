@@ -1,4 +1,4 @@
-﻿using Smart_Medical.Application.Contracts.RBAC.Users;
+﻿using Smart_Medical.RBAC.Users;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
