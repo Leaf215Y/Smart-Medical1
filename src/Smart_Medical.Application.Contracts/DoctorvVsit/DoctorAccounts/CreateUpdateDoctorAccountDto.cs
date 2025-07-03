@@ -4,14 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Volo.Abp.Domain.Entities.Auditing;
 
-namespace Smart_Medical.DoctorvVsit
+namespace Smart_Medical.DoctorvVsit.DoctorAccounts
 {
-    /// <summary>
-    /// 医生信息表
-    /// </summary>
-    public class DoctorAccount : FullAuditedAggregateRoot<Guid>
+    public class CreateUpdateDoctorAccountDto
     {
         /// <summary>
         /// 所属科室编号
@@ -29,7 +25,6 @@ namespace Smart_Medical.DoctorvVsit
         [Required(ErrorMessage = "账户标识不能为空")]
         [StringLength(200, ErrorMessage = "账户标识长度不能超过200个字符")]
         public string AccountId { get; set; } = string.Empty;
-
         /// <summary>
         /// 员工工号
         /// </summary>
@@ -56,7 +51,5 @@ namespace Smart_Medical.DoctorvVsit
         /// </summary>
         [StringLength(30, ErrorMessage = "科室名称长度不能超过30个字符")]
         public string DepartmentName { get; set; } = string.Empty;
-
-
     }
 }

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Smart_Medical.Application.Contracts.RBAC.Permissions;
 using Smart_Medical.Enums;
 using Smart_Medical.Until;
 using System;

@@ -5,7 +5,7 @@ using Volo.Abp.Application.Services;
 using Volo.Abp.Application.Dtos;
 using Smart_Medical.Until;
 
-namespace Smart_Medical.Application.Contracts.RBAC.RolePermissions
+namespace Smart_Medical.RBAC.RolePermissions
 {
     /// <summary>
     /// 角色权限关联接口服务

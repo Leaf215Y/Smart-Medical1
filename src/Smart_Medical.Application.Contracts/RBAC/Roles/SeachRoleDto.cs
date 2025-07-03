@@ -1,6 +1,6 @@
 using Volo.Abp.Application.Dtos;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Roles
+namespace Smart_Medical.RBAC.Roles
 {
     public class SeachRoleDto : PagedAndSortedResultRequestDto
     {

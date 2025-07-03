@@ -103,7 +103,7 @@ namespace Smart_Medical.Dictionarys
             var datalistres = datalist.WhereIf(!string.IsNullOrEmpty(search.DictionaryDataName), x => x.DictionaryDataName.Contains(search.DictionaryDataName))
                 .WhereIf(search.DictionaryDataState!=null, x => x.DictionaryDataState == search.DictionaryDataState);
             var res = datalistres.AsQueryable().PageResult(search.PageIndex, search.PageSize);
-            //var dto = ObjectMapper.Map<List<DictionaryData>, List<GetDictionaryDataDto>>(res.Queryable.ToList());
+            
             var pageinfo = new PageResult<List<GetDictionaryDataDto>>
             {
                 Data = res.Queryable.ToList(),

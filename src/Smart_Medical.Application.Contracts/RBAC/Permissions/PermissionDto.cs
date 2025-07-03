@@ -1,9 +1,8 @@
 using Smart_Medical.Enums;
-
 using System;
 using Volo.Abp.Application.Dtos;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Permissions
+namespace Smart_Medical.RBAC.Permissions
 {
     public class PermissionDto : AuditedEntityDto<Guid>
     {

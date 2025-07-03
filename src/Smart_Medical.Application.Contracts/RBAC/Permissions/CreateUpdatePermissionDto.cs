@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Application.Dtos;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Permissions
+namespace Smart_Medical.RBAC.Permissions
 {
     public class CreateUpdatePermissionDto
     {

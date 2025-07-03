@@ -5,7 +5,7 @@ using Volo.Abp.Application.Services;
 using Volo.Abp.Application.Dtos;
 using Smart_Medical.Until;
 
-namespace Smart_Medical.Application.Contracts.RBAC.UserRoles
+namespace Smart_Medical.RBAC.UserRoles
 {
     /// <summary>
     /// 用户角色关联接口服务

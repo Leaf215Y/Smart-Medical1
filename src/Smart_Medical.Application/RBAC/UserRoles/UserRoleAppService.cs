@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO和接口
+using Smart_Medical.RBAC.Roles;
+using Smart_Medical.RBAC.Users;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
@@ -82,11 +83,17 @@ namespace Smart_Medical.RBAC.UserRoles
             return ApiResult<UserRoleDto>.Success(userRoleDto, ResultCode.Success);
         }
 
+        /// <summary>
+        /// 根据查询条件分页获取用户角色关联列表
+        /// </summary>
+        /// <param name="input">包含分页和筛选信息的查询DTO</param>
+        /// <returns>包含用户角色关联列表和分页信息的ApiResult</returns>
         public async Task<ApiResult<PageResult<List<UserRoleDto>>>> GetListAsync([FromQuery] SeachUserRoleDto input)
         {
             var queryable = await _userRoleRepository.GetQueryableAsync();
 
             // 使用 Include 联查 User 和 Role 实体，确保在映射到 DTO 时包含关联数据
+            // 在使用Select投影并需要访问导航属性时，Include是必需的。
             queryable = queryable.Include(ur => ur.User).Include(ur => ur.Role);
 
             if (input.UserId.HasValue)
@@ -105,8 +112,39 @@ namespace Smart_Medical.RBAC.UserRoles
                 .Take(input.MaxResultCount)
                 .OrderBy(ur => ur.UserId); // 默认排序
 
-            var userRoles = await AsyncExecuter.ToListAsync(queryable);
-            var userRoleDtos = ObjectMapper.Map<List<UserRole>, List<UserRoleDto>>(userRoles);
+            var userRoleDtos = await AsyncExecuter.ToListAsync(
+                queryable.Select(ur => new UserRoleDto
+                {
+                    Id = ur.Id,
+                    UserId = ur.UserId,
+                    RoleId = ur.RoleId,
+                    CreationTime = ur.CreationTime,
+                    CreatorId = ur.CreatorId,
+                    LastModificationTime = ur.LastModificationTime,
+                    LastModifierId = ur.LastModifierId,
+
+                    // 因为我们已使用Include，可以断定ur.User和ur.Role在此处不为null
+                    User = new UserDto
+                    {
+                        UserName = ur.User.UserName,
+                        UserEmail = ur.User!.UserEmail,
+                        UserPhone = ur.User!.UserPhone,
+                        UserSex = ur.User!.UserSex,
+                        // 此处的UserDto中的RoleName可以从当前UserRole关联的Role中获取
+                        RoleName = ur.Role!.RoleName
+                    },
+                    Role = new RoleDto
+                    {
+                        Id = ur.Role!.Id,
+                        RoleName = ur.Role!.RoleName,
+                        Description = ur.Role!.Description,
+                        CreationTime = ur.Role!.CreationTime,
+                        CreatorId = ur.Role!.CreatorId,
+                        LastModificationTime = ur.Role!.LastModificationTime,
+                        LastModifierId = ur.Role!.LastModifierId
+                    }
+                })
+            );
 
             var pageResult = new PageResult<List<UserRoleDto>>
             {
@@ -117,7 +155,6 @@ namespace Smart_Medical.RBAC.UserRoles
 
             return ApiResult<PageResult<List<UserRoleDto>>>.Success(pageResult, ResultCode.Success);
         }
-        
         [UnitOfWork] // 添加 [UnitOfWork] 特性，确保此方法的数据库操作在事务中执行
         public async Task<ApiResult> UpdateAsync(Guid userId, List<Guid> roleIds)
         {

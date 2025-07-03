@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Dictionarys.DictionaryDatas;
 using Smart_Medical.DoctorvVsit.DockerDepartments;
 using Smart_Medical.Until;
+using Smart_Medical.Until.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,7 @@ using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.ObjectMapping;
 
 namespace Smart_Medical.DoctorvVsit
 {
@@ -17,11 +20,16 @@ namespace Smart_Medical.DoctorvVsit
     [ApiExplorerSettings(GroupName = "科室管理")]
     public class DoctorDepartmentService : ApplicationService, IDoctorDepartmentService
     {
+        // 定义一个常量作为缓存键，这是这个特定缓存项在 Redis 中的唯一标识。
+        // 使用一个清晰且唯一的键很重要。
+        private const string CacheKey = "SmartMedical:dept:All"; // 建议使用更具体的键名和前缀
         private readonly IRepository<DoctorDepartment, Guid> dept;
+        private readonly IRedisHelper<List<GetDoctorDepartmentListDto>> deptredis;
 
-        public DoctorDepartmentService(IRepository<DoctorDepartment, Guid> dept)
+        public DoctorDepartmentService(IRepository<DoctorDepartment, Guid> dept, IRedisHelper<List<GetDoctorDepartmentListDto>> deptredis)
         {
             this.dept = dept;
+            this.deptredis = deptredis;
         }
         /// <summary>
         /// 新增科室
@@ -36,20 +44,39 @@ namespace Smart_Medical.DoctorvVsit
             return ApiResult.Success(ResultCode.Success);
         }
         /// <summary>
-        /// 获取科室列表
+        /// 获取科室信息列表
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResult<List<GetDoctorDepartmentListDto>>> GetDoctorDepartment()
+        {
+            var datalist=await deptredis.GetAsync(CacheKey, async () =>
+            {
+                var deptlist = await dept.GetQueryableAsync();
+                return ObjectMapper.Map<List<DoctorDepartment>, List<GetDoctorDepartmentListDto>>(deptlist.ToList());
+            });
+            datalist ??=new List<GetDoctorDepartmentListDto>();
+            return ApiResult<List<GetDoctorDepartmentListDto>>.Success(datalist, ResultCode.Success);
+        }
+        /// <summary>
+        /// 获取科室列表(分页)
         /// </summary>
         /// <param name="search"></param>
         /// <returns></returns>
         [HttpGet]
         public async Task<ApiResult<PageResult<List<GetDoctorDepartmentListDto>>>> GetDoctorDepartmentList([FromQuery] GetDoctorDepartmentSearchDto search)
         {
-            var list = await dept.GetQueryableAsync();
-            list = list.WhereIf(!string.IsNullOrEmpty(search.DepartmentName), x => x.DepartmentName.Contains(search.DepartmentName));
-            var res = list.PageResult(search.PageIndex, search.PageSize);
-            var dto = ObjectMapper.Map<List<DoctorDepartment>, List<GetDoctorDepartmentListDto>>(res.Queryable.ToList());
+            var datalist = await deptredis.GetAsync(CacheKey, async () =>
+            {
+                var deptlist = await dept.GetQueryableAsync();
+                return ObjectMapper.Map<List<DoctorDepartment>, List<GetDoctorDepartmentListDto>>(deptlist.ToList());
+            });
+            datalist ??= new List<GetDoctorDepartmentListDto>();
+            //var list = await dept.GetQueryableAsync();
+           var list = datalist.WhereIf(!string.IsNullOrEmpty(search.DepartmentName), x => x.DepartmentName.Contains(search.DepartmentName));
+            var res = list.AsQueryable().PageResult(search.PageIndex, search.PageSize);
             var pageInfo = new PageResult<List<GetDoctorDepartmentListDto>>
             {
-                Data = dto,
+                Data = res.Queryable.ToList(),
                 TotleCount = res.RowCount,
                 TotlePage = (int)Math.Ceiling((double)res.RowCount / search.PageSize),
             };

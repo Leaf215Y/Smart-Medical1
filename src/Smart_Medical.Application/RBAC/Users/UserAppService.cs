@@ -1,7 +1,6 @@
 ﻿using MD5Hash;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO和接口
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
@@ -11,11 +10,8 @@ using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Smart_Medical.RBAC; // 引入Domain层的RBAC实体
-using Smart_Medical.Application.Contracts.RBAC.Users; // 引用Contracts层的Users DTO和接口
-using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO
-using Smart_Medical.Application.Contracts.RBAC.Roles;
 using Smart_Medical.Until.Redis;
-using Smart_Medical.Application.Contracts.RBAC.Permissions; // 引用Contracts层的Roles DTO
+using Smart_Medical.RBAC.Permissions;
 
 namespace Smart_Medical.RBAC.Users
 {
@@ -70,12 +66,18 @@ namespace Smart_Medical.RBAC.Users
             return ApiResult<UserDto>.Success(userDto, ResultCode.Success);
         }
 
+        /// <summary>
+        /// 根据查询条件分页获取用户列表
+        /// </summary>
+        /// <param name="input">包含分页和筛选信息的查询DTO</param>
+        /// <returns>包含用户列表和分页信息的ApiResult</returns>
         public async Task<ApiResult<PageResult<List<UserDto>>>> GetListAsync([FromQuery] SeachUserDto input)
         {
             var queryable = await _userRepository.GetQueryableAsync();
 
-            // 使用 Include 联查 UserRoles 及其关联的 Role 实体，确保在映射到 DTO 时包含关联数据
-            queryable = queryable.Include(u => u.UserRoles).ThenInclude(ur => ur.Role);
+            // BUG修复：为了能在后续投影中安全地获取角色名，需要Include关联的角色数据
+            queryable = queryable
+                .Include(u => u.UserRoles).ThenInclude(ur => ur.Role);
 
             if (!string.IsNullOrWhiteSpace(input.UserName))
             {
@@ -97,8 +99,20 @@ namespace Smart_Medical.RBAC.Users
                 .Take(input.MaxResultCount)
                 .OrderBy(u => u.UserName); // 默认排序
 
-            var users = await AsyncExecuter.ToListAsync(queryable);
-            var userDtos = ObjectMapper.Map<List<User>, List<UserDto>>(users);
+            // 使用 Select 进行投影，直接生成 UserDto 列表，绕过 AutoMapper
+            var userDtos = await AsyncExecuter.ToListAsync(
+                queryable.Select(u => new UserDto
+                {
+                    UserName = u.UserName,
+                    UserEmail = u.UserEmail,
+                    UserPhone = u.UserPhone,
+                    UserSex = u.UserSex,
+                    // EF Core表达式树不支持空传播运算符(?.), 改用Select().FirstOrDefault()达到同样的安全效果
+                    RoleName = u.UserRoles.Select(ur => ur.Role.RoleName).FirstOrDefault()
+
+                    // 根据你的要求，不再映射审计字段
+                })
+            );
 
             var pageResult = new PageResult<List<UserDto>>
             {
@@ -125,13 +139,14 @@ namespace Smart_Medical.RBAC.Users
         {
             // 1. 根据用户名查找用户
             var users = await _userRepository.GetQueryableAsync();
-            // 联查用户-角色-权限
-            var user = await users
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                        .ThenInclude(r => r.RolePermissions)
-                            .ThenInclude(rp => rp.Permission)
-                .FirstOrDefaultAsync(u => u.UserName == loginDto.UserName);
+            //// 联查用户-角色-权限
+            //var user = await users
+            //    .Include(u => u.UserRoles)
+            //        .ThenInclude(ur => ur.Role)
+            //            .ThenInclude(r => r.RolePermissions)
+            //                .ThenInclude(rp => rp.Permission)
+            //    .FirstOrDefaultAsync(u => u.UserName == loginDto.UserName);
+            var user= await users.FirstOrDefaultAsync(u => u.UserName == loginDto.UserName);
 
             // 2. 检查用户是否存在
             if (user == null)
@@ -149,19 +164,22 @@ namespace Smart_Medical.RBAC.Users
             var userDto = ObjectMapper.Map<User, UserDto>(user);
 
             // 5. 角色列表
-            userDto.Roles = user.UserRoles?
-                .Select(ur => ur.Role?.RoleName)
-                .Where(rn => !string.IsNullOrEmpty(rn))
-                .Distinct()
-                .ToList() ?? new List<string>();
+            //userDto.Roles = user.UserRoles?
+            //    .Select(ur => ur.Role?.RoleName)
+            //    .Where(rn => !string.IsNullOrEmpty(rn))
+            //    .Distinct()
+            //    .ToList() ?? new List<string>();
 
-            // 6. 权限列表（去重，返回权限编码或名称均可）
-            userDto.Permissions = user.UserRoles?
-                .SelectMany(ur => ur.Role?.RolePermissions ?? new List<RolePermission>())
-                .Select(rp => rp.Permission?.PermissionCode)
-                .Where(pc => !string.IsNullOrEmpty(pc))
-                .Distinct()
-                .ToList() ?? new List<string>();
+            //// 6. 权限列表（去重，返回权限编码或名称均可）
+            //userDto.Permissions = user.UserRoles?
+            //    .SelectMany(ur => ur.Role?.RolePermissions ?? new List<RolePermission>())
+            //    .Select(rp => rp.Permission?.PermissionCode)
+            //    .Where(pc => !string.IsNullOrEmpty(pc))
+            //    .Distinct()
+            //    .ToList() ?? new List<string>();
+            var permissiondtos= await permission.GetQueryableAsync();
+            permissiondtos= permissiondtos.Where(x=>x.Type==Enums.PermissionType.Button);
+            userDto.Permissions = permissiondtos.Select(x=>x.PermissionCode).ToList();
 
             return ApiResult<UserDto>.Success(userDto, ResultCode.Success);
         }
