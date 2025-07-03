@@ -40,6 +40,11 @@ namespace Smart_Medical.RBAC
         public PermissionType Type { get; set; }
 
         /// <summary>
+        /// 自定义属性 (例如：用于存储额外的权限信息) 只有顶级菜单权限需要指定自定义属性。
+        /// </summary>
+        public string? Icon { get; set; } = string.Empty;
+
+        /// <summary>
         /// 对应的页面路径或路由地址 (仅当Type为Menu时有效)  只有菜单权限需要指定页面路径。
         /// </summary>
         [StringLength(200, ErrorMessage = "页面路径长度不能超过 200 个字符。")]
@@ -57,24 +62,10 @@ namespace Smart_Medical.RBAC
         /// 这是一个集合导航属性，用于从 Permission 实体导航到与之关联的所有 RolePermission 实体。
         /// </summary>
         public ICollection<RolePermission> RolePermissions { get; set; }
+        /// <summary>
+        /// 自定义属性
+        /// </summary>
+        public string? Icon { get; set; } = string.Empty;
     }
 
-    // 权限类型枚举，用于区分权限是菜单、按钮还是其他类型
-    //public enum PermissionType
-    //{
-    //    /// <summary>
-    //    /// 菜单权限（用于控制菜单的显示）
-    //    /// </summary>
-    //    Menu = 0,
-
-    //    /// <summary>
-    //    /// 按钮权限（用于控制页面内按钮的显示和操作）
-    //    /// </summary>
-    //    Button = 1,
-
-    //    /// <summary>
-    //    /// 其他操作权限（例如API访问权限等）
-    //    /// </summary>
-    //    Operation = 2
-    //}
 }

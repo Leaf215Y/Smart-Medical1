@@ -44,5 +44,10 @@ namespace Smart_Medical.RBAC
         /// 这是一个集合导航属性，用于从 User 实体导航到与之关联的所有 UserRole 实体。
         /// </summary>
         public ICollection<UserRole> UserRoles { get; set; } // 新增：用户和角色之间的关联
+
+        /// <summary>
+        /// 用户关联的患者集合
+        /// </summary>
+        public ICollection<UserPatient> UserPatients { get; set; }
     }
 }

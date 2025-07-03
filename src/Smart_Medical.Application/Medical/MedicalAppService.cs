@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
@@ -7,14 +8,18 @@ using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Medical
 {
-    [ApiExplorerSettings(GroupName = "病种管理")]
+    /// <summary>
+    /// 医疗管理AppService
+    /// </summary>
+    [ApiExplorerSettings(GroupName = "医疗管理")]
     public class MedicalAppService : ApplicationService, IMedicalAppService
     {
-        private readonly IRepository<Sick,Guid> _repository;
+        private readonly IRepository<Sick, Guid> _repository;
 
         public MedicalAppService(IRepository<Sick, Guid> repository)
         {
@@ -56,7 +61,7 @@ namespace Smart_Medical.Medical
             var list = await _repository.GetQueryableAsync();
 
 
-            
+
             list = list.WhereIf(!string.IsNullOrWhiteSpace(search.PatientName), x => x.PatientName.Contains(search.PatientName))
                        .WhereIf(!string.IsNullOrWhiteSpace(search.InpatientNumber), x => x.InpatientNumber.Contains(search.InpatientNumber))
                        .WhereIf(!string.IsNullOrWhiteSpace(search.AdmissionDiagnosis), x => x.AdmissionDiagnosis.Contains(search.AdmissionDiagnosis));
@@ -173,8 +178,8 @@ namespace Smart_Medical.Medical
             return ApiResult.Success(ResultCode.Success);
         }
 
-        
 
-        
+
+
     }
 }

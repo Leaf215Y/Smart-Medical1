@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Smart_Medical.Application.Contracts.RBAC.UserRoles
+namespace Smart_Medical.RBAC.UserRoles
 {
     public class CreateUpdateUserRoleDto
     {

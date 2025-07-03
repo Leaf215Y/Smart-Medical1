@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Smart_Medical.Application.Contracts.RBAC.UserRoles;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
@@ -8,8 +7,8 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Volo.Abp;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Uow;
 using NPOI.XSSF.UserModel;
@@ -18,6 +17,9 @@ using System.IO;
 
 namespace Smart_Medical.Pharmacy
 {
+    /// <summary>
+    /// 药品管理
+    /// </summary>
     [ApiExplorerSettings(GroupName = "药品管理")]
     public class DrugAppService : ApplicationService, IDrugAppService
     {
@@ -194,7 +196,7 @@ namespace Smart_Medical.Pharmacy
                 throw new UserFriendlyException("生产日期不能晚于有效期！");
 
             ObjectMapper.Map(input, drug);
-            
+
             await Repository.UpdateAsync(drug);
 
             return ApiResult.Success(ResultCode.Success);

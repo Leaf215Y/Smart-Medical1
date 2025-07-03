@@ -1,27 +1,24 @@
 ﻿using AutoMapper;
-using Smart_Medical.Application.Contracts.RBAC.Permissions;
-using Smart_Medical.Application.Contracts.RBAC.RolePermissions;
-using Smart_Medical.Application.Contracts.RBAC.Roles;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles;
-using Smart_Medical.Application.Contracts.RBAC.Users;
 using Smart_Medical.Appointment;
 using Smart_Medical.Dictionarys;
 using Smart_Medical.Dictionarys.DictionaryDatas;
 using Smart_Medical.Dictionarys.DictionaryTypes;
 using Smart_Medical.DoctorvVsit;
-using Smart_Medical.DoctorvVsit;
 using Smart_Medical.DoctorvVsit.DockerDepartments;
-using Smart_Medical.DoctorvVsit.DockerDepartments;
+using Smart_Medical.DoctorvVsit.DoctorAccounts;
 using Smart_Medical.Medical;
 using Smart_Medical.OutpatientClinic.Dtos;
-using Smart_Medical.OutpatientClinic.Dtos.Parameter;
 using Smart_Medical.Patient;
 using Smart_Medical.Pharmacy;
 using Smart_Medical.Pharmacy.InAndOutWarehouse;
 using Smart_Medical.Prescriptions;
 using Smart_Medical.RBAC;
+using Smart_Medical.RBAC.Permissions;
+using Smart_Medical.RBAC.RolePermissions;
+using Smart_Medical.RBAC.Roles;
+using Smart_Medical.RBAC.UserRoles;
+using Smart_Medical.RBAC.Users;
 using Smart_Medical.UserLoginECC;
-using System.Collections.Generic;
 
 namespace Smart_Medical;
 
@@ -35,23 +32,45 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         //用户
         CreateMap<User, UserDto>();
         CreateMap<CreateUpdateUserDto, User>();
+        CreateMap<RegisterUserDto, User>()
+            .ForMember(dest => dest.UserPwd, opt => opt.MapFrom(src => src.UserPwd))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
+            .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.UserEmail))
+            .ForMember(dest => dest.UserPhone, opt => opt.MapFrom(src => src.UserPhone))
+            .ForMember(dest => dest.UserSex, opt => opt.MapFrom(src => src.UserSex));
+
+        CreateMap<RegisterUserDto, BasicPatientInfo>()
+            .ForMember(dest => dest.PatientName, opt => opt.MapFrom(src => src.UserName))
+            .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.UserSex.HasValue ? (src.UserSex.Value ? 1 : 2) : 1))
+            .ForMember(dest => dest.ContactPhone, opt => opt.MapFrom(src => src.UserPhone))
+            .ForMember(dest => dest.IdNumber, opt => opt.MapFrom(src => src.IdNumber ?? ""))
+            .ForMember(dest => dest.VisitType, opt => opt.MapFrom(src => src.VisitType ?? "初诊"))
+            .ForMember(dest => dest.IsInfectiousDisease, opt => opt.MapFrom(src => src.IsInfectiousDisease))
+            .ForMember(dest => dest.DiseaseOnsetTime, opt => opt.MapFrom(src => src.DiseaseOnsetTime))
+            .ForMember(dest => dest.EmergencyTime, opt => opt.MapFrom(src => src.EmergencyTime))
+            .ForMember(dest => dest.VisitStatus, opt => opt.MapFrom(src => src.VisitStatus ?? "待就诊"))
+            .ForMember(dest => dest.VisitDate, opt => opt.MapFrom(src => src.VisitDate));
+
         //角色
         CreateMap<Role, RoleDto>();
         CreateMap<CreateUpdateRoleDto, Role>();
+
         //权限
         CreateMap<Permission, PermissionDto>();
         CreateMap<CreateUpdatePermissionDto, Permission>();
+
         //用户角色关联
         CreateMap<UserRole, UserRoleDto>();
         CreateMap<CreateUpdateUserRoleDto, UserRole>();
+
         //角色权限关联
         CreateMap<RolePermission, RolePermissionDto>();
         CreateMap<CreateUpdateRolePermissionDto, RolePermission>();
+
         //处方
         CreateMap<PrescriptionDto, Prescription>().ReverseMap();
         CreateMap<CreateUpdateMedicationDto, Medication>();
         CreateMap<Medication, MedicationDto>().ReverseMap();
-
         #region 
 
         CreateMap<DoctorClinic, InsertPatientDto>().ReverseMap();
@@ -61,14 +80,14 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
         CreateMap<BasicPatientInfo, BasicPatientInfoDto>().ReverseMap();
         CreateMap<User, ResultLoginDto>().ReverseMap();
         #endregion
-
         //CreateMap<List<Medication>, List<MedicationDto>>().ReverseMap();
         //科室
         CreateMap<CreateUpdateDoctorDepartmentDto, DoctorDepartment>().ReverseMap();
         CreateMap<DoctorDepartment, GetDoctorDepartmentListDto>().ReverseMap();
         CreateMap<GetDoctorDepartmentSearchDto, DoctorDepartment>().ReverseMap();
-
-
+        //医生
+        CreateMap<CreateUpdateDoctorAccountDto, DoctorAccount>().ReverseMap();
+        CreateMap<DoctorAccount, DoctorAccountListDto>().ReverseMap();
      
            
         CreateMap<MedicalHistory, PharmaceuticalCompanyDto>();
@@ -90,7 +109,11 @@ public class Smart_MedicalApplicationAutoMapperProfile : Profile
 
 
         CreateMap<MakeAppointmentDto, BasicPatientInfo>().ReverseMap();
-
+        CreateMap<AddPatientInfoDto, BasicPatientInfo>()
+            .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender.HasValue ? (src.Gender.Value ? 1 : 2) : 1))
+            .ForMember(dest => dest.AgeUnit, opt => opt.MapFrom(src => src.AgeUnit ?? "年"))
+            .ForMember(dest => dest.VisitType, opt => opt.MapFrom(src => src.VisitType ?? "初诊"))
+            .ForMember(dest => dest.VisitStatus, opt => opt.MapFrom(src => src.VisitStatus ?? "待就诊"));
 
     }
 }

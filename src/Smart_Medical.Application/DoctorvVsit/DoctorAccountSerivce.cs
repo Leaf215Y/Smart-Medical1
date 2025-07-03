@@ -1,0 +1,147 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Smart_Medical.DoctorvVsit.DoctorAccounts;
+using Smart_Medical.RBAC;
+using Smart_Medical.Until;
+using Smart_Medical.Until.Redis;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Repositories;
+
+namespace Smart_Medical.DoctorvVsit
+{
+    [ApiExplorerSettings(GroupName = "医生管理")]
+    public class DoctorAccountSerivce:ApplicationService,IDoctorAccountSerivce
+    {
+        // 定义一个常量作为缓存键，这是这个特定缓存项在 Redis 中的唯一标识。
+        // 使用一个清晰且唯一的键很重要。
+        private const string CacheKey = "SmartMedical:doctor:All"; // 建议使用更具体的键名和前缀
+        private readonly IRepository<DoctorAccount,Guid> doctors;
+        private readonly IRepository<DoctorDepartment, Guid> dept;
+        private readonly IRepository<User, Guid> users;
+        private readonly IRedisHelper<List<DoctorAccountListDto>> doctorredis;
+
+        public DoctorAccountSerivce(IRepository<DoctorAccount, Guid> doctors, IRepository<DoctorDepartment, Guid> dept,IRepository<User, Guid> users,IRedisHelper<List<DoctorAccountListDto>> doctorredis)
+        {
+            this.doctors = doctors;
+            this.dept = dept;
+            this.users = users;
+            this.doctorredis = doctorredis;
+        }
+
+        /// <summary>
+        /// 添加医生账户
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<ApiResult> InsertDoctorAccount(CreateUpdateDoctorAccountDto input)
+        { 
+            if (input == null) 
+            {
+                return ApiResult.Fail("信息错误", ResultCode.NotFound);
+            }
+            var list=await doctors.GetQueryableAsync();
+            list=list.Where(x=>x.EmployeeId==input.EmployeeId||x.AccountId==input.AccountId);
+            if (list.Any())
+            {
+                return ApiResult.Fail("工号或账户标识已存在", ResultCode.ValidationError);
+            }
+            var deptlist = await dept.GetQueryableAsync();
+            deptlist = deptlist.Where(x => x.Id == input.DepartmentId);
+            input.DepartmentName=deptlist.FirstOrDefault()?.DepartmentName;
+            //var res=list.OrderByDescending(x => x.EmployeeId).FirstOrDefault();
+
+            //input.EmployeeId = "D" + (int.Parse(res.Replace<string>("D", "")) + 1).ToString("D6");
+            var dto=ObjectMapper.Map<CreateUpdateDoctorAccountDto, DoctorAccount>(input);
+            await doctors.InsertAsync(dto);
+           await doctorredis.RemoveAsync(CacheKey);
+            return ApiResult.Success(ResultCode.Success);
+        }
+        /// <summary>
+        /// 获取医生账户列表(分页)
+        /// </summary>
+        /// <param name="seach"></param>
+        /// <returns></returns>
+        public async Task<ApiResult<PageResult<List<DoctorAccountListDto>>>> GetDoctorAccountList(DoctorAccountsearch seach)
+        {
+            var datalist=await doctorredis.GetAsync(CacheKey, async () =>
+            {
+                var list = await doctors.GetQueryableAsync();
+                return ObjectMapper.Map<List<DoctorAccount>, List<DoctorAccountListDto>>(list.ToList());
+
+            });
+            // 防御性处理，确保 datalist 不为 null
+            datalist ??= new List<DoctorAccountListDto>();
+
+
+            var list = datalist.WhereIf(!string.IsNullOrEmpty(seach.EmployeeName), x => x.EmployeeName.Contains(seach.EmployeeName));
+            //var deptlist = await dept.GetQueryableAsync();
+            //var dto = from d in list
+            //          join dp in deptlist on d.DepartmentId equals dp.Id
+            //          select new DoctorAccountListDto
+            //          {
+            //              Id = d.Id,
+            //              DepartmentId = d.DepartmentId,
+            //              IsActive = d.IsActive,
+            //              AccountId = d.AccountId,
+            //              EmployeeId = d.EmployeeId,
+            //              EmployeeName = d.EmployeeName,
+            //              InstitutionName = d.InstitutionName,
+            //              DepartmentName = dp.DepartmentName
+            //          };
+            // 统计总数 (在应用分页之前)
+            var totalCount = list.Count();
+
+            list = list.OrderBy(x => x.Id).Skip(seach.SkipCount).Take(seach.MaxResultCount);
+            var totalPage = (int)Math.Ceiling((double)totalCount / seach.MaxResultCount);
+            var pagedList = new PageResult<List<DoctorAccountListDto>>
+            {
+                TotlePage = totalPage,
+                TotleCount = totalCount,
+                Data = list.ToList(),
+            };
+            return ApiResult<PageResult<List<DoctorAccountListDto>>>.Success(pagedList, ResultCode.Success);
+        }
+        /// <summary>
+        /// 修改医生账户
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<ApiResult> EditDoctorAccount(Guid id,CreateUpdateDoctorAccountDto input)
+        {
+            if (input == null)
+            {
+                return ApiResult.Fail("信息错误", ResultCode.NotFound);
+            }
+            var entity = await doctors.GetAsync(id);
+           
+            ObjectMapper.Map(input, entity);
+            await doctors.UpdateAsync(entity);
+            await doctorredis.RemoveAsync(CacheKey);
+
+            return ApiResult.Success(ResultCode.Success);
+        }
+        /// <summary>
+        /// 删除医生账户
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[HttpDelete]
+        public async Task<ApiResult> DeleteDoctorAccount(Guid id)
+        {
+            var entity = await doctors.GetAsync(id);
+            if (entity == null)
+            {
+                return ApiResult.Fail("医生账户不存在", ResultCode.ValidationError);
+            }
+            await doctors.DeleteAsync(id);
+            await doctorredis.RemoveAsync(CacheKey);
+            return ApiResult.Success(ResultCode.Success);
+        }
+    }
+}

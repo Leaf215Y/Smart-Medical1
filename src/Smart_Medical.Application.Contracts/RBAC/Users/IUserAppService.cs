@@ -6,7 +6,7 @@ using Volo.Abp.Application.Services;
 using Smart_Medical.Until;
 using System.Threading.Tasks;
 
-namespace Smart_Medical.Application.Contracts.RBAC.Users
+namespace Smart_Medical.RBAC.Users
 {
     /// <summary>
     /// 用户接口服务
@@ -15,10 +15,11 @@ namespace Smart_Medical.Application.Contracts.RBAC.Users
     {
         Task<ApiResult<UserDto>> GetAsync(Guid id);
         Task<ApiResult<PageResult<List<UserDto>>>> GetListAsync(SeachUserDto input);
-        Task<ApiResult> CreateAsync(CreateUpdateUserDto input);
+        Task<ApiResult> InsertUserPTAsync(CreateUpdateUserDto input);
         Task<ApiResult> UpdateAsync(Guid id, CreateUpdateUserDto input);
         Task<ApiResult> DeleteAsync(Guid id);
         Task<ApiResult<UserDto>> GetByUserNameAsync(string username);
         Task<ApiResult<UserDto>> LoginAsync(LoginDto loginDto);
+        Task<ApiResult> AddPatientInfoAsync(Guid userId, AddPatientInfoDto input);
     }
 }

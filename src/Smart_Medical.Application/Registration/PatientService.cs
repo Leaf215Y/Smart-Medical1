@@ -9,16 +9,14 @@ using Smart_Medical.OutpatientClinic.Dtos.Parameter;
 using Smart_Medical.OutpatientClinic.IServices;
 using Smart_Medical.Patient;
 using Smart_Medical.Pharmacy;
+using Smart_Medical.RBAC;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
-using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.Domain.Repositories;
-using Volo.Abp.ObjectMapping;
 using Volo.Abp.Uow;
 
 namespace Smart_Medical.Registration
@@ -27,7 +25,7 @@ namespace Smart_Medical.Registration
     /// 医疗管理
     /// </summary>
     [ApiExplorerSettings(GroupName = "医疗管理")]
-    [Authorize]
+    //[Authorize]
     [IgnoreAntiforgeryToken]
     public class PatientService : ApplicationService, IPatientService
     {
@@ -57,15 +55,17 @@ namespace Smart_Medical.Registration
         /// 预约记录
         /// </summary>
         private readonly IRepository<Smart_Medical.Patient.Appointment, Guid> _appointment;
+        private readonly IRepository<UserPatient, Guid> _userPatientRepo;
 
         public PatientService(
             IUnitOfWorkManager unitOfWorkManager,
             IRepository<DoctorClinic, Guid> doctorclinRepo,
             IRepository<BasicPatientInfo, Guid> basicpatientRepo,
             IRepository<Sick, Guid> sickRepo,
-            IRepository<PatientPrescription, Guid> prescriptionRepo
-            , IRepository<Drug, int> drugRepo
-            , IRepository<Smart_Medical.Patient.Appointment, Guid> appointmentRep 
+            IRepository<PatientPrescription, Guid> prescriptionRepo,
+            IRepository<Drug, int> drugRepo,
+            IRepository<Smart_Medical.Patient.Appointment, Guid> appointmentRep,
+            IRepository<UserPatient, Guid> userPatientRepo
             )
         {
             _unitOfWorkManager = unitOfWorkManager;
@@ -74,7 +74,8 @@ namespace Smart_Medical.Registration
             _sickRepo = sickRepo;
             _prescriptionRepo = prescriptionRepo;
             _drugRepo = drugRepo;
-            _appointment= appointmentRep;
+            _appointment = appointmentRep;
+            _userPatientRepo = userPatientRepo;
         }
 
         /// <summary>
@@ -382,12 +383,12 @@ namespace Smart_Medical.Registration
                     //保存处方记录
                     await _prescriptionRepo.InsertAsync(prescription);
 
-                    //更新患者状态为“已就诊”
+                    //更新患者状态为"已就诊"
                     patient.VisitStatus = "已就诊";
                     await _patientRepo.UpdateAsync(patient);//保留
 
                     //更新 DoctorClinic 表的状态字段 
-                    //判断状态为“待就诊”
+                    //判断状态为"待就诊"
                     var doctorClinic = await _doctorclinRepo.FirstOrDefaultAsync(
                         x => x.PatientId == input.PatientNumber &&
                         x.ExecutionStatus == ExecutionStatus.PendingConsultation
@@ -396,7 +397,7 @@ namespace Smart_Medical.Registration
                     if (doctorClinic == null)
                         return ApiResult.Fail("未找到就诊记录！", ResultCode.NotFound);
 
-                    // 更新就诊记录状态为“已就诊”
+                    // 更新就诊记录状态为"已就诊"
                     doctorClinic.ExecutionStatus = ExecutionStatus.Completed;
                     await _doctorclinRepo.UpdateAsync(doctorClinic);
 
@@ -454,7 +455,7 @@ namespace Smart_Medical.Registration
             //2 添加预约挂号记录
             Smart_Medical.Patient.Appointment appointment = new Smart_Medical.Patient.Appointment
             {
-                PatientId = make.PatientId,   
+                PatientId = make.PatientId,
                 AppointmentDateTime = make.AppointmentDateTime,
                 Status = make.Status,
                 ActualFee = make.ActualFee,
@@ -477,7 +478,7 @@ namespace Smart_Medical.Registration
             {
                 // 1. 获取预约挂号表的 IQueryable
                 var queryable = await _appointment.GetQueryableAsync();
-                queryable= queryable.Where(x => x.PatientId == input.PatientId); // 只查询当前患者的预约信息
+                queryable = queryable.Where(x => x.PatientId == input.PatientId); // 只查询当前患者的预约信息
                 // 2. 联查患者基本信息（外键 PatientId -> BasicPatientInfo.Id）
                 var patientQueryable = await _patientRepo.GetQueryableAsync();
 
@@ -546,6 +547,54 @@ namespace Smart_Medical.Registration
             }
         }
 
+
+        /// <summary>
+        /// 查询当前用户下所有关联患者
+        /// </summary>
+        public async Task<ApiResult<List<UserPatientDto>>> GetMyPatientsAsync(Guid? userId)
+        {
+            Guid queryUserId;
+
+            // 优先使用传入的 userId 参数，如果为空则使用 CurrentUser.Id
+            if (userId.HasValue)
+            {
+                queryUserId = userId.Value;
+            }
+            else
+            {
+                var userIdStr = CurrentUser?.Id?.ToString();
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out queryUserId))
+                {
+                    return ApiResult<List<UserPatientDto>>.Fail("未获取到当前用户信息", ResultCode.Error);
+                }
+            }
+
+            // 使用 WithDetailsAsync 联查 UserPatient 及其关联的 BasicPatientInfo 实体
+            var userPatients = await _userPatientRepo.WithDetailsAsync(up => up.Patient);
+
+            var query = userPatients
+                        .Where(up => up.UserId == queryUserId)
+                        .Select(up => new UserPatientDto
+                        {
+                            PatientId = up.Patient.Id,
+                            VisitId = up.Patient.VisitId,
+                            PatientName = up.Patient.PatientName,
+                            Gender = up.Patient.Gender,
+                            Age = up.Patient.Age,
+                            AgeUnit = up.Patient.AgeUnit,
+                            ContactPhone = up.Patient.ContactPhone,
+                            IdNumber = up.Patient.IdNumber,
+                            VisitType = up.Patient.VisitType,
+                            IsInfectiousDisease = up.Patient.IsInfectiousDisease,
+                            DiseaseOnsetTime = up.Patient.DiseaseOnsetTime,
+                            EmergencyTime = up.Patient.EmergencyTime,
+                            VisitStatus = up.Patient.VisitStatus,
+                            VisitDate = up.Patient.VisitDate
+                        });
+
+            var result = await AsyncExecuter.ToListAsync(query);
+            return ApiResult<List<UserPatientDto>>.Success(result, ResultCode.Success);
+        }
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Smart_Medical.RBAC;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -91,7 +92,10 @@ namespace Smart_Medical.Patient
         public DateTime VisitDate { get; set; } = DateTime.Now;
 
 
+        /// <summary>
+        /// 关联的用户集合
+        /// </summary>
+        public ICollection<UserPatient> UserPatients { get; set; }
 
-     
     }
 }

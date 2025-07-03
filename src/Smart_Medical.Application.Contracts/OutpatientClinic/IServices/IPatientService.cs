@@ -1,4 +1,5 @@
-﻿using Smart_Medical.OutpatientClinic.Dtos;
+﻿using Smart_Medical.Appointment;
+using Smart_Medical.OutpatientClinic.Dtos;
 using Smart_Medical.OutpatientClinic.Dtos.Parameter;
 using Smart_Medical.Until;
 using System;
@@ -47,5 +48,10 @@ namespace Smart_Medical.OutpatientClinic.IServices
         /// <param name="input"></param>
         /// <returns></returns>
         Task<ApiResult> DoctorsPrescription(DoctorPrescriptionDto input);
+
+        /// <summary>
+        /// 查询当前用户下所有关联患者
+        /// </summary>
+        Task<ApiResult<List<UserPatientDto>>> GetMyPatientsAsync(Guid? userId);
     }
 }

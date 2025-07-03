@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Smart_Medical.Application.Contracts.RBAC.UserRoles; // 引用Contracts层的UserRoles DTO和接口
+using Smart_Medical.RBAC.Roles;
+using Smart_Medical.RBAC.Users;
 using Smart_Medical.Until;
 using System;
 using System.Collections.Generic;
@@ -9,10 +10,15 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Uow;
+using Volo.Abp.DependencyInjection;
 
 namespace Smart_Medical.RBAC.UserRoles
 {
+    /// <summary>
+    /// 用户与角色的关联服务
+    /// </summary>
     [ApiExplorerSettings(GroupName = "用户角色关联管理")]
+    [Dependency(ReplaceServices = true)]
     public class UserRoleAppService : ApplicationService, IUserRoleAppService
     {
         private readonly IRepository<UserRole, Guid> _userRoleRepository;
@@ -28,6 +34,11 @@ namespace Smart_Medical.RBAC.UserRoles
             _roleRepository = roleRepository;
         }
 
+        /// <summary>
+        /// 为指定用户授予一个新角色
+        /// </summary>
+        /// <param name="input">包含用户ID和角色ID的数据传输对象</param>
+        /// <returns>操作结果</returns>
         public async Task<ApiResult> CreateAsync(CreateUpdateUserRoleDto input)
         {
             // 检查用户和角色是否存在
@@ -56,6 +67,11 @@ namespace Smart_Medical.RBAC.UserRoles
             return ApiResult.Success(ResultCode.Success);
         }
 
+        /// <summary>
+        /// 根据ID删除一条用户角色的关联记录
+        /// </summary>
+        /// <param name="id">用户角色关联记录的ID</param>
+        /// <returns>操作结果</returns>
         public async Task<ApiResult> DeleteAsync(Guid id)
         {
             var userRole = await _userRoleRepository.GetAsync(id);
@@ -67,6 +83,11 @@ namespace Smart_Medical.RBAC.UserRoles
             return ApiResult.Success(ResultCode.Success);
         }
 
+        /// <summary>
+        /// 根据ID获取单条用户角色关联记录的详细信息
+        /// </summary>
+        /// <param name="id">用户角色关联记录的ID</param>
+        /// <returns>包含用户角色关联详细信息的ApiResult</returns>
         public async Task<ApiResult<UserRoleDto>> GetAsync(Guid id)
         {
             // 使用 Include 联查 User 和 Role 实体
@@ -82,11 +103,17 @@ namespace Smart_Medical.RBAC.UserRoles
             return ApiResult<UserRoleDto>.Success(userRoleDto, ResultCode.Success);
         }
 
+        /// <summary>
+        /// 根据查询条件分页获取用户角色关联列表
+        /// </summary>
+        /// <param name="input">包含分页和筛选信息的查询DTO</param>
+        /// <returns>包含用户角色关联列表和分页信息的ApiResult</returns>
         public async Task<ApiResult<PageResult<List<UserRoleDto>>>> GetListAsync([FromQuery] SeachUserRoleDto input)
         {
             var queryable = await _userRoleRepository.GetQueryableAsync();
 
             // 使用 Include 联查 User 和 Role 实体，确保在映射到 DTO 时包含关联数据
+            // 在使用Select投影并需要访问导航属性时，Include是必需的。
             queryable = queryable.Include(ur => ur.User).Include(ur => ur.Role);
 
             if (input.UserId.HasValue)
@@ -105,8 +132,39 @@ namespace Smart_Medical.RBAC.UserRoles
                 .Take(input.MaxResultCount)
                 .OrderBy(ur => ur.UserId); // 默认排序
 
-            var userRoles = await AsyncExecuter.ToListAsync(queryable);
-            var userRoleDtos = ObjectMapper.Map<List<UserRole>, List<UserRoleDto>>(userRoles);
+            var userRoleDtos = await AsyncExecuter.ToListAsync(
+                queryable.Select(ur => new UserRoleDto
+                {
+                    Id = ur.Id,
+                    UserId = ur.UserId,
+                    RoleId = ur.RoleId,
+                    CreationTime = ur.CreationTime,
+                    CreatorId = ur.CreatorId,
+                    LastModificationTime = ur.LastModificationTime,
+                    LastModifierId = ur.LastModifierId,
+
+                    // 因为我们已使用Include，可以断定ur.User和ur.Role在此处不为null
+                    User = new UserDto
+                    {
+                        UserName = ur.User.UserName,
+                        UserEmail = ur.User!.UserEmail,
+                        UserPhone = ur.User!.UserPhone,
+                        UserSex = ur.User!.UserSex,
+                        // 此处的UserDto中的RoleName可以从当前UserRole关联的Role中获取
+                        RoleName = ur.Role!.RoleName
+                    },
+                    Role = new RoleDto
+                    {
+                        Id = ur.Role!.Id,
+                        RoleName = ur.Role!.RoleName,
+                        Description = ur.Role!.Description,
+                        CreationTime = ur.Role!.CreationTime,
+                        CreatorId = ur.Role!.CreatorId,
+                        LastModificationTime = ur.Role!.LastModificationTime,
+                        LastModifierId = ur.Role!.LastModifierId
+                    }
+                })
+            );
 
             var pageResult = new PageResult<List<UserRoleDto>>
             {
@@ -117,7 +175,19 @@ namespace Smart_Medical.RBAC.UserRoles
 
             return ApiResult<PageResult<List<UserRoleDto>>>.Success(pageResult, ResultCode.Success);
         }
-        
+
+        /// <summary>
+        /// 批量更新指定用户所拥有的角色
+        /// </summary>
+        /// <remarks>
+        /// 此方法会同步用户角色。传入的角色ID列表将成为该用户的全部角色。
+        /// - 如果用户已有关联，但不存在于传入列表中，该关联将被软删除。
+        /// - 如果传入列表中的角色关联尚不存在，将被新增。
+        /// - 如果传入列表中的角色关联过去存在但被软删了，将被恢复。
+        /// </remarks>
+        /// <param name="userId">要更新角色的用户ID</param>
+        /// <param name="roleIds">该用户应拥有的所有角色的ID列表</param>
+        /// <returns>操作结果</returns>
         [UnitOfWork] // 添加 [UnitOfWork] 特性，确保此方法的数据库操作在事务中执行
         public async Task<ApiResult> UpdateAsync(Guid userId, List<Guid> roleIds)
         {
@@ -148,13 +218,13 @@ namespace Smart_Medical.RBAC.UserRoles
                                                                 .Where(ur => ur.UserId == userId)
                                                                 .ToListAsync();
 
-            // 需要软删除的角色：当前活跃，但新传入的roleIds中没有的
+            // 逻辑步骤2：找出需要软删除的角色ID (当前有，但新列表没有)
             var rolesToSoftDelete = activeRoleIds.Except(roleIds).ToList();
 
-            // 需要新增或恢复的角色：新传入的roleIds中，但当前不活跃的
+            // 逻辑步骤3：找出需要新增或恢复的角色ID (新列表有，但当前没有)
             var rolesToCreateOrRestore = roleIds.Except(activeRoleIds).ToList();
 
-            // 执行软删除操作
+            // 逻辑步骤4：执行软删除
             foreach (var roleId in rolesToSoftDelete)
             {
                 var userRoleToSoftDelete = activeUserRoles.FirstOrDefault(ur => ur.RoleId == roleId);
@@ -164,7 +234,7 @@ namespace Smart_Medical.RBAC.UserRoles
                 }
             }
 
-            // 执行新增或恢复操作
+            // 逻辑步骤5：执行新增或恢复
             foreach (var roleId in rolesToCreateOrRestore)
             {
                 // 查找是否存在已存在的（包括软删除的）记录

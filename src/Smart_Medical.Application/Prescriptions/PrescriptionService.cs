@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
 
 namespace Smart_Medical.Prescriptions
 {
     /// <summary>
-    /// 处方模板
+    /// 处方服务
     /// </summary>
     [ApiExplorerSettings(GroupName = "处方管理")]
     public class PrescriptionService : ApplicationService, IPrescriptionService
