@@ -64,7 +64,8 @@ namespace Smart_Medical.Registration
             IRepository<Sick, Guid> sickRepo,
             IRepository<PatientPrescription, Guid> prescriptionRepo
             , IRepository<Drug, int> drugRepo
-            , IRepository<Smart_Medical.Patient.Appointment, Guid> appointmentRep
+            , IRepository<Smart_Medical.Patient.Appointment, Guid> appointmentRep,
+             IRepository<UserPatient, Guid> userPatientRepo
             )
         {
             _unitOfWorkManager = unitOfWorkManager;
@@ -74,6 +75,7 @@ namespace Smart_Medical.Registration
             _prescriptionRepo = prescriptionRepo;
             _drugRepo = drugRepo;
             _appointment = appointmentRep;
+            _userPatientRepo = userPatientRepo;
         }
 
         /// <summary>
